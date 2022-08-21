@@ -15,7 +15,7 @@
         <p>No recipes found for your query. Please try again!</p>
       </div> -->
 
-    <AppRecipePreview :recipes="searchResultsDisplay" />
+    <AppRecipePreview :recipes="searchResultsDisplay" :resultsActive="true" />
 
     <div class="pagination">
       <!-- Page 1, and there are other pages -->

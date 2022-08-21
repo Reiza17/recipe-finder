@@ -7,7 +7,7 @@
     <nav class="nav">
       <ul class="nav__list">
         <li class="nav__item">
-          <button class="nav__btn">
+          <button class="nav__btn" @click="toggleUploadRecipeModal">
             <svg class="nav__icon">
               <use href="@/assets/images/icons.svg#icon-edit"></use>
             </svg>
@@ -23,12 +23,16 @@
 <script>
 import AppSearch from '@/components/AppSearch.vue';
 import AppBookmarks from '@/components/AppBookmarks.vue';
+import { mapMutations } from 'vuex';
 
 export default {
   name: 'AppHeader',
   components: {
     AppSearch,
     AppBookmarks,
+  },
+  methods: {
+    ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
   },
 };
 </script>

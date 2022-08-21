@@ -1,5 +1,5 @@
 <template>
-  <ul class="results">
+  <ul :class="{ results: resultsActive }">
     <li class="preview" v-for="result in recipes" :key="result.id">
       <a
         @click="getHashUrl(result.id)"
@@ -38,6 +38,14 @@ export default {
       type: Array,
       required: true,
     },
+    resultsActive: {
+      type: Boolean,
+      default: false,
+    },
+    headerActive: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
@@ -61,6 +69,11 @@ export default {
 .results {
   list-style: none;
   margin-bottom: 2rem;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .preview {

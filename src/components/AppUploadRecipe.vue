@@ -1,6 +1,8 @@
 <template>
-  <div class="add-recipe-window hidden">
-    <button class="btn--close-modal">&times;</button>
+  <div class="add-recipe-window">
+    <button @click="toggleUploadRecipeModal" class="btn--close-modal">
+      &times;
+    </button>
     <form class="upload">
       <div class="upload__column">
         <h3 class="upload__heading">Recipe data</h3>
@@ -62,7 +64,7 @@
         />
       </div>
 
-      <button class="btn upload__btn">
+      <button @click.prevent="" class="btn upload__btn">
         <svg>
           <use :href="`${icons}#icon-upload-cloud`"></use>
         </svg>
@@ -73,6 +75,8 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex';
+
 export default {
   name: 'AppUploadRecipe',
 
@@ -80,6 +84,9 @@ export default {
     return {
       icons: require('@/assets/images/icons.svg'),
     };
+  },
+  methods: {
+    ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
   },
 };
 </script>
@@ -112,11 +119,6 @@ export default {
     border: none;
     background: none;
   }
-}
-
-.hidden {
-  visibility: hidden;
-  opacity: 0;
 }
 
 .upload {

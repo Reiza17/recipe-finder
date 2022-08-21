@@ -1,24 +1,5 @@
-# recipe-finder
+# Recipe finder project
 
-## Project setup
-```
-npm install
-```
+This application allows you to search for recipes as well as upload your own custom recipes.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Uses Vue as framework.
