@@ -8,8 +8,12 @@
           <AppRecipe />
         </div>
 
-        <div class="overlay hidden"></div>
-        <AppUploadRecipe />
+        <div
+          v-if="uploadRecipeModal"
+          @click="toggleUploadRecipeModal"
+          class="overlay"
+        ></div>
+        <AppUploadRecipe v-if="uploadRecipeModal" />
       </body>
     </html>
   </div>
@@ -20,6 +24,7 @@ import AppHeader from '@/components/AppHeader.vue';
 import AppSearchResults from './components/AppSearchResults.vue';
 import AppRecipe from './components/AppRecipe.vue';
 import AppUploadRecipe from '@/components/AppUploadRecipe.vue';
+import { mapGetters, mapMutations } from 'vuex';
 
 export default {
   name: 'App',
@@ -28,6 +33,21 @@ export default {
     AppSearchResults,
     AppRecipe,
     AppUploadRecipe,
+  },
+
+  computed: {
+    ...mapGetters(['uploadRecipeModal']),
+  },
+  methods: {
+    ...mapMutations({
+      setStoredBookmarks: 'SET_STORED_BOOKMARKS',
+      toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+    }),
+  },
+
+  created() {
+    const storage = localStorage.getItem('bookmarks');
+    if (storage) this.setStoredBookmarks(JSON.parse(storage));
   },
 };
 </script>
@@ -89,10 +109,5 @@ body {
   backdrop-filter: blur(4px);
   z-index: 100;
   transition: all 0.5s;
-}
-
-.hidden {
-  visibility: hidden;
-  opacity: 0;
 }
 </style>

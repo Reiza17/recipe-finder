@@ -3,7 +3,6 @@ import Vuex from 'vuex';
 import axios from 'axios';
 
 import { API_URL, RES_PER_PAGE, KEY } from '@/common/config.js';
-// import { AJAX } from '@/common/helpers.js';
 
 Vue.use(Vuex);
 
@@ -18,9 +17,11 @@ export default new Vuex.Store({
     },
     bookmarks: [],
     hashUrl: '',
+    uploadRecipeModal: false,
   },
   getters: {
     hashUrl: state => state.hashUrl,
+    uploadRecipeModal: state => state.uploadRecipeModal,
     recipe: state => state.recipe,
     recipeBookmarked: state => state.recipe.bookmarked,
     recipeBookmarks: state => state.bookmarks,
@@ -35,6 +36,10 @@ export default new Vuex.Store({
     },
   },
   mutations: {
+    SET_STORED_BOOKMARKS(state, bookmarks) {
+      state.bookmarks = bookmarks;
+    },
+
     GET_HASH_URL(state, id) {
       state.hashUrl = id;
     },
@@ -80,6 +85,10 @@ export default new Vuex.Store({
         state.recipe.bookmarked = false;
       }
       localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    },
+
+    TOGGLE_UPLOAD_RECIPE_MODAL(state) {
+      state.uploadRecipeModal = !state.uploadRecipeModal;
     },
   },
   actions: {

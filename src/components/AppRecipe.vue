@@ -367,6 +367,11 @@ export default {
   }
 }
 
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
 .message,
 .error {
   max-width: 40rem;
