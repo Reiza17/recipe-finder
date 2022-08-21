@@ -1,28 +1,98 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <html>
+      <body>
+        <div class="container">
+          <AppHeader />
+          <AppSearchResults />
+          <AppRecipe />
+        </div>
+
+        <div class="overlay hidden"></div>
+        <AppUploadRecipe />
+      </body>
+    </html>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import AppHeader from '@/components/AppHeader.vue';
+import AppSearchResults from './components/AppSearchResults.vue';
+import AppRecipe from './components/AppRecipe.vue';
+import AppUploadRecipe from '@/components/AppUploadRecipe.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    AppHeader,
+    AppSearchResults,
+    AppRecipe,
+    AppUploadRecipe,
+  },
+};
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss">
+@import '@/assets/sass/style.scss';
+@import '@/assets/sass/components.scss';
+
+html {
+  box-sizing: border-box;
+  font-size: 50.5%;
+
+  @media only screen and (max-width: $bp-medium) {
+    font-size: 50%;
+  }
+}
+
+body {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  color: $color-grey-dark-1;
+  background-image: $gradient;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: calc(100vh - 2 * 4vw);
+}
+
+.container {
+  max-width: 120rem;
+  min-height: 117rem;
+  margin: 4vw auto;
+  background-color: #fff;
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: 0 2rem 6rem 0.5rem rgba($color-grey-dark-1, 0.2);
+
+  display: grid;
+  grid-template-rows: 10rem minmax(100rem, auto);
+  grid-template-columns: 1fr 2fr;
+  grid-template-areas:
+    'head head'
+    'list recipe';
+
+  @media only screen and (max-width: $bp-large) {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  transition: all 0.5s;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
 }
 </style>
