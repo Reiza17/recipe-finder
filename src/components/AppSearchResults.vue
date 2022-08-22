@@ -1,21 +1,19 @@
 <template>
   <div class="search-results">
-    <!-- <div class="spinner">
+    <AppLoadingSpinner v-if="loadingSearchResults" />
+    <AppRecipePreview
+      v-else-if="!loadingSearchResults && searchResults.length > 0"
+      :recipes="searchResultsDisplay"
+      :resultsActive="true"
+    />
+    <div v-else class="error">
+      <div>
         <svg>
-          <use :href="`${icons}#icon-loader`"></use>
+          <use :href="`${icons}#icon-alert-triangle`"></use>
         </svg>
-      </div> -->
-
-    <!-- <div class="error">
-        <div>
-          <svg>
-            <use :href="`${icons}#icon-alert-triangle`"></use>
-          </svg>
-        </div>
-        <p>No recipes found for your query. Please try again!</p>
-      </div> -->
-
-    <AppRecipePreview :recipes="searchResultsDisplay" :resultsActive="true" />
+      </div>
+      <p>No recipes found for your query. Please try again!</p>
+    </div>
 
     <div class="pagination">
       <!-- Page 1, and there are other pages -->
@@ -71,11 +69,13 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import AppRecipePreview from '@/components/AppRecipePreview.vue';
+import AppLoadingSpinner from '@/components/AppLoadingSpinner.vue';
 
 export default {
   name: 'AppSearchResults',
   components: {
     AppRecipePreview,
+    AppLoadingSpinner,
   },
 
   data() {
@@ -89,6 +89,7 @@ export default {
       'searchResultsCurrentPage',
       'searchResultsPerPage',
       'searchResultsDisplay',
+      'loadingSearchResults',
     ]),
     numPages() {
       return Math.ceil(this.searchResults.length / this.searchResultsPerPage);

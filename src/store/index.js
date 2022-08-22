@@ -18,6 +18,8 @@ export default new Vuex.Store({
     bookmarks: [],
     hashUrl: '',
     uploadRecipeModal: false,
+    loadingSearchResults: false,
+    loadingRecipe: false,
   },
   getters: {
     hashUrl: state => state.hashUrl,
@@ -34,8 +36,18 @@ export default new Vuex.Store({
 
       return state.search.results.slice(start, end);
     },
+    loadingSearchResults: state => state.loadingSearchResults,
+    loadingRecipe: state => state.loadingRecipe,
   },
   mutations: {
+    TOGGLE_SEARCH_SPINNER(state, boolean) {
+      state.loadingSearchResults = boolean;
+    },
+
+    TOGGLE_RECIPE_SPINNER(state, boolean) {
+      state.loadingRecipe = boolean;
+    },
+
     SET_STORED_BOOKMARKS(state, bookmarks) {
       state.bookmarks = bookmarks;
     },
@@ -109,22 +121,4 @@ export default new Vuex.Store({
       commit('CREATE_SEARCH_RESULTS', res.data);
     },
   },
-
-  // async loadRecipe({ commit }, {id}) {
-  //   try {
-  //     const data = await AJAX(`${API_URL}${id}`);
-
-  //     commit('CREATE_RECIPE_OBJECT', data);
-  //     // if (state.bookmarks.some(bookmark => bookmark.id === id))
-  //     //   state.recipe.bookmarked = true;
-  //     // else state.recipe.bookmarked = false;
-
-  //     console.log(this.$store.state.recipe);
-  //   } catch (err) {
-  //     // Temp error handling
-  //     console.error(`${err} 💥💥💥💥`);
-  //     throw err;
-  //   }
-  // },
-  // },
 });
