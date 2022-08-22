@@ -1,5 +1,5 @@
 <template>
-  <form class="search" @submit.prevent="searchRecipes(query)">
+  <form class="search" @submit.prevent="submitSearch(query)">
     <input
       type="text"
       class="search__field"
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters, mapMutations } from 'vuex';
 
 export default {
   name: 'AppSearch',
@@ -29,7 +29,19 @@ export default {
   },
 
   methods: {
+    ...mapGetters(['loadingSearchResults']),
     ...mapActions(['searchRecipes']),
+    ...mapMutations({ toggleSearchSpinner: 'TOGGLE_SEARCH_SPINNER' }),
+
+    async submitSearch(searchInput) {
+      try {
+        this.toggleSearchSpinner(true);
+        await this.$store.dispatch('searchRecipes', searchInput);
+        this.toggleSearchSpinner(false);
+      } catch (err) {
+        console.log(err);
+      }
+    },
   },
 };
 </script>

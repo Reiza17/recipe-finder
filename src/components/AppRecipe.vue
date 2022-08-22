@@ -9,6 +9,8 @@
       <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
 
+    <AppLoadingSpinner v-else-if="loadingRecipe" />
+
     <div v-else>
       <figure class="recipe__fig">
         <img :src="recipe.image_url" :alt="recipe.title" class="recipe__img" />
@@ -123,10 +125,10 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import fracty from 'fracty';
+import AppLoadingSpinner from './AppLoadingSpinner.vue';
 
 export default {
   name: 'AppRecipe',
-
   data() {
     return {
       // icons: '@/assets/images/icons.svg',
@@ -134,42 +136,56 @@ export default {
       fracty,
     };
   },
-
   computed: {
-    ...mapGetters(['recipe', 'recipeBookmarked']),
+    ...mapGetters(['recipe', 'recipeBookmarked', 'loadingRecipe']),
   },
-
   methods: {
     ...mapMutations({
       updateServings: 'UPDATE_SERVINGS',
       toggleBookmark: 'TOGGLE_BOOKMARK',
+      toggleRecipeSpinner: 'TOGGLE_RECIPE_SPINNER',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
     },
+    async init() {
+      try {
+        this.toggleRecipeSpinner(true);
+        await this.$store.dispatch('loadRecipe', {
+          id: window.location.hash.slice(1),
+        });
+        this.toggleRecipeSpinner(false);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    async renderNewRecipe() {
+      try {
+        window.addEventListener('hashchange', async () => {
+          this.toggleRecipeSpinner(true);
+          await this.$store.dispatch('loadRecipe', {
+            id: window.location.hash.slice(1),
+          });
+          this.toggleRecipeSpinner(false);
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
   },
-
-  created() {
-    this.$store.dispatch('loadRecipe', {
-      id: window.location.hash.slice(1),
-    });
-    window.addEventListener('hashchange', () => {
-      this.$store.dispatch('loadRecipe', {
-        id: window.location.hash.slice(1),
-      });
-    });
+  mounted() {
+    this.init();
+    this.renderNewRecipe();
+    // this.$store.dispatch('loadRecipe', {
+    //   id: window.location.hash.slice(1),
+    // });
+    // window.addEventListener('hashchange', () => {
+    //   this.$store.dispatch('loadRecipe', {
+    //     id: window.location.hash.slice(1),
+    //   });
+    // });
   },
-
-  // dispatch with a payload
-  // store.dispatch('incrementAsync', {
-  //   amount: 10
-  // })
-
-  // // dispatch with an object
-  // store.dispatch({
-  //   type: 'incrementAsync',
-  //   amount: 10
-  // })
+  components: { AppLoadingSpinner },
 };
 </script>
 
