@@ -2,7 +2,7 @@
   <header class="header">
     <img src="@/assets/images/logo.png" alt="Logo" class="header__logo" />
 
-    <AppSearch />
+    <VSearch />
 
     <nav class="nav">
       <ul class="nav__list">
@@ -14,22 +14,22 @@
             <span>Add recipe</span>
           </button>
         </li>
-        <AppBookmarks />
+        <VBookmarks />
       </ul>
     </nav>
   </header>
 </template>
 
 <script>
-import AppSearch from '@/components/AppSearch.vue';
-import AppBookmarks from '@/components/AppBookmarks.vue';
+import VSearch from '@/components/VSearch.vue';
+import VBookmarks from '@/components/VBookmarks.vue';
 import { mapMutations } from 'vuex';
 
 export default {
-  name: 'AppHeader',
+  name: 'VHeader',
   components: {
-    AppSearch,
-    AppBookmarks,
+    VSearch,
+    VBookmarks,
   },
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),

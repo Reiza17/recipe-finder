@@ -9,7 +9,7 @@
       <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
 
-    <AppLoadingSpinner v-else-if="loadingRecipe" />
+    <VLoadingSpinner v-else-if="loadingRecipe" />
 
     <div v-else>
       <figure class="recipe__fig">
@@ -125,10 +125,10 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import fracty from 'fracty';
-import AppLoadingSpinner from './AppLoadingSpinner.vue';
+import VLoadingSpinner from './VLoadingSpinner.vue';
 
 export default {
-  name: 'AppRecipe',
+  name: 'VRecipe',
   data() {
     return {
       // icons: '@/assets/images/icons.svg',
@@ -185,7 +185,7 @@ export default {
     //   });
     // });
   },
-  components: { AppLoadingSpinner },
+  components: { VLoadingSpinner },
 };
 </script>
 

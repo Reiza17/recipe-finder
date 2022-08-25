@@ -32,7 +32,7 @@ export default new Vuex.Store({
     searchResultsPerPage: state => state.search.resultsPerPage,
     searchResultsDisplay: state => {
       const start = (state.search.page - 1) * state.search.resultsPerPage; // 0
-      const end = state.search.page * state.search.resultsPerPage; // 9
+      const end = state.search.page * state.search.resultsPerPage; // 10
 
       return state.search.results.slice(start, end);
     },
@@ -62,7 +62,7 @@ export default new Vuex.Store({
       if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
         state.recipe.bookmarked = true;
       else state.recipe.bookmarked = false;
-      // console.log(state);
+      console.log(state);
     },
 
     CREATE_SEARCH_RESULTS(state, data) {

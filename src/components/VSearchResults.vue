@@ -1,7 +1,7 @@
 <template>
   <div class="search-results">
-    <AppLoadingSpinner v-if="loadingSearchResults" />
-    <AppRecipePreview
+    <VLoadingSpinner v-if="loadingSearchResults" />
+    <VRecipePreview
       v-else-if="!loadingSearchResults && searchResults.length > 0"
       :recipes="searchResultsDisplay"
       :resultsActive="true"
@@ -68,14 +68,14 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import AppRecipePreview from '@/components/AppRecipePreview.vue';
-import AppLoadingSpinner from '@/components/AppLoadingSpinner.vue';
+import VRecipePreview from '@/components/VRecipePreview.vue';
+import VLoadingSpinner from '@/components/VLoadingSpinner.vue';
 
 export default {
-  name: 'AppSearchResults',
+  name: 'VSearchResults',
   components: {
-    AppRecipePreview,
-    AppLoadingSpinner,
+    VRecipePreview,
+    VLoadingSpinner,
   },
 
   data() {
