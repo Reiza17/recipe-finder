@@ -3,30 +3,30 @@
     <html>
       <body>
         <div class="container">
-          <AppHeader />
-          <AppSearchResults />
-          <AppRecipe />
+          <VHeader />
+          <VSearchResults />
+          <VRecipe />
         </div>
-        <AppUploadRecipe v-if="uploadRecipeModal" />
+        <VUploadRecipe v-if="uploadRecipeModal" />
       </body>
     </html>
   </div>
 </template>
 
 <script>
-import AppHeader from '@/components/AppHeader.vue';
-import AppSearchResults from './components/AppSearchResults.vue';
-import AppRecipe from './components/AppRecipe.vue';
-import AppUploadRecipe from '@/components/AppUploadRecipe.vue';
+import VHeader from '@/components/VHeader.vue';
+import VSearchResults from './components/VSearchResults.vue';
+import VRecipe from './components/VRecipe.vue';
+import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import { mapGetters, mapMutations } from 'vuex';
 
 export default {
   name: 'App',
   components: {
-    AppHeader,
-    AppSearchResults,
-    AppRecipe,
-    AppUploadRecipe,
+    VHeader,
+    VSearchResults,
+    VRecipe,
+    VUploadRecipe,
   },
 
   computed: {

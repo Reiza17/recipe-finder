@@ -19,7 +19,7 @@
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 
 export default {
-  name: 'AppSearch',
+  name: 'VSearch',
 
   data() {
     return {

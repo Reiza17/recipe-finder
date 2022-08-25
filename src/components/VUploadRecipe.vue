@@ -5,34 +5,89 @@
       <button @click="toggleUploadRecipeModal" class="btn--close-modal">
         &times;
       </button>
-      <form class="upload">
+      <form @submit.prevent="submitForm" class="upload">
         <div class="upload__column">
           <h3 class="upload__heading">Recipe data</h3>
           <label>Title</label>
-          <input value="TEST23" required name="title" type="text" />
+          <input v-model="formData.title" required name="title" type="text" />
           <label>URL</label>
-          <input value="TEST23" required name="sourceUrl" type="text" />
+          <input
+            v-model="formData.source_url"
+            required
+            name="sourceUrl"
+            type="text"
+          />
           <label>Image URL</label>
-          <input value="TEST23" required name="image" type="text" />
+          <input
+            v-model="formData.image_url"
+            required
+            name="image"
+            type="text"
+          />
           <label>Publisher</label>
-          <input value="TEST23" required name="publisher" type="text" />
+          <input
+            v-model="formData.publisher"
+            required
+            name="publisher"
+            type="text"
+          />
           <label>Prep time</label>
-          <input value="23" required name="cookingTime" type="number" />
+          <input
+            v-model="formData.cookingTime"
+            required
+            name="cookingTime"
+            type="number"
+          />
           <label>Servings</label>
-          <input value="23" required name="servings" type="number" />
+          <input
+            v-model="formData.servings"
+            required
+            name="servings"
+            type="number"
+          />
         </div>
 
         <div class="upload__column">
           <h3 class="upload__heading">Ingredients</h3>
-          <label>Ingredient 1</label>
-          <input
-            value="0.5,kg,Rice"
-            type="text"
-            required
-            name="ingredient-1"
-            placeholder="Format: 'Quantity,Unit,Description'"
-          />
-          <label>Ingredient 2</label>
+          <div>
+            <label>Ingredient 1</label>
+            <input
+              v-model="formData.ingredients[1].quantity"
+              type="text"
+              required
+              placeholder="quantity"
+            />
+            <input
+              v-model="formData.ingredients[1].unit"
+              type="text"
+              required
+              placeholder="unit"
+            />
+            <input
+              v-model="formData.ingredients[1].description"
+              type="text"
+              required
+              placeholder="description"
+            />
+          </div>
+          <div
+            v-for="(ingredient, index) of formData.ingredients.slice(1)"
+            :key="index + 2"
+          >
+            <label>Ingredient {{ index + 2 }}</label>
+            <input
+              v-model="ingredient.quantity"
+              type="text"
+              placeholder="quantity"
+            />
+            <input v-model="ingredient.unit" type="text" placeholder="unit" />
+            <input
+              v-model="ingredient.description"
+              type="text"
+              placeholder="description"
+            />
+          </div>
+          <!-- <label>Ingredient 2</label>
           <input
             value="1,,Avocado"
             type="text"
@@ -63,10 +118,10 @@
             type="text"
             name="ingredient-6"
             placeholder="Format: 'Quantity,Unit,Description'"
-          />
+          /> -->
         </div>
 
-        <button @click.prevent="" class="btn upload__btn">
+        <button class="btn upload__btn">
           <svg>
             <use :href="`${icons}#icon-upload-cloud`"></use>
           </svg>
@@ -81,15 +136,35 @@
 import { mapMutations } from 'vuex';
 
 export default {
-  name: 'AppUploadRecipe',
+  name: 'VUploadRecipe',
 
   data() {
     return {
       icons: require('@/assets/images/icons.svg'),
+      formData: {
+        // id: '',
+        title: 'TEST17',
+        publisher: 'TEST17',
+        source_url: 'TEST17',
+        image_url: 'TEST17',
+        servings: 23,
+        cookingTime: 23,
+        ingredients: [
+          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+        ],
+      },
     };
   },
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
+    submitForm() {
+      console.log(this.formData);
+    },
   },
 };
 </script>
