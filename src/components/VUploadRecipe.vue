@@ -5,79 +5,39 @@
       <button @click="toggleUploadRecipeModal" class="btn--close-modal">
         &times;
       </button>
-      <form @submit.prevent="submitForm" class="upload">
+      <form @submit.prevent="submitForm(formData)" class="upload">
         <div class="upload__column">
           <h3 class="upload__heading">Recipe data</h3>
           <label>Title</label>
-          <input v-model="formData.title" required name="title" type="text" />
+          <input v-model="formData.title" name="title" type="text" />
           <label>URL</label>
-          <input
-            v-model="formData.source_url"
-            required
-            name="sourceUrl"
-            type="text"
-          />
+          <input v-model="formData.source_url" name="sourceUrl" type="text" />
           <label>Image URL</label>
-          <input
-            v-model="formData.image_url"
-            required
-            name="image"
-            type="text"
-          />
+          <input v-model="formData.image_url" name="image" type="text" />
           <label>Publisher</label>
-          <input
-            v-model="formData.publisher"
-            required
-            name="publisher"
-            type="text"
-          />
+          <input v-model="formData.publisher" name="publisher" type="text" />
           <label>Prep time</label>
           <input
             v-model="formData.cookingTime"
-            required
             name="cookingTime"
             type="number"
           />
           <label>Servings</label>
-          <input
-            v-model="formData.servings"
-            required
-            name="servings"
-            type="number"
-          />
+          <input v-model="formData.servings" name="servings" type="number" />
         </div>
 
         <div class="upload__column">
           <h3 class="upload__heading">Ingredients</h3>
-          <div>
-            <label>Ingredient 1</label>
-            <input
-              v-model="formData.ingredients[1].quantity"
-              type="text"
-              required
-              placeholder="quantity"
-            />
-            <input
-              v-model="formData.ingredients[1].unit"
-              type="text"
-              required
-              placeholder="unit"
-            />
-            <input
-              v-model="formData.ingredients[1].description"
-              type="text"
-              required
-              placeholder="description"
-            />
-          </div>
           <div
-            v-for="(ingredient, index) of formData.ingredients.slice(1)"
-            :key="index + 2"
+            v-for="(ingredient, index) of formData.ingredients"
+            :key="index + 1"
           >
-            <label>Ingredient {{ index + 2 }}</label>
+            <label>Ingredient {{ index + 1 }}</label>
             <input
               v-model="ingredient.quantity"
-              type="text"
+              type="number"
+              step="0.01"
+              min="0.01"
               placeholder="quantity"
             />
             <input v-model="ingredient.unit" type="text" placeholder="unit" />
@@ -134,13 +94,22 @@
 
 <script>
 import { mapMutations } from 'vuex';
+import useVuelidate from '@vuelidate/core';
+import { required } from '@vuelidate/validators';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { db } from '@/firebaseInit';
 
 export default {
   name: 'VUploadRecipe',
 
+  setup() {
+    return { v$: useVuelidate() };
+  },
+
   data() {
     return {
       icons: require('@/assets/images/icons.svg'),
+      // isSubmitted: false,
       formData: {
         // id: '',
         title: 'TEST17',
@@ -160,10 +129,77 @@ export default {
       },
     };
   },
+  validations() {
+    return {
+      formData: {
+        // id: '',
+        title: { required },
+        publisher: { required },
+        source_url: { required },
+        image_url: { required },
+        servings: { required },
+        cookingTime: { required },
+        ingredients: [
+          {
+            quantity: { required },
+            unit: { required },
+            description: { required },
+          },
+          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
+        ],
+      },
+    };
+  },
+
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
-    submitForm() {
-      console.log(this.formData);
+    async submitForm(data) {
+      const isFormCorrect = await this.v$.$validate();
+      if (!isFormCorrect) return console.log(this.v$.$errors);
+      console.log('SUCCESS!' + this.formData);
+      this.createRecipe(data);
+    },
+
+    // submitForm() {
+    //   db.collection('data')
+    //     .add(JSON.stringify(this.formData))
+    //     .then(() => {
+    //       alert('Recipe successfully created!');
+    //       // this.user.name = '';
+    //       // this.user.email = '';
+    //       // this.user.phone = '';
+    //     })
+    //     .catch(error => {
+    //       console.log(error);
+    //     });
+    // },
+
+    async createRecipe(recipe) {
+      // return new Promise( (resolve, reject) => {
+      try {
+        const docRef = await addDoc(collection(db, 'recipes'), recipe);
+        console.log('Document written with ID: ', docRef.id);
+        // resolve(docRef)
+      } catch (e) {
+        console.error('Error adding document: ', e);
+        // reject(e)
+      }
+      // })
+    },
+
+    async loadRecipes() {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'recipes'));
+        querySnapshot.forEach(doc => {
+          console.log(`${doc.id} => ${doc.data()}`);
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
   },
 };
