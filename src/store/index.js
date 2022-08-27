@@ -3,6 +3,8 @@ import Vuex from 'vuex';
 import axios from 'axios';
 
 import { API_URL, RES_PER_PAGE, KEY } from '@/common/config.js';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { db } from '@/firebaseInit';
 
 Vue.use(Vuex);
 
@@ -20,7 +22,9 @@ export default new Vuex.Store({
     uploadRecipeModal: false,
     loadingSearchResults: false,
     loadingRecipe: false,
+    userRecipes: [],
   },
+
   getters: {
     hashUrl: state => state.hashUrl,
     uploadRecipeModal: state => state.uploadRecipeModal,
@@ -38,7 +42,9 @@ export default new Vuex.Store({
     },
     loadingSearchResults: state => state.loadingSearchResults,
     loadingRecipe: state => state.loadingRecipe,
+    userRecipeData: state => state.userRecipes,
   },
+
   mutations: {
     TOGGLE_SEARCH_SPINNER(state, boolean) {
       state.loadingSearchResults = boolean;
@@ -57,16 +63,16 @@ export default new Vuex.Store({
     },
 
     CREATE_RECIPE_OBJECT(state, data) {
-      state.recipe = { ...data.data.recipe, bookmarked: false };
-
+      state.recipe = { ...data, bookmarked: false };
+      console.log(state.recipe);
       if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
         state.recipe.bookmarked = true;
       else state.recipe.bookmarked = false;
-      console.log(state);
+      console.log(state.recipe);
     },
 
     CREATE_SEARCH_RESULTS(state, data) {
-      state.search.results = data.data.recipes;
+      state.search.results = [...state.userRecipes, ...data.data.recipes];
       console.log(state);
       console.log(state.search.results);
     },
@@ -102,23 +108,75 @@ export default new Vuex.Store({
     TOGGLE_UPLOAD_RECIPE_MODAL(state) {
       state.uploadRecipeModal = !state.uploadRecipeModal;
     },
+
+    SET_USER_RECIPES(state, recipes) {
+      state.userRecipes = recipes;
+      console.log(state.userRecipes);
+    },
+
+    ADD_USER_RECIPE(state, recipe) {
+      console.log(recipe);
+      state.userRecipes.unshift(recipe);
+      state.bookmarks.push(recipe);
+      console.log(state.userRecipes);
+    },
   },
+
   actions: {
-    async loadRecipe({ commit }, { id }) {
+    async loadRecipe({ commit, getters }, { id }) {
       // try {
       // console.log(id);
-      const res = await axios.get(`${API_URL}${id}`);
-      // this.recipe = res.data.recipe;
+      if (getters.userRecipeData.find(recipe => recipe.id === id)) {
+        const [userRecipe] = getters.userRecipeData.filter(
+          recipe => recipe.id === id
+        );
+        console.log(userRecipe);
+        commit('CREATE_RECIPE_OBJECT', userRecipe);
+      } else {
+        const res = await axios.get(`${API_URL}${id}`);
+        // this.recipe = res.data.recipe;
 
-      commit('CREATE_RECIPE_OBJECT', res.data);
-      // } catch (error) {
-      // console.error(`${error} 💥💥💥💥`);
-      // throw error;
-      // }
+        commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
+        // } catch (error) {
+        // console.error(`${error} 💥💥💥💥`);
+        // throw error;
+        // }
+      }
     },
+
     async searchRecipes({ commit }, query) {
       const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
       commit('CREATE_SEARCH_RESULTS', res.data);
+    },
+
+    async fetchUserRecipes({ commit }) {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'recipes'));
+        // querySnapshot.forEach(doc => console.log(doc.data().id));
+        // querySnapshot.forEach(doc => {
+        //    doc.data().id === doc.id() });
+        const userRecipes = querySnapshot.docs.map(doc => doc.data());
+        commit('SET_USER_RECIPES', userRecipes);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async addUserRecipe({ commit }, recipe) {
+      // return new Promise( (resolve, reject) => {
+      console.log(recipe);
+      try {
+        const docRef = await addDoc(collection(db, 'recipes'), recipe);
+        console.log(docRef);
+        // add success upload condition..if successful (e.g. res.ok or 200 msg), then:
+        commit('ADD_USER_RECIPE', recipe);
+
+        // resolve(docRef)
+      } catch (e) {
+        console.error('Error adding document: ', e);
+        // reject(e)
+      }
+      // })
     },
   },
 });

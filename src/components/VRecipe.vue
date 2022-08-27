@@ -151,6 +151,7 @@ export default {
     async init() {
       try {
         this.toggleRecipeSpinner(true);
+        await this.$store.dispatch('fetchUserRecipes');
         await this.$store.dispatch('loadRecipe', {
           id: window.location.hash.slice(1),
         });

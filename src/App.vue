@@ -42,6 +42,7 @@ export default {
   created() {
     const storage = localStorage.getItem('bookmarks');
     if (storage) this.setStoredBookmarks(JSON.parse(storage));
+    // this.$store.dispatch('fetchUserRecipes');
   },
 };
 </script>
