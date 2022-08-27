@@ -11,15 +11,15 @@
           <label>Title</label>
           <input v-model="formData.title" name="title" type="text" />
           <label>URL</label>
-          <input v-model="formData.source_url" name="sourceUrl" type="text" />
+          <input v-model="formData.source_url" name="source_url" type="text" />
           <label>Image URL</label>
           <input v-model="formData.image_url" name="image" type="text" />
           <label>Publisher</label>
           <input v-model="formData.publisher" name="publisher" type="text" />
           <label>Prep time</label>
           <input
-            v-model="formData.cookingTime"
-            name="cookingTime"
+            v-model="formData.cooking_time"
+            name="cooking_time"
             type="number"
           />
           <label>Servings</label>
@@ -96,8 +96,7 @@
 import { mapMutations } from 'vuex';
 import useVuelidate from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { db } from '@/firebaseInit';
+import uniqid from 'uniqid';
 
 export default {
   name: 'VUploadRecipe',
@@ -111,13 +110,16 @@ export default {
       icons: require('@/assets/images/icons.svg'),
       // isSubmitted: false,
       formData: {
-        // id: '',
+        // submittedByUser: true,
+        id: uniqid(),
         title: 'TEST17',
         publisher: 'TEST17',
-        source_url: 'TEST17',
-        image_url: 'TEST17',
+        source_url:
+          'https://www.closetcooking.com/chicken-fajita-grilled-cheese/',
+        image_url:
+          'https://images.unsplash.com/photo-1583224994076-ae951d019af7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
         servings: 23,
-        cookingTime: 23,
+        cooking_time: 23,
         ingredients: [
           { quantity: 0.5, unit: 'kg', description: 'Rice' },
           { quantity: 0.5, unit: 'kg', description: 'Rice' },
@@ -132,13 +134,12 @@ export default {
   validations() {
     return {
       formData: {
-        // id: '',
         title: { required },
         publisher: { required },
         source_url: { required },
         image_url: { required },
         servings: { required },
-        cookingTime: { required },
+        cooking_time: { required },
         ingredients: [
           {
             quantity: { required },
@@ -157,11 +158,13 @@ export default {
 
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
+
     async submitForm(data) {
       const isFormCorrect = await this.v$.$validate();
       if (!isFormCorrect) return console.log(this.v$.$errors);
-      console.log('SUCCESS!' + this.formData);
-      this.createRecipe(data);
+      console.log('SUCCESS!');
+      console.log(this.formData);
+      this.$store.dispatch('addUserRecipe', data);
     },
 
     // submitForm() {
@@ -177,30 +180,6 @@ export default {
     //       console.log(error);
     //     });
     // },
-
-    async createRecipe(recipe) {
-      // return new Promise( (resolve, reject) => {
-      try {
-        const docRef = await addDoc(collection(db, 'recipes'), recipe);
-        console.log('Document written with ID: ', docRef.id);
-        // resolve(docRef)
-      } catch (e) {
-        console.error('Error adding document: ', e);
-        // reject(e)
-      }
-      // })
-    },
-
-    async loadRecipes() {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'recipes'));
-        querySnapshot.forEach(doc => {
-          console.log(`${doc.id} => ${doc.data()}`);
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    },
   },
 };
 </script>
