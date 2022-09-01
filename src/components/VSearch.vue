@@ -33,10 +33,10 @@ export default {
     ...mapActions(['searchRecipes']),
     ...mapMutations({ toggleSearchSpinner: 'TOGGLE_SEARCH_SPINNER' }),
 
-    async submitSearch(searchInput) {
+    async submitSearch(searchQuery) {
       try {
         this.toggleSearchSpinner(true);
-        await this.$store.dispatch('searchRecipes', searchInput);
+        await this.$store.dispatch('searchRecipes', searchQuery);
         this.toggleSearchSpinner(false);
       } catch (err) {
         console.log(err);
