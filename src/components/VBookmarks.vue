@@ -97,7 +97,7 @@ export default {
 
   visibility: hidden;
   opacity: 0;
-  transition: all 0.5s 0.2s;
+  transition: all 0.01s 0.01s;
 
   &__list {
     list-style: none;
@@ -110,7 +110,7 @@ export default {
     display: flex;
     align-items: center;
     height: 100%;
-    transition: all 0.3s;
+    transition: all 0.01s;
 
     &:hover {
       background-color: $color-grey-light-2;

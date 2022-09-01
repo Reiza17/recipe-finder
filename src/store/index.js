@@ -11,26 +11,25 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     recipe: {},
+    userRecipes: [],
+    bookmarks: [],
+    hashUrl: '',
     search: {
       query: '',
       results: [],
       page: 1,
       resultsPerPage: RES_PER_PAGE,
     },
-    bookmarks: [],
-    hashUrl: '',
-    uploadRecipeModal: false,
     loadingSearchResults: false,
     loadingRecipe: false,
-    userRecipes: [],
+    uploadRecipeModal: false,
   },
 
   getters: {
-    hashUrl: state => state.hashUrl,
-    uploadRecipeModal: state => state.uploadRecipeModal,
     recipe: state => state.recipe,
-    recipeBookmarked: state => state.recipe.bookmarked,
     recipeBookmarks: state => state.bookmarks,
+    recipeBookmarked: state => state.recipe.bookmarked,
+    hashUrl: state => state.hashUrl,
     searchResults: state => state.search.results,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
@@ -42,24 +41,27 @@ export default new Vuex.Store({
     },
     loadingSearchResults: state => state.loadingSearchResults,
     loadingRecipe: state => state.loadingRecipe,
-    userRecipeData: state => state.userRecipes,
+    uploadRecipeModal: state => state.uploadRecipeModal,
   },
 
   mutations: {
+    GET_HASH_URL(state, id) {
+      state.hashUrl = id;
+    },
+
+    CREATE_SEARCH_RESULTS(state, data) {
+      state.search.results = [...state.userRecipes, ...data.data.recipes];
+      state.search.page = 1;
+      console.log(state);
+      console.log(state.search.results);
+    },
+
     TOGGLE_SEARCH_SPINNER(state, boolean) {
       state.loadingSearchResults = boolean;
     },
 
-    TOGGLE_RECIPE_SPINNER(state, boolean) {
-      state.loadingRecipe = boolean;
-    },
-
-    SET_STORED_BOOKMARKS(state, bookmarks) {
-      state.bookmarks = bookmarks;
-    },
-
-    GET_HASH_URL(state, id) {
-      state.hashUrl = id;
+    UPDATE_PAGINATION(state, amount) {
+      state.search.page += amount;
     },
 
     CREATE_RECIPE_OBJECT(state, data) {
@@ -71,10 +73,8 @@ export default new Vuex.Store({
       console.log(state.recipe);
     },
 
-    CREATE_SEARCH_RESULTS(state, data) {
-      state.search.results = [...state.userRecipes, ...data.data.recipes];
-      console.log(state);
-      console.log(state.search.results);
+    TOGGLE_RECIPE_SPINNER(state, boolean) {
+      state.loadingRecipe = boolean;
     },
 
     UPDATE_SERVINGS(state, amount) {
@@ -87,13 +87,9 @@ export default new Vuex.Store({
       });
     },
 
-    UPDATE_PAGINATION(state, amount) {
-      state.search.page += amount;
-    },
-
     TOGGLE_BOOKMARK(state, recipe) {
       if (!state.bookmarks.some(bookmark => bookmark.id === recipe.id)) {
-        state.bookmarks.push(recipe);
+        state.bookmarks.unshift(recipe);
         state.recipe.bookmarked = true;
       } else {
         const recipeIndex = state.bookmarks.findIndex(
@@ -105,78 +101,75 @@ export default new Vuex.Store({
       localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
     },
 
+    SET_STORED_BOOKMARKS(state, bookmarks) {
+      state.bookmarks = bookmarks;
+    },
+
     TOGGLE_UPLOAD_RECIPE_MODAL(state) {
       state.uploadRecipeModal = !state.uploadRecipeModal;
+    },
+
+    ADD_USER_RECIPE(state, recipe) {
+      // console.log(recipe.id);
+      state.userRecipes.unshift(recipe);
+      state.bookmarks.unshift(recipe);
+      console.log(state.userRecipes);
     },
 
     SET_USER_RECIPES(state, recipes) {
       state.userRecipes = recipes;
       console.log(state.userRecipes);
     },
-
-    ADD_USER_RECIPE(state, recipe) {
-      console.log(recipe);
-      state.userRecipes.unshift(recipe);
-      state.bookmarks.push(recipe);
-      console.log(state.userRecipes);
-    },
   },
 
   actions: {
-    async loadRecipe({ commit, getters }, { id }) {
-      // try {
-      // console.log(id);
-      if (getters.userRecipeData.find(recipe => recipe.id === id)) {
-        const [userRecipe] = getters.userRecipeData.filter(
-          recipe => recipe.id === id
-        );
-        console.log(userRecipe);
-        commit('CREATE_RECIPE_OBJECT', userRecipe);
-      } else {
-        const res = await axios.get(`${API_URL}${id}`);
-        // this.recipe = res.data.recipe;
-
-        commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
-        // } catch (error) {
-        // console.error(`${error} 💥💥💥💥`);
-        // throw error;
-        // }
+    async searchRecipes({ commit }, query) {
+      try {
+        const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
+        commit('CREATE_SEARCH_RESULTS', res.data);
+      } catch (err) {
+        console.error('Error searching for recipes: ', err);
       }
     },
 
-    async searchRecipes({ commit }, query) {
-      const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
-      commit('CREATE_SEARCH_RESULTS', res.data);
+    async loadRecipe({ commit, state }, { id }) {
+      try {
+        // console.log(id);
+        const [userRecipe] = state.userRecipes.filter(
+          recipe => recipe.id === id
+        );
+
+        if (userRecipe) commit('CREATE_RECIPE_OBJECT', userRecipe);
+        else {
+          const res = await axios.get(`${API_URL}${id}`);
+          commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
+        }
+      } catch (err) {
+        console.error('Error loading recipe: ', err);
+      }
+    },
+
+    async addUserRecipe({ commit }, recipe) {
+      try {
+        // console.log(recipe.id);
+        const docRef = await addDoc(collection(db, 'recipes'), recipe);
+        console.log(docRef);
+        // add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
+        console.log('Passed server-side validation!');
+        commit('ADD_USER_RECIPE', recipe);
+      } catch (err) {
+        console.error('Error adding document: ', err);
+      }
     },
 
     async fetchUserRecipes({ commit }) {
       try {
         const querySnapshot = await getDocs(collection(db, 'recipes'));
-        // querySnapshot.forEach(doc => console.log(doc.data().id));
-        // querySnapshot.forEach(doc => {
-        //    doc.data().id === doc.id() });
         const userRecipes = querySnapshot.docs.map(doc => doc.data());
         commit('SET_USER_RECIPES', userRecipes);
       } catch (err) {
-        console.log(err);
+        console.log('Error loading user recipes: ', err);
       }
-    },
-
-    async addUserRecipe({ commit }, recipe) {
-      // return new Promise( (resolve, reject) => {
-      console.log(recipe);
-      try {
-        const docRef = await addDoc(collection(db, 'recipes'), recipe);
-        console.log(docRef);
-        // add success upload condition..if successful (e.g. res.ok or 200 msg), then:
-        commit('ADD_USER_RECIPE', recipe);
-
-        // resolve(docRef)
-      } catch (e) {
-        console.error('Error adding document: ', e);
-        // reject(e)
-      }
-      // })
     },
   },
 });

@@ -5,25 +5,89 @@
       <button @click="toggleUploadRecipeModal" class="btn--close-modal">
         &times;
       </button>
-      <form @submit.prevent="submitForm(formData)" class="upload">
+      <form @submit.prevent="submitForm" class="upload">
         <div class="upload__column">
           <h3 class="upload__heading">Recipe data</h3>
+
           <label>Title</label>
-          <input v-model="formData.title" name="title" type="text" />
+          <div class="upload__field">
+            <input v-model="formData.title" name="title" type="text" />
+            <p v-if="formErrorsExist" class="upload__error">
+              <span v-if="v$.formData.title.required.$invalid"
+                >This field is required</span
+              >
+              <!-- <span v-if="....backend title duplicate found"
+                >This title already exists. Please choose a different title!</span
+                > -->
+            </p>
+          </div>
+
           <label>URL</label>
-          <input v-model="formData.source_url" name="source_url" type="text" />
+          <div class="upload__field">
+            <input
+              v-model="formData.source_url"
+              name="source_url"
+              type="text"
+            />
+            <p v-if="formErrorsExist" class="upload__error">
+              <span v-if="v$.formData.source_url.required.$invalid"
+                >This field is required</span
+              >
+              <span v-if="v$.formData.source_url.url.$invalid"
+                >Please enter a valid URL</span
+              >
+              <!-- <span v-if="....backend source_url duplicate found"
+              >This url is already being used for an existing recipe: (link to it)</span
+            > -->
+            </p>
+          </div>
+
           <label>Image URL</label>
-          <input v-model="formData.image_url" name="image" type="text" />
+          <div class="upload__field">
+            <input v-model="formData.image_url" name="image" type="text" />
+            <p v-if="formErrorsExist" class="upload__error">
+              <span v-if="v$.formData.image_url.required.$invalid"
+                >This field is required</span
+              >
+              <span v-if="v$.formData.image_url.url.$invalid"
+                >Please enter a valid URL</span
+              >
+            </p>
+          </div>
+
           <label>Publisher</label>
-          <input v-model="formData.publisher" name="publisher" type="text" />
+          <div class="upload__field">
+            <input v-model="formData.publisher" name="publisher" type="text" />
+            <p v-if="formErrorsExist" class="upload__error">
+              <span v-if="v$.formData.publisher.required.$invalid"
+                >This field is required</span
+              >
+            </p>
+          </div>
+
           <label>Prep time</label>
-          <input
-            v-model="formData.cooking_time"
-            name="cooking_time"
-            type="number"
-          />
+          <div class="upload__field">
+            <input
+              v-model="formData.cooking_time"
+              name="cooking_time"
+              type="number"
+            />
+            <p v-if="formErrorsExist" class="upload__error">
+              <span v-if="v$.formData.cooking_time.required.$invalid"
+                >This field is required</span
+              >
+            </p>
+          </div>
+
           <label>Servings</label>
-          <input v-model="formData.servings" name="servings" type="number" />
+          <div class="upload__field">
+            <input v-model="formData.servings" name="servings" type="number" />
+            <p v-if="formErrorsExist" class="upload__error">
+              <span v-if="v$.formData.servings.required.$invalid"
+                >This field is required</span
+              >
+            </p>
+          </div>
         </div>
 
         <div class="upload__column">
@@ -47,41 +111,14 @@
               placeholder="description"
             />
           </div>
-          <!-- <label>Ingredient 2</label>
-          <input
-            value="1,,Avocado"
-            type="text"
-            name="ingredient-2"
-            placeholder="Format: 'Quantity,Unit,Description'"
-          />
-          <label>Ingredient 3</label>
-          <input
-            value=",,salt"
-            type="text"
-            name="ingredient-3"
-            placeholder="Format: 'Quantity,Unit,Description'"
-          />
-          <label>Ingredient 4</label>
-          <input
-            type="text"
-            name="ingredient-4"
-            placeholder="Format: 'Quantity,Unit,Description'"
-          />
-          <label>Ingredient 5</label>
-          <input
-            type="text"
-            name="ingredient-5"
-            placeholder="Format: 'Quantity,Unit,Description'"
-          />
-          <label>Ingredient 6</label>
-          <input
-            type="text"
-            name="ingredient-6"
-            placeholder="Format: 'Quantity,Unit,Description'"
-          /> -->
+          <p v-if="formErrorsExist" class="upload__error">
+            <span v-if="v$.formData.ingredients.$invalid"
+              >Enter at least one ingredient</span
+            >
+          </p>
         </div>
 
-        <button class="btn upload__btn">
+        <button type="submit" :disabled="formSubmitted" class="btn upload__btn">
           <svg>
             <use :href="`${icons}#icon-upload-cloud`"></use>
           </svg>
@@ -95,7 +132,7 @@
 <script>
 import { mapMutations } from 'vuex';
 import useVuelidate from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { required, url } from '@vuelidate/validators';
 import uniqid from 'uniqid';
 
 export default {
@@ -109,24 +146,29 @@ export default {
     return {
       icons: require('@/assets/images/icons.svg'),
       // isSubmitted: false,
+      // uiState: 'submit not clicked',
+      formSubmitted: false,
+      formErrorsExist: false,
+      // formEmpty: true,
       formData: {
         // submittedByUser: true,
+        // id: uniqid(),
         id: uniqid(),
-        title: 'TEST17',
+        title: 'TEST RECIPE',
         publisher: 'TEST17',
         source_url:
           'https://www.closetcooking.com/chicken-fajita-grilled-cheese/',
         image_url:
           'https://images.unsplash.com/photo-1583224994076-ae951d019af7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-        servings: 23,
-        cooking_time: 23,
+        servings: 2,
+        cooking_time: 25,
         ingredients: [
-          { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          { quantity: 0.5, unit: 'kg', description: 'Rice' },
+          { quantity: 0.5, unit: 'kg', description: 'rice' },
+          { quantity: 1, unit: 'tsp', description: 'coriander seeds' },
+          { quantity: 50, unit: 'oz', description: 'butter' },
+          { quantity: 2, unit: 'free-range', description: 'eggs' },
+          { quantity: 2, unit: 'pieces', description: 'bread' },
+          { quantity: 1, unit: 'cup', description: 'grated romano cheese' },
         ],
       },
     };
@@ -136,21 +178,16 @@ export default {
       formData: {
         title: { required },
         publisher: { required },
-        source_url: { required },
-        image_url: { required },
-        servings: { required },
-        cooking_time: { required },
+        source_url: { required, url },
+        image_url: { required, url },
+        servings: { required }, // minValue
+        cooking_time: { required }, // minValue
         ingredients: [
           {
-            quantity: { required },
+            quantity: { required }, // minValue
             unit: { required },
             description: { required },
           },
-          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
-          // { quantity: 0.5, unit: 'kg', description: 'Rice' },
         ],
       },
     };
@@ -159,28 +196,48 @@ export default {
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
 
-    async submitForm(data) {
-      const isFormCorrect = await this.v$.$validate();
-      if (!isFormCorrect) return console.log(this.v$.$errors);
-      console.log('SUCCESS!');
-      console.log(this.formData);
-      this.$store.dispatch('addUserRecipe', data);
-    },
+    // validateFormClientSide() {
+    //   {
 
-    // submitForm() {
-    //   db.collection('data')
-    //     .add(JSON.stringify(this.formData))
-    //     .then(() => {
-    //       alert('Recipe successfully created!');
-    //       // this.user.name = '';
-    //       // this.user.email = '';
-    //       // this.user.phone = '';
-    //     })
-    //     .catch(error => {
-    //       console.log(error);
-    //     });
+    //   }
     // },
+
+    async submitForm() {
+      // is loading
+      try {
+        const isFormCorrect = await this.v$.$validate();
+        // is not loading
+        if (!isFormCorrect) {
+          this.formErrorsExist = true;
+          throw Error('Failed client-side validation');
+        }
+        console.log('Passed client-side validation!');
+        // is loading
+        // console.log(this.formData.id);
+        this.formSubmitted = true;
+        await this.$store.dispatch('addUserRecipe', this.formData);
+        // is not loading
+        // successful upload message
+      } catch (err) {
+        // unsuccessful upload message
+        console.log(err);
+      }
+    },
   },
+
+  // submitForm() {
+  //   db.collection('data')
+  //     .add(JSON.stringify(this.formData))
+  //     .then(() => {
+  //       alert('Recipe successfully created!');
+  //       // this.user.name = '';
+  //       // this.user.email = '';
+  //       // this.user.phone = '';
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // },
 };
 </script>
 
@@ -279,6 +336,19 @@ export default {
   &__btn {
     grid-column: 1 / -1;
     justify-self: center;
+  }
+
+  &__error {
+    color: red;
+    font-size: 12px;
+    position: absolute;
+    // text-transform: uppercase;
+  }
+
+  &__field {
+    position: relative;
+    // padding-bottom: 30px;
+    // display: flex;
   }
 }
 </style>
