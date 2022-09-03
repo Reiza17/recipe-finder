@@ -67,9 +67,10 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex';
 import VRecipePreview from '@/components/VRecipePreview.vue';
 import VLoadingSpinner from '@/components/VLoadingSpinner.vue';
+import { createNamespacedHelpers } from 'vuex';
+const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 
 export default {
   name: 'VSearchResults',

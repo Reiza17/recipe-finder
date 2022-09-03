@@ -130,7 +130,8 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
+import { createNamespacedHelpers } from 'vuex';
+const { mapMutations } = createNamespacedHelpers('home');
 import useVuelidate from '@vuelidate/core';
 import { required, url } from '@vuelidate/validators';
 import uniqid from 'uniqid';
@@ -215,7 +216,7 @@ export default {
         // is loading
         // console.log(this.formData.id);
         this.formSubmitted = true;
-        await this.$store.dispatch('addUserRecipe', this.formData);
+        await this.$store.dispatch('home/addUserRecipe', this.formData);
         // is not loading
         // successful upload message
       } catch (err) {

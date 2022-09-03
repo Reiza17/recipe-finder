@@ -16,7 +16,9 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapMutations } from 'vuex';
+import { createNamespacedHelpers } from 'vuex';
+const { mapActions, mapGetters, mapMutations } =
+  createNamespacedHelpers('home');
 
 export default {
   name: 'VSearch',
@@ -36,7 +38,7 @@ export default {
     async submitSearch(searchQuery) {
       try {
         this.toggleSearchSpinner(true);
-        await this.$store.dispatch('searchRecipes', searchQuery);
+        await this.$store.dispatch('home/searchRecipes', searchQuery);
         this.toggleSearchSpinner(false);
       } catch (err) {
         console.log(err);
