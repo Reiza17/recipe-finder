@@ -28,7 +28,8 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex';
+import { createNamespacedHelpers } from 'vuex';
+const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 
 export default {
   name: 'VRecipePreview',

@@ -25,7 +25,8 @@
 
 <script>
 import VRecipePreview from '@/components/VRecipePreview.vue';
-import { mapGetters } from 'vuex';
+import { createNamespacedHelpers } from 'vuex';
+const { mapGetters } = createNamespacedHelpers('home');
 
 export default {
   name: 'VBookmarks',

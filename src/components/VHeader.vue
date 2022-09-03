@@ -15,6 +15,33 @@
           </button>
         </li>
         <VBookmarks />
+        <li class="nav__item" v-if="!isLoggedIn">
+          <!-- <router-link :to="{ name: 'Home' }">
+            <v-btn color="primary" large>
+              <v-icon left>mdi-home</v-icon>
+              <span>Home</span>
+            </v-btn>
+          </router-link> -->
+          <router-link to="/register" class="nav__btn">
+            <span>Register</span>
+          </router-link>
+        </li>
+        <li class="nav__item" v-if="!isLoggedIn">
+          <router-link to="/login" class="nav__btn">
+            <span>Login</span>
+          </router-link>
+        </li>
+        <li class="nav__item" v-else>
+          <!-- <button class="nav__btn" @click="toggleUploadRecipeModal">
+            <svg class="nav__icon">
+              <use href="@/assets/images/icons.svg#icon-edit"></use>
+            </svg>
+            <span>Add recipe</span>
+          </button> -->
+          <button class="nav__btn" @click="$store.dispatch('auth/logout')">
+            Logout
+          </button>
+        </li>
       </ul>
     </nav>
   </header>
@@ -23,13 +50,19 @@
 <script>
 import VSearch from '@/components/VSearch.vue';
 import VBookmarks from '@/components/VBookmarks.vue';
-import { mapMutations } from 'vuex';
+import { createNamespacedHelpers } from 'vuex';
+const { mapMutations } = createNamespacedHelpers('home');
 
 export default {
   name: 'VHeader',
   components: {
     VSearch,
     VBookmarks,
+  },
+  computed: {
+    isLoggedIn() {
+      return this.$store.getters['auth/isLoggedIn'];
+    },
   },
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
@@ -80,6 +113,8 @@ export default {
     cursor: pointer;
     padding: 0 1.5rem;
     transition: all 0.3s;
+    // added below just for non-bootstrap version
+    text-decoration: none;
 
     display: flex;
     align-items: center;

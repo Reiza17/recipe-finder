@@ -123,7 +123,8 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex';
+import { createNamespacedHelpers } from 'vuex';
+const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 import fracty from 'fracty';
 import VLoadingSpinner from './VLoadingSpinner.vue';
 
@@ -151,8 +152,8 @@ export default {
     async init() {
       try {
         this.toggleRecipeSpinner(true);
-        await this.$store.dispatch('fetchUserRecipes');
-        await this.$store.dispatch('loadRecipe', {
+        await this.$store.dispatch('home/fetchUserRecipes');
+        await this.$store.dispatch('home/loadRecipe', {
           id: window.location.hash.slice(1),
         });
         this.toggleRecipeSpinner(false);
@@ -164,7 +165,7 @@ export default {
       try {
         window.addEventListener('hashchange', async () => {
           this.toggleRecipeSpinner(true);
-          await this.$store.dispatch('loadRecipe', {
+          await this.$store.dispatch('home/loadRecipe', {
             id: window.location.hash.slice(1),
           });
           this.toggleRecipeSpinner(false);
