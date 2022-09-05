@@ -1,10 +1,8 @@
 <template>
   <div>
-    <div @click="toggleUploadRecipeModal" class="overlay"></div>
+    <div @click="$router.back()" class="overlay"></div>
     <div class="add-recipe-window">
-      <button @click="toggleUploadRecipeModal" class="btn--close-modal">
-        &times;
-      </button>
+      <button @click="$router.back()" class="btn--close-modal">&times;</button>
       <form @submit.prevent="submitForm" class="upload">
         <div class="upload__column">
           <h3 class="upload__heading">Recipe data</h3>
@@ -337,6 +335,7 @@ export default {
   &__btn {
     grid-column: 1 / -1;
     justify-self: center;
+    padding: 1.5rem 4rem;
   }
 
   &__error {
