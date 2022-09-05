@@ -4,7 +4,7 @@ import VHome from '@/views/VHome.vue';
 import VueRouter from 'vue-router';
 import VRegister from '@/views/VRegister.vue';
 import VLogin from '@/views/VLogin.vue';
-// import Secret from "@/views/Secret.vue";
+import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import { auth } from '@/firebaseInit';
 
 Vue.use(VueRouter);
@@ -14,23 +14,26 @@ const routes = [
     path: '/',
     name: 'home',
     component: VHome,
+    children: [
+      {
+        path: '/upload',
+        name: 'upload',
+        component: VUploadRecipe,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/login',
+        name: 'login',
+        component: VLogin,
+      },
+      {
+        path: '/register',
+        name: 'register',
+        component: VRegister,
+      },
+    ],
   },
-  // {
-  //   path: '/secret',
-  //   name: 'secret',
-  //   component: Secret,
-  //   meta: { requiresAuth: true },
-  // },
-  {
-    path: '/login',
-    name: 'login',
-    component: VLogin,
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: VRegister,
-  },
+
   // {
   //   path: '/about',
   //   name: 'about',
@@ -49,9 +52,10 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  console.log(from);
+
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const isAuthenticated = auth.currentUser;
-  console.log('isauthenticated', isAuthenticated);
   if (requiresAuth && !isAuthenticated) {
     next('/login');
   } else {

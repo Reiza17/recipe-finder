@@ -2,18 +2,18 @@
   <div id="app">
     <!-- <header></header> -->
     <!-- <top-header></top-header> -->
-    <div id="nav">
-      <!-- <router-link to="/">Home</router-link>| -->
-      <!-- <router-link to="/about">About</router-link>| -->
-      <!-- <div v-if="!isLoggedIn">
+    <!-- <div id="nav"> -->
+    <!-- <router-link to="/">Home</router-link>| -->
+    <!-- <router-link to="/about">About</router-link>| -->
+    <!-- <div v-if="!loggedIn">
         <router-link to="/register">Register</router-link>|
         <router-link to="/login">Login</router-link>
       </div>
       <div v-else>
         <button @click="$store.dispatch('auth/logout')">Logout</button>
       </div> -->
-      <!-- <router-link to="/secret">Secret</router-link> -->
-    </div>
+    <!-- <router-link to="/secret">Secret</router-link> -->
+    <!-- </div> -->
     <router-view />
   </div>
 </template>
@@ -27,8 +27,8 @@ export default {
   //   'top-header': Header,
   // },
   // computed: {
-  //   isLoggedIn() {
-  //     return this.$store.getters['auth/isLoggedIn'];
+  //   loggedIn() {
+  //     return this.$store.getters['auth/loggedIn'];
   //   },
   // },
   beforeMount() {
@@ -38,24 +38,24 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+// #app {
+//   font-family: 'Avenir', Helvetica, Arial, sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   text-align: center;
+//   color: #2c3e50;
+// }
 
-#nav {
-  padding: 30px;
+// #nav {
+//   padding: 30px;
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+//   a {
+//     font-weight: bold;
+//     color: #2c3e50;
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
+//     &.router-link-exact-active {
+//       color: #42b983;
+//     }
+//   }
+// }
 </style>

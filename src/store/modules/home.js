@@ -2,18 +2,16 @@ import axios from 'axios';
 import { API_URL, RES_PER_PAGE, KEY } from '@/common/config.js';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseInit';
-import { user } from './auth';
 
 export default {
   namespaced: true,
 
   state: {
-    // the user variable below is from auth module
-    user,
     recipe: {},
     userRecipes: [],
     bookmarks: [],
     hashUrl: '',
+    previousURL: '',
     search: {
       query: '',
       results: [],
@@ -45,6 +43,10 @@ export default {
   },
 
   mutations: {
+    SET_PREVIOUS_URL(state, pageName) {
+      state.previousURL = pageName;
+    },
+
     GET_HASH_URL(state, id) {
       state.hashUrl = id;
     },

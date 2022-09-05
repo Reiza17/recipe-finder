@@ -8,7 +8,8 @@
           <VSearchResults />
           <VRecipe />
         </div>
-        <VUploadRecipe v-if="uploadRecipeModal" />
+        <!-- <VUploadRecipe v-if="uploadRecipeModal" /> -->
+        <router-view />
       </body>
     </html>
   </div>
@@ -18,7 +19,7 @@
 import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
-import VUploadRecipe from '@/components/VUploadRecipe.vue';
+// import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 
@@ -28,7 +29,7 @@ export default {
     VHeader,
     VSearchResults,
     VRecipe,
-    VUploadRecipe,
+    // VUploadRecipe,
   },
 
   computed: {
