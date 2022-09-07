@@ -6,7 +6,7 @@
         &times;
       </button>
       <div class="message">
-        <p>Sign up</p>
+        <p>Sign up to upload or bookmark recipes!</p>
       </div>
       <form @submit.prevent="pressed">
         <div class="email">

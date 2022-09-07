@@ -66,10 +66,7 @@
             <use :href="`${icons}#icon-user`"></use>
           </svg>
         </div>
-        <button
-          @click="toggleBookmark(recipe)"
-          class="btn--round btn--bookmark"
-        >
+        <button @click="bookmarkRecipe" class="btn--round btn--bookmark">
           <svg class="">
             <use
               :href="`${icons}#icon-bookmark${recipeBookmarked ? '-fill' : ''}`"
@@ -139,6 +136,9 @@ export default {
   },
   computed: {
     ...mapGetters(['recipe', 'recipeBookmarked', 'loadingRecipe']),
+    loggedIn() {
+      return this.$store.getters['auth/user'];
+    },
   },
   methods: {
     ...mapMutations({
@@ -149,10 +149,14 @@ export default {
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
     },
+    bookmarkRecipe() {
+      if (!this.loggedIn) this.$router.push({ name: 'register' });
+      else this.toggleBookmark(this.recipe);
+    },
     async init() {
       try {
         this.toggleRecipeSpinner(true);
-        await this.$store.dispatch('home/fetchUserRecipes');
+        // await this.$store.dispatch('home/fetchUserRecipes');
         await this.$store.dispatch('home/loadRecipe', {
           id: window.location.hash.slice(1),
         });
