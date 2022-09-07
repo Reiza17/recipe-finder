@@ -61,7 +61,7 @@ export default {
   },
   computed: {
     loggedIn() {
-      return this.$store.getters['auth/loggedIn'];
+      return this.$store.getters['auth/user'];
     },
   },
   methods: {

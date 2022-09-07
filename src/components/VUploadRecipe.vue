@@ -188,6 +188,7 @@ export default {
             description: { required },
           },
         ],
+        timestamp: '',
       },
     };
   },
@@ -213,6 +214,7 @@ export default {
         console.log('Passed client-side validation!');
         // is loading
         // console.log(this.formData.id);
+        this.formData.timestamp = Date.now();
         this.formSubmitted = true;
         await this.$store.dispatch('home/addUserRecipe', this.formData);
         // is not loading

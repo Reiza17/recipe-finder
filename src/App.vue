@@ -31,8 +31,9 @@ export default {
   //     return this.$store.getters['auth/loggedIn'];
   //   },
   // },
-  beforeMount() {
-    this.$store.dispatch('auth/fetchUser');
+  async beforeMount() {
+    await this.$store.dispatch('auth/fetchUser');
+    await this.$store.dispatch('home/fetchUserRecipes');
   },
 };
 </script>

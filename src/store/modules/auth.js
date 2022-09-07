@@ -1,10 +1,12 @@
-import { auth } from '@/firebaseInit';
+import { auth, db } from '@/firebaseInit';
 import router from '@/router';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+// import { collection, setDoc } from 'firebase/firestore';
 
 export default {
   namespaced: true,
@@ -14,7 +16,7 @@ export default {
   },
 
   getters: {
-    loggedIn: state => state.user,
+    user: state => state.user,
   },
 
   mutations: {
@@ -40,7 +42,16 @@ export default {
       const { email, password } = details;
 
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const cred = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          email: email,
+          recipes: [],
+        });
       } catch (error) {
         switch (error.code) {
           case 'auth/email-already-in-use':
@@ -58,13 +69,13 @@ export default {
           default:
             alert('Something went wrong');
         }
-
+        console.log(error);
         return;
       }
 
       commit('SET_USER', auth.currentUser);
 
-      this.$router.push('/');
+      router.push('/');
       //// Alternative syntax below
       // router.replace({ name: 'home' });
     },
@@ -95,7 +106,7 @@ export default {
           default:
             alert('Something went wrong');
         }
-
+        console.log(error);
         return;
       }
 
@@ -136,7 +147,7 @@ export default {
     fetchUser({ commit }) {
       auth.onAuthStateChanged(async user => {
         console.log(user);
-        if (user === null) {
+        if (!user) {
           commit('CLEAR_USER');
         } else {
           commit('SET_USER', user);

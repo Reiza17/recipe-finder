@@ -52,12 +52,12 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  console.log(from);
+  // console.log(from);
 
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const isAuthenticated = auth.currentUser;
   if (requiresAuth && !isAuthenticated) {
-    next('/login');
+    next('/register');
   } else {
     next();
   }

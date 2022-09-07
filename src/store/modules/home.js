@@ -1,12 +1,22 @@
 import axios from 'axios';
 import { API_URL, RES_PER_PAGE, KEY } from '@/common/config.js';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import {
+  // collection,
+  // getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+  arrayUnion,
+  // arrayRemove,
+} from 'firebase/firestore';
 import { db } from '@/firebaseInit';
+import { user } from '@/store/modules/auth';
 
 export default {
   namespaced: true,
 
   state: {
+    user,
     recipe: {},
     userRecipes: [],
     bookmarks: [],
@@ -41,6 +51,12 @@ export default {
     loadingRecipe: state => state.loadingRecipe,
     uploadRecipeModal: state => state.uploadRecipeModal,
   },
+
+  // computed: {
+  //   user() {
+  //     return ;
+  //   },
+  // },
 
   mutations: {
     SET_PREVIOUS_URL(state, pageName) {
@@ -130,7 +146,7 @@ export default {
         const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
         commit('CREATE_SEARCH_RESULTS', res.data);
       } catch (err) {
-        console.error('Error searching for recipes: ', err);
+        console.error(`Error searching for recipes: ${err}`);
       }
     },
 
@@ -147,30 +163,51 @@ export default {
           commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
         }
       } catch (err) {
-        console.error('Error loading recipe: ', err);
+        console.error(`Error loading recipe: ${err}`);
       }
     },
 
-    async addUserRecipe({ commit }, recipe) {
+    async addUserRecipe({ commit, rootState }, recipe) {
       try {
-        // console.log(recipe.id);
-        const docRef = await addDoc(collection(db, 'recipes'), recipe);
-        console.log(docRef);
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+        await updateDoc(docRef, {
+          recipes: arrayUnion(recipe),
+        });
+        // const docRef = await addDoc(collection(db, 'recipes'), recipe);
         // add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
-        console.log('Passed server-side validation!');
+        console.log('Successfully uploaded user recipe to server!');
         commit('ADD_USER_RECIPE', recipe);
       } catch (err) {
-        console.error('Error adding document: ', err);
+        console.error(`Failed to upload user recipe to server: ${err}`);
       }
     },
 
-    async fetchUserRecipes({ commit }) {
+    // async deleteUserRecipe({ commit, rootState }, id) {
+    //   try {
+    //     const docRef = doc(db, 'users', rootState.auth.user.uid);
+    //     await updateDoc(docRef, {
+    //       recipes: arrayRemove(id),
+    //     });
+    //     console.log('Successfully removed user recipe from server');
+    //     commit('DELETE_USER_RECIPE', id);
+    //   } catch (err) {
+    //     console.error(`Failed to remove user recipe from server: ${err}`);
+    //   }
+    // },
+
+    async fetchUserRecipes({ commit, rootState }) {
       try {
-        const querySnapshot = await getDocs(collection(db, 'recipes'));
-        const userRecipes = querySnapshot.docs.map(doc => doc.data());
-        commit('SET_USER_RECIPES', userRecipes);
+        console.log(rootState);
+
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+        const docSnap = await getDoc(docRef);
+
+        commit('SET_USER_RECIPES', docSnap.data().recipes);
+
+        // const querySnapshot = await getDocs(collection(db, 'users'));
+        // const userRecipes = querySnapshot.docs.map(doc => doc.data());
       } catch (err) {
-        console.log('Error loading user recipes: ', err);
+        console.error(`Failed to get user recipes from server: ${err}`);
       }
     },
   },
