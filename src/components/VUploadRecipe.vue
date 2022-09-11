@@ -1,19 +1,29 @@
 <template>
   <div>
-    <div @click="$router.back()" class="overlay"></div>
+    <div @click="$router.push({ name: 'home' })" class="overlay"></div>
     <div class="add-recipe-window">
-      <button @click="$router.back()" class="btn--close-modal">&times;</button>
+      <button @click="$router.push({ name: 'home' })" class="btn--close-modal">
+        &times;
+      </button>
       <form @submit.prevent="submitForm" class="upload">
         <div class="upload__column">
           <h3 class="upload__heading">Recipe data</h3>
 
           <label>Title</label>
           <div class="upload__field">
-            <input v-model="formData.title" name="title" type="text" />
-            <p v-if="formErrorsExist" class="upload__error">
+            <input
+              v-model="formData.title"
+              name="title"
+              type="text"
+              @blur="v$.formData.title.$touch"
+            />
+            <!-- NOTE Alternatively, could show  errors only after the form is submitted, rather than right after a field is modified:  -->
+            <!-- <p v-if="formErrorsExist" class="upload__error"> -->
+            <p v-if="v$.formData.title.$error" class="upload__error">
               <span v-if="v$.formData.title.required.$invalid"
                 >This field is required</span
               >
+              <!-- TODO implement duplicate validation-->
               <!-- <span v-if="....backend title duplicate found"
                 >This title already exists. Please choose a different title!</span
                 > -->
@@ -26,14 +36,16 @@
               v-model="formData.source_url"
               name="source_url"
               type="text"
+              @blur="v$.formData.source_url.$touch"
             />
-            <p v-if="formErrorsExist" class="upload__error">
+            <p v-if="v$.formData.source_url.$error" class="upload__error">
               <span v-if="v$.formData.source_url.required.$invalid"
                 >This field is required</span
               >
               <span v-if="v$.formData.source_url.url.$invalid"
                 >Please enter a valid URL</span
               >
+              <!-- TODO implement duplicate validation -->
               <!-- <span v-if="....backend source_url duplicate found"
               >This url is already being used for an existing recipe: (link to it)</span
             > -->
@@ -42,8 +54,13 @@
 
           <label>Image URL</label>
           <div class="upload__field">
-            <input v-model="formData.image_url" name="image" type="text" />
-            <p v-if="formErrorsExist" class="upload__error">
+            <input
+              v-model="formData.image_url"
+              name="image"
+              type="text"
+              @blur="v$.formData.image_url.$touch"
+            />
+            <p v-if="v$.formData.image_url.$error" class="upload__error">
               <span v-if="v$.formData.image_url.required.$invalid"
                 >This field is required</span
               >
@@ -55,8 +72,13 @@
 
           <label>Publisher</label>
           <div class="upload__field">
-            <input v-model="formData.publisher" name="publisher" type="text" />
-            <p v-if="formErrorsExist" class="upload__error">
+            <input
+              v-model="formData.publisher"
+              name="publisher"
+              type="text"
+              @blur="v$.formData.publisher.$touch"
+            />
+            <p v-if="v$.formData.publisher.$error" class="upload__error">
               <span v-if="v$.formData.publisher.required.$invalid"
                 >This field is required</span
               >
@@ -69,8 +91,11 @@
               v-model="formData.cooking_time"
               name="cooking_time"
               type="number"
+              min="1"
+              oninput="this.value = Math.abs(this.value) > 0 ? Math.abs(this.value) : null"
+              @blur="v$.formData.cooking_time.$touch"
             />
-            <p v-if="formErrorsExist" class="upload__error">
+            <p v-if="v$.formData.cooking_time.$error" class="upload__error">
               <span v-if="v$.formData.cooking_time.required.$invalid"
                 >This field is required</span
               >
@@ -79,8 +104,15 @@
 
           <label>Servings</label>
           <div class="upload__field">
-            <input v-model="formData.servings" name="servings" type="number" />
-            <p v-if="formErrorsExist" class="upload__error">
+            <input
+              v-model="formData.servings"
+              name="servings"
+              type="number"
+              min="1"
+              oninput="this.value = Math.abs(this.value) > 0 ? Math.abs(this.value) : null"
+              @blur="v$.formData.servings.$touch"
+            />
+            <p v-if="v$.formData.servings.$error" class="upload__error">
               <span v-if="v$.formData.servings.required.$invalid"
                 >This field is required</span
               >
@@ -98,18 +130,25 @@
             <input
               v-model="ingredient.quantity"
               type="number"
-              step="0.01"
+              step="any"
               min="0.01"
               placeholder="quantity"
+              name="ingredient_quantity"
             />
-            <input v-model="ingredient.unit" type="text" placeholder="unit" />
+            <input
+              v-model="ingredient.unit"
+              type="text"
+              placeholder="unit"
+              name="ingredient_unit"
+            />
             <input
               v-model="ingredient.description"
               type="text"
               placeholder="description"
+              name="ingredient_description"
             />
           </div>
-          <p v-if="formErrorsExist" class="upload__error">
+          <p v-if="v$.formData.ingredients.$error" class="upload__error">
             <span v-if="v$.formData.ingredients.$invalid"
               >Enter at least one ingredient</span
             >
@@ -147,7 +186,8 @@ export default {
       // isSubmitted: false,
       // uiState: 'submit not clicked',
       formSubmitted: false,
-      formErrorsExist: false,
+      // NOTE For alternative way to display errors
+      // formErrorsExist: false,
       // formEmpty: true,
       formData: {
         // submittedByUser: true,
@@ -208,7 +248,8 @@ export default {
         const isFormCorrect = await this.v$.$validate();
         // is not loading
         if (!isFormCorrect) {
-          this.formErrorsExist = true;
+          // NOTE For alternative way to display errors
+          // this.formErrorsExist = true;
           throw Error('Failed client-side validation');
         }
         console.log('Passed client-side validation!');
@@ -224,7 +265,62 @@ export default {
         console.log(err);
       }
     },
+
+    confirmStayInDirtyForm() {
+      return this.v$.formData.$anyDirty && !this.confirmLeave();
+    },
+
+    confirmLeave() {
+      return window.confirm(
+        '⚠ You have unsaved changes. Do you really want to leave?'
+      );
+    },
+
+    checkLeaveWindow(e) {
+      if (this.confirmStayInDirtyForm()) {
+        // NOTE default message is 'Changes you made may not be saved', and is unchangeable
+        e.returnValue = '';
+      }
+    },
   },
+
+  beforeRouteLeave(to, from, next) {
+    if (!this.formSubmitted && this.confirmStayInDirtyForm()) {
+      next(false);
+    } else {
+      next();
+    }
+  },
+
+  created() {
+    window.addEventListener('beforeunload', this.checkLeaveWindow);
+  },
+
+  beforeDestroy() {
+    window.removeEventListener('beforeunload', this.checkLeaveWindow);
+  },
+
+  // NOTE below watcher could be useful if I want to alter a variable's value depending on changes in anyDirty
+  // watch: {
+  //   'v$.formData.$anyDirty': {
+  //     handler() {
+  //       console.log('change detected! ');
+  //     },
+  //   },
+  // },
+
+  // beforeRouteLeave(to, from, next) {
+  //   if (!this.formSubmitted && this.v$.formData.$anyDirty) {
+  //     let confirmLeave = window.confirm('Close page without saving data?');
+  //     if (confirmLeave) {
+  //       this.canceledFormSubmit = true;
+  //       next();
+  //     } else {
+  //       next(from);
+  //     }
+  //   }
+  //   next();
+  // },
 
   // submitForm() {
   //   db.collection('data')

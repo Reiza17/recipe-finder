@@ -19,7 +19,7 @@
           <span>Log In</span>
         </button>
       </form>
-      <!-- need to add validation display -->
+      <!-- TODO need to add validation display -->
       <div class="error" v-if="error">{{ error.message }}</div>
       <p>
         New to Reciper Finder?

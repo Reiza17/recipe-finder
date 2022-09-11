@@ -8,7 +8,9 @@
     </button>
     <div class="bookmarks">
       <ul class="bookmarks__list">
-        <div class="message" v-if="recipeBookmarks.length === 0">
+        <VLoadingSpinner v-if="loadingBookmarks" />
+        <!-- Change condition to if fetch results in nothing -->
+        <div class="message" v-else-if="recipeBookmarks.length === 0">
           <div>
             <svg>
               <use :href="`${icons}#icon-smile`"></use>
@@ -24,6 +26,7 @@
 </template>
 
 <script>
+import VLoadingSpinner from './VLoadingSpinner.vue';
 import VRecipePreview from '@/components/VRecipePreview.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters } = createNamespacedHelpers('home');
@@ -32,6 +35,7 @@ export default {
   name: 'VBookmarks',
   components: {
     VRecipePreview,
+    VLoadingSpinner,
   },
   data() {
     return {
@@ -39,7 +43,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recipeBookmarks']),
+    ...mapGetters(['recipeBookmarks', 'loadingBookmarks']),
   },
 };
 </script>

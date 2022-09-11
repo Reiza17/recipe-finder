@@ -1,6 +1,8 @@
 <template>
   <div class="recipe">
-    <div class="message" v-if="Object.keys(recipe).length === 0">
+    <VLoadingSpinner v-if="loadingRecipe" />
+
+    <div class="message" v-else-if="!recipeUrl && isEmptyObject">
       <div>
         <svg>
           <use :href="`${icons}#icon-smile`"></use>
@@ -8,8 +10,6 @@
       </div>
       <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
-
-    <VLoadingSpinner v-else-if="loadingRecipe" />
 
     <div v-else>
       <figure class="recipe__fig">
@@ -120,18 +120,21 @@
 </template>
 
 <script>
+import VLoadingSpinner from './VLoadingSpinner.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 import fracty from 'fracty';
-import VLoadingSpinner from './VLoadingSpinner.vue';
 
 export default {
   name: 'VRecipe',
+  components: { VLoadingSpinner },
   data() {
     return {
       // icons: '@/assets/images/icons.svg',
       icons: require('@/assets/images/icons.svg'),
       fracty,
+      // REVIEW Instead of below, could get the value from init. Or, I could also use something like v-if="this.$router.currentRoute.value.path === '/login'". However, this would require that my url changes when I do a search (currently it doesn't).
+      recipeUrl: window.location.hash.slice(1),
     };
   },
   computed: {
@@ -139,28 +142,39 @@ export default {
     loggedIn() {
       return this.$store.getters['auth/user'];
     },
+    isEmptyObject() {
+      if (!Object.keys(this.recipe).length) return true;
+      return false;
+    },
   },
   methods: {
     ...mapMutations({
       updateServings: 'UPDATE_SERVINGS',
-      toggleBookmark: 'TOGGLE_BOOKMARK',
       toggleRecipeSpinner: 'TOGGLE_RECIPE_SPINNER',
+      toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
     },
     bookmarkRecipe() {
       if (!this.loggedIn) this.$router.push({ name: 'register' });
-      else this.toggleBookmark(this.recipe);
+      else this.$store.dispatch('home/toggleBookmark', this.recipe);
     },
+    // TODO Move below two functions to either App.vue, VHome.vue, upon login, or upon user state change
     async init() {
       try {
         this.toggleRecipeSpinner(true);
-        // await this.$store.dispatch('home/fetchUserRecipes');
-        await this.$store.dispatch('home/loadRecipe', {
-          id: window.location.hash.slice(1),
+        this.toggleBookmarksSpinner(true);
+        await this.$store.dispatch('auth/fetchUser');
+        await this.$store.dispatch('home/fetchUserRecipes');
+
+        // REVIEW Not sure whether loadRecipe ought to have await before it
+        this.$store.dispatch('home/loadRecipe', {
+          id: this.recipeUrl,
         });
         this.toggleRecipeSpinner(false);
+        await this.$store.dispatch('home/fetchBookmarks');
+        this.toggleBookmarksSpinner(false);
       } catch (err) {
         console.log(err);
       }
@@ -182,16 +196,12 @@ export default {
   mounted() {
     this.init();
     this.renderNewRecipe();
-    // this.$store.dispatch('loadRecipe', {
-    //   id: window.location.hash.slice(1),
-    // });
-    // window.addEventListener('hashchange', () => {
-    //   this.$store.dispatch('loadRecipe', {
-    //     id: window.location.hash.slice(1),
-    //   });
+    // document.addEventListener('visibilitychange', () => {
+    //   if (document.visibilityState === 'hidden') {
+    //     this.$store.dispatch('home/uploadBookmarks');
+    //   }
     // });
   },
-  components: { VLoadingSpinner },
 };
 </script>
 
