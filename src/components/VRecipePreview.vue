@@ -148,7 +148,7 @@ export default {
     text-transform: uppercase;
     font-weight: 600;
 
-    // This is how text is truncated!
+    // NOTE This is how text is truncated!
     text-overflow: ellipsis;
     max-width: 25rem;
     white-space: nowrap;

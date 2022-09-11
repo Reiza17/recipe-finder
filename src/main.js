@@ -23,7 +23,7 @@ Vue.config.productionTip = false;
 let app;
 
 auth.onAuthStateChanged(user => {
-  console.log('user', user);
+  console.log('User', user);
   if (!app) {
     app = new Vue({
       router,

@@ -20,8 +20,8 @@ import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
 // import VUploadRecipe from '@/components/VUploadRecipe.vue';
-import { createNamespacedHelpers } from 'vuex';
-const { mapGetters, mapMutations } = createNamespacedHelpers('home');
+// import { createNamespacedHelpers } from 'vuex';
+// const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 
 export default {
   name: 'VHome',
@@ -32,21 +32,22 @@ export default {
     // VUploadRecipe,
   },
 
-  computed: {
-    ...mapGetters(['uploadRecipeModal']),
-  },
-  methods: {
-    ...mapMutations({
-      setStoredBookmarks: 'SET_STORED_BOOKMARKS',
-      toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
-    }),
-  },
+  // computed: {
+  //   ...mapGetters(['uploadRecipeModal']),
+  // },
+  // methods: {
+  //   ...mapMutations({
+  //     setStoredBookmarks: 'SET_STORED_BOOKMARKS',
+  //     toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+  //   }),
+  // },
 
-  created() {
-    const storage = localStorage.getItem('bookmarks');
-    if (storage) this.setStoredBookmarks(JSON.parse(storage));
-    // this.$store.dispatch('fetchUserRecipes');
-  },
+  // created() {
+  // const storage = localStorage.getItem('bookmarks');
+  // if (storage) this.setStoredBookmarks(JSON.parse(storage));
+
+  // this.$store.dispatch('fetchUserRecipes');
+  // },
 };
 </script>
 

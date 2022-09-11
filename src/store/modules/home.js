@@ -7,16 +7,14 @@ import {
   doc,
   updateDoc,
   arrayUnion,
-  // arrayRemove,
+  arrayRemove,
 } from 'firebase/firestore';
 import { db } from '@/firebaseInit';
-import { user } from '@/store/modules/auth';
 
 export default {
   namespaced: true,
 
   state: {
-    user,
     recipe: {},
     userRecipes: [],
     bookmarks: [],
@@ -28,8 +26,10 @@ export default {
       page: 1,
       resultsPerPage: RES_PER_PAGE,
     },
+    initialSearchSubmitted: false,
     loadingSearchResults: false,
     loadingRecipe: false,
+    loadingBookmarks: false,
     uploadRecipeModal: false,
   },
 
@@ -38,6 +38,7 @@ export default {
     recipeBookmarks: state => state.bookmarks,
     recipeBookmarked: state => state.recipe.bookmarked,
     hashUrl: state => state.hashUrl,
+    initialSearchSubmitted: state => state.initialSearchSubmitted,
     searchResults: state => state.search.results,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
@@ -49,14 +50,9 @@ export default {
     },
     loadingSearchResults: state => state.loadingSearchResults,
     loadingRecipe: state => state.loadingRecipe,
+    loadingBookmarks: state => state.loadingBookmarks,
     uploadRecipeModal: state => state.uploadRecipeModal,
   },
-
-  // computed: {
-  //   user() {
-  //     return ;
-  //   },
-  // },
 
   mutations: {
     SET_PREVIOUS_URL(state, pageName) {
@@ -67,8 +63,12 @@ export default {
       state.hashUrl = id;
     },
 
-    CREATE_SEARCH_RESULTS(state, data) {
-      state.search.results = [...state.userRecipes, ...data.data.recipes];
+    INITIAL_SEARCH_SUBMITTED(state, boolean) {
+      state.initialSearchSubmitted = boolean;
+    },
+
+    CREATE_SEARCH_RESULTS(state, results) {
+      state.search.results = results;
       state.search.page = 1;
       console.log(state);
       console.log(state.search.results);
@@ -105,22 +105,25 @@ export default {
       });
     },
 
-    TOGGLE_BOOKMARK(state, recipe) {
-      if (!state.bookmarks.some(bookmark => bookmark.id === recipe.id)) {
-        state.bookmarks.unshift(recipe);
-        state.recipe.bookmarked = true;
-      } else {
-        const recipeIndex = state.bookmarks.findIndex(
-          bookmark => bookmark.id === recipe.id
-        );
-        state.bookmarks.splice(recipeIndex, 1);
-        state.recipe.bookmarked = false;
-      }
-      localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+    TOGGLE_BOOKMARKS_SPINNER(state, boolean) {
+      state.loadingBookmarks = boolean;
     },
 
     SET_STORED_BOOKMARKS(state, bookmarks) {
       state.bookmarks = bookmarks;
+    },
+
+    ADD_BOOKMARK(state, recipe) {
+      state.recipe.bookmarked = true;
+      state.bookmarks.unshift(recipe);
+    },
+
+    DELETE_BOOKMARK(state, recipe) {
+      const recipeIndex = state.bookmarks.findIndex(
+        bookmark => bookmark.id === recipe.id
+      );
+      state.bookmarks.splice(recipeIndex, 1);
+      state.recipe.bookmarked = false;
     },
 
     TOGGLE_UPLOAD_RECIPE_MODAL(state) {
@@ -130,7 +133,6 @@ export default {
     ADD_USER_RECIPE(state, recipe) {
       // console.log(recipe.id);
       state.userRecipes.unshift(recipe);
-      state.bookmarks.unshift(recipe);
       console.log(state.userRecipes);
     },
 
@@ -141,15 +143,26 @@ export default {
   },
 
   actions: {
-    async searchRecipes({ commit }, query) {
+    async searchRecipes({ commit, state }, query) {
       try {
+        commit('INITIAL_SEARCH_SUBMITTED', true);
+
         const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
-        commit('CREATE_SEARCH_RESULTS', res.data);
+
+        const filteredApiRecipes = res.data.data.recipes;
+        // NOTE Remove 'split' below if I want to include partial-word results
+        const filteredUserRecipes = state.userRecipes.filter(recipe =>
+          recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
+        );
+
+        const filteredResults = [...filteredUserRecipes, ...filteredApiRecipes];
+        commit('CREATE_SEARCH_RESULTS', filteredResults);
       } catch (err) {
         console.error(`Error searching for recipes: ${err}`);
       }
     },
 
+    // FIXME Change to the more descriptive 'renderRecipe'
     async loadRecipe({ commit, state }, { id }) {
       try {
         // console.log(id);
@@ -167,16 +180,43 @@ export default {
       }
     },
 
-    async addUserRecipe({ commit, rootState }, recipe) {
+    async fetchUserRecipes({ commit, rootState }) {
+      try {
+        console.log(rootState);
+
+        commit('TOGGLE_RECIPE_SPINNER', true);
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+        const docSnap = await getDoc(docRef);
+
+        // NOTE async test timer
+        // const setTimeoutPromise = timeout => {
+        //   return new Promise(resolve => setTimeout(resolve, timeout));
+        // };
+        // await setTimeoutPromise(2000);
+        // console.log('done');
+
+        commit('SET_USER_RECIPES', docSnap.data().uploadedRecipes);
+        commit('TOGGLE_RECIPE_SPINNER', false);
+
+        // NOTE Fetching an entire collection (e.g. all users, instead of a single user)
+        // const querySnapshot = await getDocs(collection(db, 'users'));
+        // const userRecipes = querySnapshot.docs.map(doc => doc.data());
+      } catch (err) {
+        console.error(`Failed to get user recipes from server: ${err}`);
+      }
+    },
+
+    async addUserRecipe({ commit, dispatch, rootState }, recipe) {
       try {
         const docRef = doc(db, 'users', rootState.auth.user.uid);
         await updateDoc(docRef, {
-          recipes: arrayUnion(recipe),
+          uploadedRecipes: arrayUnion(recipe),
         });
         // const docRef = await addDoc(collection(db, 'recipes'), recipe);
-        // add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
+        // REVIEW add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
         console.log('Successfully uploaded user recipe to server!');
         commit('ADD_USER_RECIPE', recipe);
+        dispatch('toggleBookmark', { ...recipe, bookmarked: true });
       } catch (err) {
         console.error(`Failed to upload user recipe to server: ${err}`);
       }
@@ -195,19 +235,39 @@ export default {
     //   }
     // },
 
-    async fetchUserRecipes({ commit, rootState }) {
+    async fetchBookmarks({ commit, rootState }) {
       try {
-        console.log(rootState);
-
+        // REVIEW Test effectiveness of below spinners if init executes upon login, user state change, or in App
+        // commit('TOGGLE_BOOKMARKS_SPINNER', true);
         const docRef = doc(db, 'users', rootState.auth.user.uid);
         const docSnap = await getDoc(docRef);
-
-        commit('SET_USER_RECIPES', docSnap.data().recipes);
-
-        // const querySnapshot = await getDocs(collection(db, 'users'));
-        // const userRecipes = querySnapshot.docs.map(doc => doc.data());
+        commit('SET_STORED_BOOKMARKS', docSnap.data().bookmarks);
+        // commit('TOGGLE_BOOKMARKS_SPINNER', false);
       } catch (err) {
         console.error(`Failed to get user recipes from server: ${err}`);
+      }
+    },
+
+    // REVIEW Instead of pushing an entire recipe object, it might be better to push just its id.
+    async toggleBookmark({ state, commit, rootState }, recipe) {
+      try {
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+
+        if (!state.bookmarks.some(bookmark => bookmark.id === recipe.id)) {
+          commit('ADD_BOOKMARK', recipe);
+          await updateDoc(docRef, {
+            bookmarks: arrayUnion(recipe),
+          });
+        } else {
+          // NOTE the mutation below actually changes the recipe (setting its 'bookmarked' property to 'false'), meaning it becomes different from the object in the backend. Having this discrepancy means the backend cannot remove the object, as they need to exactly match. Therefore, need to dispatch action to backend FIRST before committing the mutation.
+          await updateDoc(docRef, {
+            bookmarks: arrayRemove(recipe),
+          });
+          commit('DELETE_BOOKMARK', recipe);
+          console.log('deleted bookmark');
+        }
+      } catch (err) {
+        console.error(`Failed to add/delete bookmark: ${err}`);
       }
     },
   },

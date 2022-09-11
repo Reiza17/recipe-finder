@@ -1,6 +1,7 @@
 <template>
   <div class="search-results">
-    <VLoadingSpinner v-if="loadingSearchResults" />
+    <div v-if="!initialSearchSubmitted"></div>
+    <VLoadingSpinner v-else-if="loadingSearchResults" />
     <VRecipePreview
       v-else-if="!loadingSearchResults && searchResults.length > 0"
       :recipes="searchResultsDisplay"
@@ -86,6 +87,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'initialSearchSubmitted',
       'searchResults',
       'searchResultsCurrentPage',
       'searchResultsPerPage',

@@ -30,14 +30,6 @@ export default {
   },
 
   actions: {
-    // pressed() {
-    //   createUserWithEmailAndPassword(auth, this.email, this.password)
-    //     .then(() => {
-    //       console.log('here');
-    //       this.$router.replace({ name: 'home' });
-    //     })
-    //     .catch(error => (this.error = error));
-    // },
     async register({ commit }, details) {
       const { email, password } = details;
 
@@ -50,7 +42,8 @@ export default {
 
         await setDoc(doc(db, 'users', cred.user.uid), {
           email: email,
-          recipes: [],
+          uploadedRecipes: [],
+          bookmarks: [],
         });
       } catch (error) {
         switch (error.code) {
@@ -76,20 +69,10 @@ export default {
       commit('SET_USER', auth.currentUser);
 
       router.push('/');
-      //// Alternative syntax below
+      // NOTE Alternative syntax below. Would have to also add "dispatch" as a parameter (refer to official docs)
       // router.replace({ name: 'home' });
     },
 
-    // pressed() {
-    //   signInWithEmailAndPassword(auth, this.email, this.password)
-    //     .then(data => {
-    //       console.log(data);
-    //       this.$router.replace({ name: 'home' });
-    //     })
-    //     .catch(error => {
-    //       this.error = error;
-    //     });
-    // },
     async login({ commit }, details) {
       const { email, password } = details;
 
@@ -110,10 +93,16 @@ export default {
         return;
       }
 
-      commit('SET_USER', auth.currentUser);
+      // commit('home/TOGGLE_RECIPE_SPINNER', null, { root: true });
 
-      router.push('/');
+      commit('SET_USER', auth.currentUser);
+      // NOTE Need to either refresh the page or call fetchUserRecipes from home.js.
       // router.replace({ name: 'home' });
+      router.push('/');
+      location.reload();
+
+      // NOTE Alternatively, without reloading I would have to manually refetch the user's data:
+      // dispatch('home/fetchUserRecipes', null, { root: true });
     },
 
     // signOut() {
@@ -126,8 +115,10 @@ export default {
 
       commit('CLEAR_USER');
 
-      // // Include below only if you want user redirected to login
+      // NOTE Include below only if we want user redirected to login
       // router.push('login');
+      router.push('/');
+      location.reload();
     },
 
     // setupFirebase() {
@@ -143,7 +134,8 @@ export default {
     //     }
     //   });
     // },
-    // The 'async' next to user below might not actually be necessary. Test this.
+
+    // REVIEW The 'async' next to user below might not actually be necessary. Test this.
     fetchUser({ commit }) {
       auth.onAuthStateChanged(async user => {
         console.log(user);
@@ -152,7 +144,7 @@ export default {
         } else {
           commit('SET_USER', user);
 
-          // // NOTE: isReady is Vue 3 version of Vue 2's onReady
+          // // NOTE: isReady() is Vue 3 version of Vue 2's onReady
           // if (
           //   this.$router.isReady() &&
           //   this.$router.currentRoute.value.path === '/login'

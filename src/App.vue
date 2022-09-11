@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <!-- NOTE Code for if I use a navbar instead -->
     <!-- <header></header> -->
     <!-- <top-header></top-header> -->
     <!-- <div id="nav"> -->
@@ -31,10 +32,10 @@ export default {
   //     return this.$store.getters['auth/loggedIn'];
   //   },
   // },
-  async beforeMount() {
-    await this.$store.dispatch('auth/fetchUser');
-    await this.$store.dispatch('home/fetchUserRecipes');
-  },
+  // async beforeMount() {
+  //   await this.$store.dispatch('auth/fetchUser');
+  //   await this.$store.dispatch('home/fetchUserRecipes');
+  // },
 };
 </script>
 
