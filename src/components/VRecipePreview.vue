@@ -15,7 +15,7 @@
           <p class="preview__publisher">{{ result.publisher }}</p>
           <div
             class="preview__user-generated"
-            :class="[result.key ? '' : 'hidden']"
+            :class="[result.user_generated ? '' : 'hidden']"
           >
             <svg>
               <use :href="`${icons}#icon-user`"></use>

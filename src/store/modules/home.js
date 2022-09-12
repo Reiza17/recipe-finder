@@ -110,7 +110,8 @@ export default {
     },
 
     SET_STORED_BOOKMARKS(state, bookmarks) {
-      state.bookmarks = bookmarks;
+      // NOTE uses reverse() so that newly bookmarked/uploaded recipes are at the top, similar to newly "Liked" videos on Youtube. In reality, it's probably better to use a timestamp and sort().
+      state.bookmarks = bookmarks.reverse();
     },
 
     ADD_BOOKMARK(state, recipe) {
@@ -162,8 +163,7 @@ export default {
       }
     },
 
-    // FIXME Change to the more descriptive 'renderRecipe'
-    async loadRecipe({ commit, state }, { id }) {
+    async renderRecipe({ commit, state }, { id }) {
       try {
         // console.log(id);
         const [userRecipe] = state.userRecipes.filter(

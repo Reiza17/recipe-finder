@@ -60,7 +60,7 @@
 
         <div
           class="recipe__user-generated"
-          :class="[recipe.key ? '' : 'hidden']"
+          :class="[recipe.user_generated ? '' : 'hidden']"
         >
           <svg>
             <use :href="`${icons}#icon-user`"></use>
@@ -168,8 +168,8 @@ export default {
         await this.$store.dispatch('auth/fetchUser');
         await this.$store.dispatch('home/fetchUserRecipes');
 
-        // REVIEW Not sure whether loadRecipe ought to have await before it
-        this.$store.dispatch('home/loadRecipe', {
+        // REVIEW Not sure whether renderRecipe ought to have await before it
+        this.$store.dispatch('home/renderRecipe', {
           id: this.recipeUrl,
         });
         this.toggleRecipeSpinner(false);
@@ -183,7 +183,7 @@ export default {
       try {
         window.addEventListener('hashchange', async () => {
           this.toggleRecipeSpinner(true);
-          await this.$store.dispatch('home/loadRecipe', {
+          await this.$store.dispatch('home/renderRecipe', {
             id: window.location.hash.slice(1),
           });
           this.toggleRecipeSpinner(false);

@@ -8,7 +8,7 @@
       <div class="message">
         <p>Log in</p>
       </div>
-      <form @submit.prevent="pressed">
+      <form @submit.prevent="login">
         <div class="login">
           <input type="text" placeholder="email" v-model="email" />
         </div>
@@ -20,7 +20,9 @@
         </button>
       </form>
       <!-- TODO need to add validation display -->
-      <div class="error" v-if="error">{{ error.message }}</div>
+      <div class="error" v-if="error">
+        <p>{{ error }}</p>
+      </div>
       <p>
         New to Reciper Finder?
         <router-link to="/register" class="bottom-link"> SIGN UP </router-link>
@@ -33,18 +35,31 @@
 export default {
   data() {
     return {
-      error: '',
       email: '',
       password: '',
     };
   },
+  computed: {
+    error() {
+      return this.$store.getters['auth/loginErrorMessage'];
+    },
+  },
   methods: {
-    pressed() {
+    login() {
       this.$store.dispatch('auth/login', {
         email: this.email,
         password: this.password,
       });
     },
+    // NOTE does the same as below
+    // exit() {
+    //   this.$router.push({ name: 'home' });
+    //   this.$store.commit('auth/CLEAR_LOGIN_ERROR');
+    // },
+  },
+  // REVIEW is this a good way to reset the authentication error message?
+  beforeDestroy() {
+    this.$store.commit('auth/CLEAR_LOGIN_ERROR');
   },
   // beforeRouteEnter(to, from, next) {
   //   console.log(from.name);
@@ -118,8 +133,7 @@ export default {
     }
   }
 
-  .message,
-  .error {
+  .message {
     max-width: 40rem;
     display: flex;
 
@@ -128,6 +142,18 @@ export default {
       font-size: 2.2rem;
       line-height: 1.5;
       font-weight: 600;
+    }
+  }
+
+  .error {
+    width: 300px;
+    margin-left: 40px;
+    margin-top: 20px;
+    font-size: 1.5rem;
+    color: #d30000;
+
+    p {
+      margin: auto;
     }
   }
 
