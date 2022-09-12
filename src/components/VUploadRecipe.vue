@@ -193,6 +193,7 @@ export default {
         // submittedByUser: true,
         // id: uniqid(),
         id: uniqid(),
+        user_generated: true,
         title: 'TEST RECIPE',
         publisher: 'TEST17',
         source_url:

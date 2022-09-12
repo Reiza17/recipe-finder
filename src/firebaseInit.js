@@ -62,7 +62,7 @@ export { auth };
 //       // })
 //     },
 
-//     async loadRecipes() {
+//     async renderRecipes() {
 //       try {
 //         const querySnapshot = await getDocs(collection(db, 'recipes'));
 //         querySnapshot.forEach(doc => {
@@ -76,13 +76,13 @@ export { auth };
 
 //   created() {
 //     this.createRecipe({ test1: 3, test2: 4 });
-//     console.log('kiyhkhkh');
+//     console.log('test');
 //   },
 // };
 
 // // import firebaseService from 'where you put the file above`
 
-// // loadRecipes({commit}) {
-// //   const recipes = firebaseService.loadRecipes()
+// // renderRecipes({commit}) {
+// //   const recipes = firebaseService.renderRecipes()
 // //   //commit here to save recipes
 // // }

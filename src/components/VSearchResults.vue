@@ -109,8 +109,8 @@ export default {
   },
 
   // methods: {
-  //   loadRecipe() {
-  //     this.$store.dispatch('loadRecipe');
+  //   renderRecipe() {
+  //     this.$store.dispatch('renderRecipe');
   //   },
   // },
 };

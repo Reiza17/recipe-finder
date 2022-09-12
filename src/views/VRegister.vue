@@ -8,7 +8,7 @@
       <div class="message">
         <p>Sign up to upload or bookmark recipes!</p>
       </div>
-      <form @submit.prevent="pressed">
+      <form @submit.prevent="register">
         <div class="email">
           <input type="email" v-model="email" placeholder="email" />
         </div>
@@ -19,7 +19,9 @@
           <span>Sign Up</span>
         </button>
       </form>
-      <div class="error" v-if="error">{{ error.message }}</div>
+      <div class="error" v-if="error">
+        <p>{{ error }}</p>
+      </div>
       <p>
         Already have an account?
         <router-link to="/login" class="bottom-link"> LOG IN </router-link>
@@ -34,16 +36,29 @@ export default {
     return {
       email: '',
       password: '',
-      error: '',
     };
   },
+  computed: {
+    error() {
+      return this.$store.getters['auth/registerErrorMessage'];
+    },
+  },
   methods: {
-    pressed() {
+    register() {
       this.$store.dispatch('auth/register', {
         email: this.email,
         password: this.password,
       });
     },
+    // NOTE does the same as below
+    // exit() {
+    //   this.$router.push({ name: 'home' });
+    //   this.$store.commit('auth/CLEAR_REGISTRATION_ERROR');
+    // },
+  },
+  // REVIEW is this a good way to reset the authentication error message?
+  beforeDestroy() {
+    this.$store.commit('auth/CLEAR_REGISTRATION_ERROR');
   },
 };
 </script>
@@ -113,8 +128,7 @@ export default {
     }
   }
 
-  .message,
-  .error {
+  .message {
     max-width: 40rem;
     display: flex;
 
@@ -123,6 +137,18 @@ export default {
       font-size: 2.2rem;
       line-height: 1.5;
       font-weight: 600;
+    }
+  }
+
+  .error {
+    width: 300px;
+    margin-left: 40px;
+    margin-top: 20px;
+    font-size: 1.5rem;
+    color: #d30000;
+
+    p {
+      margin: auto;
     }
   }
 

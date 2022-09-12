@@ -13,13 +13,25 @@ export default {
 
   state: {
     user: null,
+    registerErrorMessage: '',
+    loginErrorMessage: '',
   },
 
   getters: {
     user: state => state.user,
+    registerErrorMessage: state => state.registerErrorMessage,
+    loginErrorMessage: state => state.loginErrorMessage,
   },
 
   mutations: {
+    CLEAR_LOGIN_ERROR(state) {
+      state.loginErrorMessage = '';
+    },
+
+    CLEAR_REGISTRATION_ERROR(state) {
+      state.registerErrorMessage = '';
+    },
+
     SET_USER(state, user) {
       state.user = user;
     },
@@ -30,7 +42,7 @@ export default {
   },
 
   actions: {
-    async register({ commit }, details) {
+    async register({ commit, state }, details) {
       const { email, password } = details;
 
       try {
@@ -46,26 +58,14 @@ export default {
           bookmarks: [],
         });
       } catch (error) {
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            alert('Email already in use');
-            break;
-          case 'auth/invalid-email':
-            alert('Invalid email');
-            break;
-          case 'auth/operation-not-allowed':
-            alert('Operation not allowed');
-            break;
-          case 'auth/weak-password':
-            alert('Weak password');
-            break;
-          default:
-            alert('Something went wrong');
-        }
-        console.log(error);
+        if (error.code === 'auth/email-already-in-use')
+          state.registerErrorMessage = 'Email already in use';
+        if (error.code === 'auth/weak-password')
+          state.registerErrorMessage = 'Password too weak';
+        else state.registerErrorMessage = 'Something went wrong';
+
         return;
       }
-
       commit('SET_USER', auth.currentUser);
 
       router.push('/');
@@ -73,23 +73,18 @@ export default {
       // router.replace({ name: 'home' });
     },
 
-    async login({ commit }, details) {
+    async login({ commit, state }, details) {
       const { email, password } = details;
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (error) {
-        switch (error.code) {
-          case 'auth/user-not-found':
-            alert('User not found');
-            break;
-          case 'auth/wrong-password':
-            alert('Wrong password');
-            break;
-          default:
-            alert('Something went wrong');
-        }
-        console.log(error);
+        if (
+          error.code === 'auth/user-not-found' ||
+          error.code === 'auth/wrong-password'
+        )
+          state.loginErrorMessage = 'Incorrect username or password';
+        else state.loginErrorMessage = 'Something went wrong';
         return;
       }
 
