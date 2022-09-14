@@ -156,7 +156,27 @@ export default {
           recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
         );
 
-        const filteredResults = [...filteredUserRecipes, ...filteredApiRecipes];
+        // TODO Rename variable to something better?
+        const bookmarkedApiRecipes = filteredApiRecipes.filter(apiRecipe =>
+          state.bookmarks.some(
+            bookmarkedRecipe => bookmarkedRecipe.id === apiRecipe.id
+          )
+        );
+
+        // TODO Rename variable to something better?
+        const remainingApiRecipes = filteredApiRecipes.filter(
+          apiRecipe =>
+            !state.bookmarks.some(
+              bookmarkedRecipe => bookmarkedRecipe.id === apiRecipe.id
+            )
+        );
+
+        console.log(remainingApiRecipes);
+        const filteredResults = [
+          ...filteredUserRecipes,
+          ...bookmarkedApiRecipes,
+          ...remainingApiRecipes,
+        ];
         commit('CREATE_SEARCH_RESULTS', filteredResults);
       } catch (err) {
         console.error(`Error searching for recipes: ${err}`);
@@ -255,12 +275,13 @@ export default {
 
         if (!state.bookmarks.some(bookmark => bookmark.id === recipe.id)) {
           commit('ADD_BOOKMARK', recipe);
-          await updateDoc(docRef, {
+          // NOTE no need to await this, since no further thing depends on it here. Not awaiting allows the toggling of bookmarks to be much faster
+          updateDoc(docRef, {
             bookmarks: arrayUnion(recipe),
           });
         } else {
           // NOTE the mutation below actually changes the recipe (setting its 'bookmarked' property to 'false'), meaning it becomes different from the object in the backend. Having this discrepancy means the backend cannot remove the object, as they need to exactly match. Therefore, need to dispatch action to backend FIRST before committing the mutation.
-          await updateDoc(docRef, {
+          updateDoc(docRef, {
             bookmarks: arrayRemove(recipe),
           });
           commit('DELETE_BOOKMARK', recipe);

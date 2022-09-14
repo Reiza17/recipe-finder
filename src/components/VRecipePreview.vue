@@ -13,13 +13,24 @@
         <div class="preview__data">
           <h4 class="preview__title">{{ result.title }}</h4>
           <p class="preview__publisher">{{ result.publisher }}</p>
-          <div
-            class="preview__user-generated"
-            :class="[result.user_generated ? '' : 'hidden']"
-          >
-            <svg>
-              <use :href="`${icons}#icon-user`"></use>
-            </svg>
+          <div class="preview__experiment">
+            <div
+              class="preview__user-generated"
+              :class="[result.user_generated ? '' : 'hidden']"
+            >
+              <svg>
+                <use :href="`${icons}#icon-user`"></use>
+              </svg>
+            </div>
+            <div
+              v-if="resultsActive"
+              class="preview__bookmarked btn--round"
+              :class="[isBookmarked(result.id) ? '' : 'hidden']"
+            >
+              <svg>
+                <use :href="`${icons}#icon-bookmark-fill`"></use>
+              </svg>
+            </div>
           </div>
         </div>
       </a>
@@ -56,10 +67,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['searchResultsDisplay', 'hashUrl']),
+    ...mapGetters(['searchResultsDisplay', 'hashUrl', 'recipeBookmarks']),
   },
   methods: {
     ...mapMutations({ getHashUrl: 'GET_HASH_URL' }),
+    isBookmarked(id) {
+      return this.recipeBookmarks.some(recipe => recipe.id === id);
+    },
   },
 };
 </script>
@@ -136,7 +150,9 @@ export default {
   &__data {
     display: grid;
     width: 100%;
-    grid-template-columns: 1fr 2rem;
+    // FORMER SETTINGS:
+    // grid-template-columns: 1fr 2.7rem;
+    grid-template-columns: 1fr 2.5rem;
     row-gap: 0.1rem;
     align-items: center;
   }
@@ -162,6 +178,13 @@ export default {
     font-weight: 600;
   }
 
+  // FORMER SETTINGS:
+  // Remove for previous settings
+  &__experiment {
+    display: flex;
+    margin-left: auto;
+  }
+
   &__user-generated {
     background-color: darken($color-grey-light-2, 2%);
 
@@ -172,8 +195,10 @@ export default {
     width: 2rem;
     border-radius: 10rem;
 
-    margin-left: auto;
-    margin-right: 1.75rem;
+    // FORMER SETTINGS:
+    // margin-left: auto;
+    // margin-right: 1.75rem;
+    margin-right: 0.6rem;
 
     svg {
       height: 1.2rem;
@@ -181,5 +206,51 @@ export default {
       fill: $color-primary;
     }
   }
+
+  &__bookmarked {
+    background-color: darken($color-grey-light-2, 2%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2rem;
+    width: 2rem;
+    border-radius: 10rem;
+
+    svg {
+      height: 1.2rem;
+      width: 1.2rem;
+      fill: #fff;
+    }
+  }
+
+  // .btn--round {
+  //   background-image: $gradient;
+  //   border-radius: 50%;
+  //   border: none;
+  //   cursor: pointer;
+  //   height: 4.5rem;
+  //   width: 4.5rem;
+  //   // margin-left: auto;
+  //   transition: all 0.2s;
+
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+
+  //   &:hover {
+  //     transform: scale(1.07);
+  //   }
+
+  //   &:focus {
+  //     outline: none;
+  //   }
+
+  //   svg {
+  //     height: 2.5rem;
+  //     width: 2.5rem;
+  //     fill: #fff;
+  //   }
+  // }
 }
 </style>
