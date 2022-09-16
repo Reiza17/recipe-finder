@@ -258,7 +258,7 @@ export default {
         // console.log(this.formData.id);
         this.formData.timestamp = Date.now();
         this.formSubmitted = true;
-        await this.$store.dispatch('home/addUserRecipe', this.formData);
+        await this.$store.dispatch('home/uploadUserRecipe', this.formData);
         // is not loading
         // successful upload message
       } catch (err) {

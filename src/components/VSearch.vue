@@ -1,5 +1,8 @@
 <template>
-  <form class="search" @submit.prevent="submitSearch(query)">
+  <form
+    class="search"
+    @submit.prevent="$store.dispatch('home/searchRecipes', query)"
+  >
     <input
       type="text"
       class="search__field"
@@ -16,10 +19,6 @@
 </template>
 
 <script>
-import { createNamespacedHelpers } from 'vuex';
-const { mapActions, mapGetters, mapMutations } =
-  createNamespacedHelpers('home');
-
 export default {
   name: 'VSearch',
 
@@ -28,22 +27,6 @@ export default {
       icons: require('@/assets/images/icons.svg'),
       query: '',
     };
-  },
-
-  methods: {
-    ...mapGetters(['loadingSearchResults']),
-    ...mapActions(['searchRecipes']),
-    ...mapMutations({ toggleSearchSpinner: 'TOGGLE_SEARCH_SPINNER' }),
-
-    async submitSearch(searchQuery) {
-      try {
-        this.toggleSearchSpinner(true);
-        await this.$store.dispatch('home/searchRecipes', searchQuery);
-        this.toggleSearchSpinner(false);
-      } catch (err) {
-        console.log(err);
-      }
-    },
   },
 };
 </script>

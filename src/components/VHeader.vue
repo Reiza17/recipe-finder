@@ -6,6 +6,7 @@
 
     <nav class="nav">
       <ul class="nav__list">
+        <VUserRecipes v-if="loggedIn" />
         <li class="nav__item">
           <router-link to="/upload" class="nav__btn">
             <svg class="nav__icon">
@@ -50,6 +51,7 @@
 <script>
 import VSearch from '@/components/VSearch.vue';
 import VBookmarks from '@/components/VBookmarks.vue';
+import VUserRecipes from '@/components/VUserRecipes.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapMutations } = createNamespacedHelpers('home');
 
@@ -58,6 +60,7 @@ export default {
   components: {
     VSearch,
     VBookmarks,
+    VUserRecipes,
   },
   computed: {
     loggedIn() {

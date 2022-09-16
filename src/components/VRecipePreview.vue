@@ -13,20 +13,15 @@
         <div class="preview__data">
           <h4 class="preview__title">{{ result.title }}</h4>
           <p class="preview__publisher">{{ result.publisher }}</p>
-          <div class="preview__experiment">
-            <div
-              class="preview__user-generated"
-              :class="[result.user_generated ? '' : 'hidden']"
-            >
+          <div v-if="result.user_generated">
+            <div v-if="resultsActive" class="preview__user-generated">
               <svg>
                 <use :href="`${icons}#icon-user`"></use>
               </svg>
             </div>
-            <div
-              v-if="resultsActive"
-              class="preview__bookmarked btn--round"
-              :class="[isBookmarked(result.id) ? '' : 'hidden']"
-            >
+          </div>
+          <div v-if="isBookmarked(result.id)">
+            <div v-if="resultsActive" class="preview__bookmarked btn--round">
               <svg>
                 <use :href="`${icons}#icon-bookmark-fill`"></use>
               </svg>
@@ -86,10 +81,11 @@ export default {
   margin-bottom: 2rem;
 }
 
-.hidden {
-  visibility: hidden;
-  opacity: 0;
-}
+// NOTE unnecessary because of v-if
+// .hidden {
+//   visibility: hidden;
+//   opacity: 0;
+// }
 
 .preview {
   &__link {
@@ -150,9 +146,7 @@ export default {
   &__data {
     display: grid;
     width: 100%;
-    // FORMER SETTINGS:
-    // grid-template-columns: 1fr 2.7rem;
-    grid-template-columns: 1fr 2.5rem;
+    grid-template-columns: 1fr 2.7rem;
     row-gap: 0.1rem;
     align-items: center;
   }
@@ -178,13 +172,6 @@ export default {
     font-weight: 600;
   }
 
-  // FORMER SETTINGS:
-  // Remove for previous settings
-  &__experiment {
-    display: flex;
-    margin-left: auto;
-  }
-
   &__user-generated {
     background-color: darken($color-grey-light-2, 2%);
 
@@ -195,10 +182,8 @@ export default {
     width: 2rem;
     border-radius: 10rem;
 
-    // FORMER SETTINGS:
     // margin-left: auto;
     // margin-right: 1.75rem;
-    margin-right: 0.6rem;
 
     svg {
       height: 1.2rem;
