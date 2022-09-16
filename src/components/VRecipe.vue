@@ -58,15 +58,34 @@
           </div>
         </div>
 
-        <div
-          class="recipe__user-generated"
-          :class="[recipe.user_generated ? '' : 'hidden']"
+        <button
+          v-if="recipe.user_generated"
+          @click="deleteUserRecipe"
+          class="btn--round"
         >
+          <svg class="">
+            <use :href="`${icons}#icon-delete`"></use>
+          </svg>
+        </button>
+        <button
+          v-if="recipe.user_generated"
+          @click="editUserRecipe"
+          class="btn--round"
+        >
+          <svg class="">
+            <use :href="`${icons}#icon-edit`"></use>
+          </svg>
+        </button>
+        <div v-if="recipe.user_generated" class="recipe__user-generated">
           <svg>
             <use :href="`${icons}#icon-user`"></use>
           </svg>
         </div>
-        <button @click="bookmarkRecipe" class="btn--round btn--bookmark">
+        <button
+          v-if="!recipe.user_generated"
+          @click="bookmarkRecipe"
+          class="btn--round btn--bookmark"
+        >
           <svg class="">
             <use
               :href="`${icons}#icon-bookmark${recipeBookmarked ? '-fill' : ''}`"
@@ -138,7 +157,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recipe', 'recipeBookmarked', 'loadingRecipe']),
+    ...mapGetters([
+      'recipe',
+      'recipeBookmarked',
+      'loadingRecipe',
+      'searchQuery',
+    ]),
     loggedIn() {
       return this.$store.getters['auth/user'];
     },
@@ -152,6 +176,7 @@ export default {
       updateServings: 'UPDATE_SERVINGS',
       toggleRecipeSpinner: 'TOGGLE_RECIPE_SPINNER',
       toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
+      toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
@@ -160,19 +185,29 @@ export default {
       if (!this.loggedIn) this.$router.push({ name: 'register' });
       else this.$store.dispatch('home/toggleBookmark', this.recipe);
     },
+    deleteUserRecipe() {
+      this.$store.dispatch('home/deleteUserRecipe', this.recipe);
+    },
+    editUserRecipe() {
+      this.$store.dispatch('home/editUserRecipe', this.recipe);
+    },
+
     // TODO Move below two functions to either App.vue, VHome.vue, upon login, or upon user state change
     async init() {
       try {
         this.toggleRecipeSpinner(true);
         this.toggleBookmarksSpinner(true);
+        this.toggleUserRecipesSpinner(true);
         await this.$store.dispatch('auth/fetchUser');
         await this.$store.dispatch('home/fetchUserRecipes');
+        this.toggleUserRecipesSpinner(false);
 
         // REVIEW Not sure whether renderRecipe ought to have await before it
         this.$store.dispatch('home/renderRecipe', {
           id: this.recipeUrl,
         });
         this.toggleRecipeSpinner(false);
+
         await this.$store.dispatch('home/fetchBookmarks');
         this.toggleBookmarksSpinner(false);
       } catch (err) {
@@ -196,6 +231,10 @@ export default {
   mounted() {
     this.init();
     this.renderNewRecipe();
+    this.$store.dispatch('home/reloadSearchResults');
+
+    console.log(this.searchQuery);
+
     // document.addEventListener('visibilitychange', () => {
     //   if (document.visibilityState === 'hidden') {
     //     this.$store.dispatch('home/uploadBookmarks');
@@ -307,7 +346,8 @@ export default {
   cursor: pointer;
   height: 4.5rem;
   width: 4.5rem;
-  // margin-left: auto;
+  margin-left: auto;
+  margin-right: 1.75rem;
   transition: all 0.2s;
 
   display: flex;
@@ -399,10 +439,11 @@ export default {
   }
 }
 
-.hidden {
-  visibility: hidden;
-  opacity: 0;
-}
+// NOTE no need because of v-if
+// .hidden {
+//   visibility: hidden;
+//   opacity: 0;
+// }
 
 .message,
 .error {

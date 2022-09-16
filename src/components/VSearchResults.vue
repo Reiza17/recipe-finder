@@ -16,7 +16,7 @@
       <p>No recipes found for your query. Please try again!</p>
     </div>
 
-    <div class="pagination">
+    <div v-if="!loadingSearchResults" class="pagination">
       <!-- Page 1, and there are other pages -->
       <button
         v-if="searchResultsCurrentPage === 1 && numPages > 1"

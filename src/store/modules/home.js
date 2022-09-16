@@ -30,6 +30,7 @@ export default {
     loadingSearchResults: false,
     loadingRecipe: false,
     loadingBookmarks: false,
+    loadingUserRecipes: false,
     uploadRecipeModal: false,
   },
 
@@ -37,8 +38,10 @@ export default {
     recipe: state => state.recipe,
     recipeBookmarks: state => state.bookmarks,
     recipeBookmarked: state => state.recipe.bookmarked,
+    userRecipes: state => state.userRecipes,
     hashUrl: state => state.hashUrl,
     initialSearchSubmitted: state => state.initialSearchSubmitted,
+    // searchQuery: state => state.search.query,
     searchResults: state => state.search.results,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
@@ -65,6 +68,10 @@ export default {
 
     INITIAL_SEARCH_SUBMITTED(state, boolean) {
       state.initialSearchSubmitted = boolean;
+    },
+
+    STORE_SEARCH_QUERY(state, query) {
+      state.search.query = query;
     },
 
     CREATE_SEARCH_RESULTS(state, results) {
@@ -109,6 +116,10 @@ export default {
       state.loadingBookmarks = boolean;
     },
 
+    TOGGLE_USER_RECIPES_SPINNER(state, boolean) {
+      state.loadingUserRecipes = boolean;
+    },
+
     SET_STORED_BOOKMARKS(state, bookmarks) {
       // NOTE uses reverse() so that newly bookmarked/uploaded recipes are at the top, similar to newly "Liked" videos on Youtube. In reality, it's probably better to use a timestamp and sort().
       state.bookmarks = bookmarks.reverse();
@@ -137,6 +148,19 @@ export default {
       console.log(state.userRecipes);
     },
 
+    DELETE_USER_RECIPE(state, recipe) {
+      const recipeIndex = state.userRecipes.findIndex(
+        userRecipes => userRecipes.id === recipe.id
+      );
+      state.userRecipes.splice(recipeIndex, 1);
+    },
+
+    EDIT_USER_RECIPE(state, recipe) {
+      // console.log(recipe.id);
+      state.userRecipes.unshift(recipe);
+      console.log(state.userRecipes);
+    },
+
     SET_USER_RECIPES(state, recipes) {
       state.userRecipes = recipes;
       console.log(state.userRecipes);
@@ -144,40 +168,47 @@ export default {
   },
 
   actions: {
+    async reloadSearchResults({ dispatch, state }) {
+      console.log(state.search.query);
+      dispatch('searchRecipes', state.search.query);
+    },
+
     async searchRecipes({ commit, state }, query) {
       try {
+        commit('TOGGLE_SEARCH_SPINNER', true);
         commit('INITIAL_SEARCH_SUBMITTED', true);
+        commit('STORE_SEARCH_QUERY', query);
 
-        const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
-
-        const filteredApiRecipes = res.data.data.recipes;
         // NOTE Remove 'split' below if I want to include partial-word results
-        const filteredUserRecipes = state.userRecipes.filter(recipe =>
+        const matchingUserRecipes = state.userRecipes.filter(recipe =>
           recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
         );
 
+        const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
+        const allSearchResults = res.data.data.recipes;
+
         // TODO Rename variable to something better?
-        const bookmarkedApiRecipes = filteredApiRecipes.filter(apiRecipe =>
+        const bookmarkedSearchResults = allSearchResults.filter(apiRecipe =>
           state.bookmarks.some(
             bookmarkedRecipe => bookmarkedRecipe.id === apiRecipe.id
           )
         );
 
         // TODO Rename variable to something better?
-        const remainingApiRecipes = filteredApiRecipes.filter(
+        const nonBookmarkedSearchResults = allSearchResults.filter(
           apiRecipe =>
             !state.bookmarks.some(
               bookmarkedRecipe => bookmarkedRecipe.id === apiRecipe.id
             )
         );
 
-        console.log(remainingApiRecipes);
         const filteredResults = [
-          ...filteredUserRecipes,
-          ...bookmarkedApiRecipes,
-          ...remainingApiRecipes,
+          ...matchingUserRecipes,
+          ...bookmarkedSearchResults,
+          ...nonBookmarkedSearchResults,
         ];
         commit('CREATE_SEARCH_RESULTS', filteredResults);
+        commit('TOGGLE_SEARCH_SPINNER', false);
       } catch (err) {
         console.error(`Error searching for recipes: ${err}`);
       }
@@ -226,34 +257,46 @@ export default {
       }
     },
 
-    async addUserRecipe({ commit, dispatch, rootState }, recipe) {
+    async uploadUserRecipe({ commit, rootState }, recipe) {
       try {
+        const userRecipe = { ...recipe, bookmarked: false };
         const docRef = doc(db, 'users', rootState.auth.user.uid);
         await updateDoc(docRef, {
-          uploadedRecipes: arrayUnion(recipe),
+          uploadedRecipes: arrayUnion(userRecipe),
         });
         // const docRef = await addDoc(collection(db, 'recipes'), recipe);
         // REVIEW add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
         console.log('Successfully uploaded user recipe to server!');
-        commit('ADD_USER_RECIPE', recipe);
-        dispatch('toggleBookmark', { ...recipe, bookmarked: true });
+        commit('ADD_USER_RECIPE', userRecipe);
       } catch (err) {
         console.error(`Failed to upload user recipe to server: ${err}`);
       }
     },
 
-    // async deleteUserRecipe({ commit, rootState }, id) {
-    //   try {
-    //     const docRef = doc(db, 'users', rootState.auth.user.uid);
-    //     await updateDoc(docRef, {
-    //       recipes: arrayRemove(id),
-    //     });
-    //     console.log('Successfully removed user recipe from server');
-    //     commit('DELETE_USER_RECIPE', id);
-    //   } catch (err) {
-    //     console.error(`Failed to remove user recipe from server: ${err}`);
-    //   }
-    // },
+    async deleteUserRecipe({ commit, rootState }, recipe) {
+      try {
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+        await updateDoc(docRef, {
+          uploadedRecipes: arrayRemove(recipe),
+        });
+        commit('DELETE_USER_RECIPE', recipe);
+      } catch (err) {
+        console.error(`Failed to remove user recipe from server: ${err}`);
+      }
+    },
+
+    // FIXME placeholder
+    async editUserRecipe({ commit, rootState }, recipe) {
+      try {
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+        await updateDoc(docRef, {
+          recipes: arrayRemove(recipe),
+        });
+        commit('DELETE_USER_RECIPE', recipe);
+      } catch (err) {
+        console.error(`Failed to begin edit for user recipe: ${err}`);
+      }
+    },
 
     async fetchBookmarks({ commit, rootState }) {
       try {
