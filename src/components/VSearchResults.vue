@@ -1,6 +1,6 @@
 <template>
   <div class="search-results">
-    <div v-if="!initialSearchSubmitted"></div>
+    <div v-if="!$route.query.query && !$route.params.id"></div>
     <VLoadingSpinner v-else-if="loadingSearchResults" />
     <VRecipePreview
       v-else-if="!loadingSearchResults && searchResults.length > 0"
@@ -87,7 +87,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'initialSearchSubmitted',
+      'searchQuery',
       'searchResults',
       'searchResultsCurrentPage',
       'searchResultsPerPage',
@@ -108,6 +108,9 @@ export default {
     ...mapMutations({ updatePagination: 'UPDATE_PAGINATION' }),
   },
 
+  mounted() {
+    console.log(this.$route);
+  },
   // methods: {
   //   renderRecipe() {
   //     this.$store.dispatch('renderRecipe');

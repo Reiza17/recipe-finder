@@ -2,7 +2,10 @@
   <div class="recipe">
     <VLoadingSpinner v-if="loadingRecipe" />
 
-    <div class="message" v-else-if="!recipeUrl && isEmptyObject">
+    <div
+      class="message"
+      v-else-if="!this.$route.params.id && !Object.keys(this.recipe).length"
+    >
       <div>
         <svg>
           <use :href="`${icons}#icon-smile`"></use>
@@ -153,25 +156,37 @@ export default {
       icons: require('@/assets/images/icons.svg'),
       fracty,
       // REVIEW Instead of below, could get the value from init. Or, I could also use something like v-if="this.$router.currentRoute.value.path === '/login'". However, this would require that my url changes when I do a search (currently it doesn't).
-      recipeUrl: window.location.hash.slice(1),
+      // existingRecipe: this.$route.params.id,
     };
+  },
+  watch: {
+    '$route.params'(newValue) {
+      console.log(newValue);
+      console.log(this.$route);
+
+      if (newValue.id)
+        this.$store.dispatch('home/renderRecipe', {
+          id: newValue.id,
+        });
+    },
   },
   computed: {
     ...mapGetters([
       'recipe',
       'recipeBookmarked',
       'loadingRecipe',
-      'searchQuery',
+      // 'searchQuery',
     ]),
     loggedIn() {
       return this.$store.getters['auth/user'];
     },
-    isEmptyObject() {
-      if (!Object.keys(this.recipe).length) return true;
-      return false;
-    },
+    // validRecipe() {
+    //   if (Object.keys(this.recipe).length) return true;
+    //   return false;
+    // },
   },
   methods: {
+    // TODO delete the unused
     ...mapMutations({
       updateServings: 'UPDATE_SERVINGS',
       toggleRecipeSpinner: 'TOGGLE_RECIPE_SPINNER',
@@ -192,49 +207,28 @@ export default {
       this.$store.dispatch('home/editUserRecipe', this.recipe);
     },
 
-    // TODO Move below two functions to either App.vue, VHome.vue, upon login, or upon user state change
-    async init() {
-      try {
-        this.toggleRecipeSpinner(true);
-        this.toggleBookmarksSpinner(true);
-        this.toggleUserRecipesSpinner(true);
-        await this.$store.dispatch('auth/fetchUser');
-        await this.$store.dispatch('home/fetchUserRecipes');
-        this.toggleUserRecipesSpinner(false);
+    // TODO move this to either App.vue, VHome.vue, upon login, or upon user state change.
+    // Concerns: if I put this in App, it would render the recipe even if I begin in another tab, thereby using resources and slowing things down. Or maybe that doesn't matter?
+    // I could try to avoid the above issue by putting the function in Home, but I would also need to fetch user and fetch user recipes if I begin in another tab. So perhaps App is where I fetchUser and fetchUserRecipes. Home is where I render the recipe, user recipes tab is where I do something else. This separation makes sense, but how do I ensure that renderRecipe is only dispatched after fetchUser and fetchUserRecipes? Does it go by order automatically, since App is the base level? Could try to experiment.
 
-        // REVIEW Not sure whether renderRecipe ought to have await before it
-        this.$store.dispatch('home/renderRecipe', {
-          id: this.recipeUrl,
-        });
-        this.toggleRecipeSpinner(false);
-
-        await this.$store.dispatch('home/fetchBookmarks');
-        this.toggleBookmarksSpinner(false);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    async renderNewRecipe() {
-      try {
-        window.addEventListener('hashchange', async () => {
-          this.toggleRecipeSpinner(true);
-          await this.$store.dispatch('home/renderRecipe', {
-            id: window.location.hash.slice(1),
-          });
-          this.toggleRecipeSpinner(false);
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    },
+    // TODO probably put this in RecipePreview and make it execute upon clicking a preview. Though perhaps also leave it in mounted() below in case of reloading or pasting in a recipe URL.
+    // async renderNewRecipe() {
+    //   try {
+    //     window.addEventListener('hashchange', async () => {
+    //       await this.$store.dispatch('home/renderRecipe', {
+    //         id: this.$route.hash.slice(1),
+    //       });
+    //     });
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // },
   },
   mounted() {
-    this.init();
-    this.renderNewRecipe();
-    this.$store.dispatch('home/reloadSearchResults');
-
-    console.log(this.searchQuery);
-
+    // this.init();
+    // this.renderNewRecipe();
+    // this.$store.dispatch('home/reloadSearchResults');
+    // console.log(this.searchQuery);
     // document.addEventListener('visibilitychange', () => {
     //   if (document.visibilityState === 'hidden') {
     //     this.$store.dispatch('home/uploadBookmarks');

@@ -1,8 +1,18 @@
 <template>
   <div>
-    <div @click="$router.push({ name: 'home' })" class="overlay"></div>
+    <div
+      @click="
+        $router.push({ name: 'recipe', params: { id: $route.params.id } })
+      "
+      class="overlay"
+    ></div>
     <div class="login-window">
-      <button @click="$router.push({ name: 'home' })" class="btn--close-modal">
+      <button
+        @click="
+          $router.push({ name: 'recipe', params: { id: $route.params.id } })
+        "
+        class="btn--close-modal"
+      >
         &times;
       </button>
       <div class="message">
