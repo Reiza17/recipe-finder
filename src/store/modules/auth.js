@@ -73,7 +73,7 @@ export default {
       // router.replace({ name: 'home' });
     },
 
-    async login({ commit, state }, details) {
+    async login({ commit, state, dispatch }, details) {
       const { email, password } = details;
 
       try {
@@ -91,13 +91,16 @@ export default {
       // commit('home/TOGGLE_RECIPE_SPINNER', null, { root: true });
 
       commit('SET_USER', auth.currentUser);
-      // NOTE Need to either refresh the page or call fetchUserRecipes from home.js.
-      // router.replace({ name: 'home' });
-      router.push('/');
-      location.reload();
+      // NOTE including the params means it will redirect back to the same recipe
 
-      // NOTE Alternatively, without reloading I would have to manually refetch the user's data:
-      // dispatch('home/fetchUserRecipes', null, { root: true });
+      router.push({
+        name: 'recipe',
+        params: { id: router.app._route.params.id },
+      });
+      // router.push('/');
+
+      location.reload();
+      dispatch('home/init', true, null, { root: true });
     },
 
     // signOut() {
@@ -105,15 +108,18 @@ export default {
     //     this.$router.replace({ name: 'login' });
     //   });
     // },
-    async logout({ commit }) {
+    async logout({ commit, dispatch }) {
       await signOut(auth);
 
       commit('CLEAR_USER');
 
-      // NOTE Include below only if we want user redirected to login
+      // NOTE Include below only if we want user redirected to login or home
       // router.push('login');
-      router.push('/');
+      // router.push('/');
+
+      // NOTE dispatching the init here allows the state to remain
       location.reload();
+      dispatch('home/init', null, { root: true });
     },
 
     // setupFirebase() {

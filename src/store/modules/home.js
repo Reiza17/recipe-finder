@@ -1,4 +1,5 @@
 import axios from 'axios';
+import router from '@/router';
 import { API_URL, RES_PER_PAGE, KEY } from '@/common/config.js';
 import {
   // collection,
@@ -18,15 +19,13 @@ export default {
     recipe: {},
     userRecipes: [],
     bookmarks: [],
-    hashUrl: '',
     previousURL: '',
     search: {
-      query: '',
       results: [],
       page: 1,
       resultsPerPage: RES_PER_PAGE,
     },
-    initialSearchSubmitted: false,
+    // searchQuery: false,
     loadingSearchResults: false,
     loadingRecipe: false,
     loadingBookmarks: false,
@@ -39,9 +38,7 @@ export default {
     recipeBookmarks: state => state.bookmarks,
     recipeBookmarked: state => state.recipe.bookmarked,
     userRecipes: state => state.userRecipes,
-    hashUrl: state => state.hashUrl,
-    initialSearchSubmitted: state => state.initialSearchSubmitted,
-    // searchQuery: state => state.search.query,
+    // searchQuery: state => state.initialSearchSubmitted,
     searchResults: state => state.search.results,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
@@ -62,17 +59,9 @@ export default {
       state.previousURL = pageName;
     },
 
-    GET_HASH_URL(state, id) {
-      state.hashUrl = id;
-    },
-
-    INITIAL_SEARCH_SUBMITTED(state, boolean) {
-      state.initialSearchSubmitted = boolean;
-    },
-
-    STORE_SEARCH_QUERY(state, query) {
-      state.search.query = query;
-    },
+    // INITIAL_SEARCH_SUBMITTED(state, boolean) {
+    //   state.initialSearchSubmitted = boolean;
+    // },
 
     CREATE_SEARCH_RESULTS(state, results) {
       state.search.results = results;
@@ -168,17 +157,45 @@ export default {
   },
 
   actions: {
-    async reloadSearchResults({ dispatch, state }) {
-      console.log(state.search.query);
-      dispatch('searchRecipes', state.search.query);
+    async init({ commit, dispatch }, loggingIn = false) {
+      try {
+        commit('TOGGLE_RECIPE_SPINNER', true);
+        commit('TOGGLE_BOOKMARKS_SPINNER', true);
+        commit('TOGGLE_USER_RECIPES_SPINNER', true);
+        commit('TOGGLE_SEARCH_SPINNER', true);
+        // NOTE no need to toggle above spinners to false, as that's done at the end of the actions themselves
+
+        // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
+
+        await dispatch('auth/fetchUser', null, { root: true });
+
+        dispatch('fetchBookmarks');
+        await dispatch('fetchUserRecipes');
+
+        console.log(router);
+
+        dispatch('searchRecipes', router.app._route.query.query);
+
+        // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
+        if (loggingIn) return;
+
+        dispatch('renderRecipe', {
+          id: router.app._route.params.id,
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
 
+    // FIXME doesn't go back to original search result page after reloading (e.g. to Page 2)
     async searchRecipes({ commit, state }, query) {
       try {
         commit('TOGGLE_SEARCH_SPINNER', true);
-        commit('INITIAL_SEARCH_SUBMITTED', true);
-        commit('STORE_SEARCH_QUERY', query);
 
+        // router.push({ name: 'recipe', query: { query: query } });
+        router.push({ query: { query: query } });
+
+        console.log(state.userRecipes);
         // NOTE Remove 'split' below if I want to include partial-word results
         const matchingUserRecipes = state.userRecipes.filter(recipe =>
           recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
@@ -211,12 +228,14 @@ export default {
         commit('TOGGLE_SEARCH_SPINNER', false);
       } catch (err) {
         console.error(`Error searching for recipes: ${err}`);
+        commit('TOGGLE_SEARCH_SPINNER', false);
       }
     },
 
     async renderRecipe({ commit, state }, { id }) {
       try {
         // console.log(id);
+        commit('TOGGLE_RECIPE_SPINNER', true);
         const [userRecipe] = state.userRecipes.filter(
           recipe => recipe.id === id
         );
@@ -226,8 +245,11 @@ export default {
           const res = await axios.get(`${API_URL}${id}`);
           commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
         }
+        commit('TOGGLE_RECIPE_SPINNER', false);
       } catch (err) {
         console.error(`Error loading recipe: ${err}`);
+        // FIXME need to do something about the errors for failing to fetch user data when not logged in
+        commit('TOGGLE_RECIPE_SPINNER', false);
       }
     },
 
@@ -254,6 +276,7 @@ export default {
         // const userRecipes = querySnapshot.docs.map(doc => doc.data());
       } catch (err) {
         console.error(`Failed to get user recipes from server: ${err}`);
+        commit('TOGGLE_RECIPE_SPINNER', false);
       }
     },
 
@@ -300,14 +323,15 @@ export default {
 
     async fetchBookmarks({ commit, rootState }) {
       try {
-        // REVIEW Test effectiveness of below spinners if init executes upon login, user state change, or in App
-        // commit('TOGGLE_BOOKMARKS_SPINNER', true);
+        // REVIEW probably unnecessary to have below
+        commit('TOGGLE_BOOKMARKS_SPINNER', true);
         const docRef = doc(db, 'users', rootState.auth.user.uid);
         const docSnap = await getDoc(docRef);
         commit('SET_STORED_BOOKMARKS', docSnap.data().bookmarks);
-        // commit('TOGGLE_BOOKMARKS_SPINNER', false);
+        commit('TOGGLE_BOOKMARKS_SPINNER', false);
       } catch (err) {
         console.error(`Failed to get user recipes from server: ${err}`);
+        commit('TOGGLE_BOOKMARKS_SPINNER', false);
       }
     },
 

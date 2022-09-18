@@ -42,11 +42,14 @@ export default {
   //   }),
   // },
 
+  // NOTE could put elsewhere; not sure
   // created() {
-  // const storage = localStorage.getItem('bookmarks');
-  // if (storage) this.setStoredBookmarks(JSON.parse(storage));
+  //   this.$store.dispatch('home/searchRecipes');
 
-  // this.$store.dispatch('fetchUserRecipes');
+  //   // const storage = localStorage.getItem('bookmarks');
+  //   // if (storage) this.setStoredBookmarks(JSON.parse(storage));
+
+  //   // this.$store.dispatch('fetchUserRecipes');
   // },
 };
 </script>

@@ -1,11 +1,14 @@
 <template>
   <ul :class="{ results: resultsActive }">
-    <li class="preview" v-for="result in recipes" :key="result.id">
-      <a
-        @click="getHashUrl(result.id)"
+    <li
+      class="preview"
+      :class="{ 'preview__link--active': result.id === $route.params.id }"
+      v-for="result in recipes"
+      :key="result.id"
+    >
+      <router-link
+        :to="{ name: 'recipe', params: { id: result.id } }"
         class="preview__link"
-        :class="{ 'preview__link--active': result.id === hashUrl }"
-        :href="`#${result.id}`"
       >
         <figure class="preview__fig">
           <img :src="result.image_url" :alt="result.title" />
@@ -28,14 +31,38 @@
             </div>
           </div>
         </div>
-      </a>
+      </router-link>
+
+      <!-- <a class="preview__link" :href="`#${result.id}`">
+        <figure class="preview__fig">
+          <img :src="result.image_url" :alt="result.title" />
+        </figure>
+        <div class="preview__data">
+          <h4 class="preview__title">{{ result.title }}</h4>
+          <p class="preview__publisher">{{ result.publisher }}</p>
+          <div v-if="result.user_generated">
+            <div v-if="resultsActive" class="preview__user-generated">
+              <svg>
+                <use :href="`${icons}#icon-user`"></use>
+              </svg>
+            </div>
+          </div>
+          <div v-if="isBookmarked(result.id)">
+            <div v-if="resultsActive" class="preview__bookmarked btn--round">
+              <svg>
+                <use :href="`${icons}#icon-bookmark-fill`"></use>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </a> -->
     </li>
   </ul>
 </template>
 
 <script>
 import { createNamespacedHelpers } from 'vuex';
-const { mapGetters, mapMutations } = createNamespacedHelpers('home');
+const { mapGetters } = createNamespacedHelpers('home');
 
 export default {
   name: 'VRecipePreview',
@@ -62,10 +89,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['searchResultsDisplay', 'hashUrl', 'recipeBookmarks']),
+    ...mapGetters(['searchResultsDisplay', 'recipeBookmarks']),
   },
   methods: {
-    ...mapMutations({ getHashUrl: 'GET_HASH_URL' }),
     isBookmarked(id) {
       return this.recipeBookmarks.some(recipe => recipe.id === id);
     },

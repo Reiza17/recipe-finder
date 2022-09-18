@@ -31,24 +31,69 @@ const routes = [
         name: 'register',
         component: VRegister,
       },
+      {
+        path: ':id',
+        name: 'recipe',
+        // REVIEW What exactly should I put here?
+        // component:
+      },
+      // {
+      //   path: '/search',
+      //   name: 'search',
+      //   // REVIEW What exactly should I put here?
+      //   // component:
+      // },
     ],
   },
-
-  // {
-  //   path: '/about',
-  //   name: 'about',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "about" */ '../views/About.vue'),
-  // },
 ];
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes,
+});
+
+// router.beforeEach((to, from, next) => {
+//   // console.log(from);
+//   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+//   const isAuthenticated = auth.currentUser;
+//   if (requiresAuth && !isAuthenticated) {
+//     next('/register');
+//   } else if (
+//     isAuthenticated &&
+//     (to.name === 'register' || to.name === 'login')
+//   ) {
+//     next('/');
+//   } else {
+//     next();
+//   }
+// });
+
+// router.beforeEach((to, from, next) => {
+//   if (!hasQueryParams(to) && hasQueryParams(from)) {
+//     next({ ...to, query: { query: from.query.query } });
+//   } else {
+//     next();
+//   }
+// });
+
+function hasQueryParams(route) {
+  return !!Object.keys(route.query).length;
+}
+
+function hasRecipeParams(route) {
+  return !!Object.keys(route.params).length;
+}
+
+router.beforeEach((to, from, next) => {
+  console.log(from.params.id);
+  console.log(hasRecipeParams(to));
+  console.log(hasRecipeParams(from));
+  if (!hasRecipeParams(to) && hasRecipeParams(from)) {
+    next({ ...to, params: { id: from.params.id } });
+  } else {
+    next();
+  }
 });
 
 router.beforeEach((to, from, next) => {
@@ -63,7 +108,16 @@ router.beforeEach((to, from, next) => {
   ) {
     next('/');
   } else {
-    next();
+    // If user reloads the page, it will retain the previous search results in the search panel. To remove this functionality, simply replace the code block below with the params codeblock above;
+    if (hasQueryParams(from) && !hasQueryParams(to)) {
+      next({
+        ...to,
+        // params: { id: from.params.id },
+        query: { query: from.query.query },
+      });
+    } else {
+      next();
+    }
   }
 });
 

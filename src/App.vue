@@ -21,7 +21,6 @@
 
 <script>
 // import Header from './components/Top-Header';
-
 export default {
   name: 'app',
   // components: {
@@ -36,6 +35,10 @@ export default {
   //   await this.$store.dispatch('auth/fetchUser');
   //   await this.$store.dispatch('home/fetchUserRecipes');
   // },
+
+  created() {
+    this.$store.dispatch('home/init');
+  },
 };
 </script>
 
