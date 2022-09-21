@@ -25,12 +25,13 @@ export default {
       page: 1,
       resultsPerPage: RES_PER_PAGE,
     },
-    // searchQuery: false,
     loadingSearchResults: false,
     loadingRecipe: false,
     loadingBookmarks: false,
     loadingUserRecipes: false,
     uploadRecipeModal: false,
+    loginModal: false,
+    registerModal: false,
   },
 
   getters: {
@@ -38,7 +39,6 @@ export default {
     recipeBookmarks: state => state.bookmarks,
     recipeBookmarked: state => state.recipe.bookmarked,
     userRecipes: state => state.userRecipes,
-    // searchQuery: state => state.initialSearchSubmitted,
     searchResults: state => state.search.results,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
@@ -52,6 +52,8 @@ export default {
     loadingRecipe: state => state.loadingRecipe,
     loadingBookmarks: state => state.loadingBookmarks,
     uploadRecipeModal: state => state.uploadRecipeModal,
+    loginModal: state => state.loginModal,
+    registerModal: state => state.registerModal,
   },
 
   mutations: {
@@ -59,15 +61,9 @@ export default {
       state.previousURL = pageName;
     },
 
-    // INITIAL_SEARCH_SUBMITTED(state, boolean) {
-    //   state.initialSearchSubmitted = boolean;
-    // },
-
     CREATE_SEARCH_RESULTS(state, results) {
       state.search.results = results;
       state.search.page = 1;
-      console.log(state);
-      console.log(state.search.results);
     },
 
     TOGGLE_SEARCH_SPINNER(state, boolean) {
@@ -80,11 +76,9 @@ export default {
 
     CREATE_RECIPE_OBJECT(state, data) {
       state.recipe = { ...data, bookmarked: false };
-      console.log(state.recipe);
       if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
         state.recipe.bookmarked = true;
       else state.recipe.bookmarked = false;
-      console.log(state.recipe);
     },
 
     TOGGLE_RECIPE_SPINNER(state, boolean) {
@@ -127,6 +121,14 @@ export default {
       state.recipe.bookmarked = false;
     },
 
+    TOGGLE_LOGIN_MODAL(state) {
+      state.loginModal = !state.loginModal;
+    },
+
+    TOGGLE_REGISTER_MODAL(state) {
+      state.registerModal = !state.registerModal;
+    },
+
     TOGGLE_UPLOAD_RECIPE_MODAL(state) {
       state.uploadRecipeModal = !state.uploadRecipeModal;
     },
@@ -142,6 +144,9 @@ export default {
         userRecipes => userRecipes.id === recipe.id
       );
       state.userRecipes.splice(recipeIndex, 1);
+
+      // NOTE delete the recipe object so that Recipe view changes (there's a v-if that's based on object length)
+      Object.keys(recipe).forEach(key => delete recipe[key]);
     },
 
     EDIT_USER_RECIPE(state, recipe) {
@@ -152,12 +157,12 @@ export default {
 
     SET_USER_RECIPES(state, recipes) {
       state.userRecipes = recipes;
-      console.log(state.userRecipes);
+      // console.log(state.userRecipes);
     },
   },
 
   actions: {
-    async init({ commit, dispatch }, loggingIn = false) {
+    async init({ commit, dispatch, rootState }) {
       try {
         commit('TOGGLE_RECIPE_SPINNER', true);
         commit('TOGGLE_BOOKMARKS_SPINNER', true);
@@ -166,36 +171,42 @@ export default {
         // NOTE no need to toggle above spinners to false, as that's done at the end of the actions themselves
 
         // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
-
         await dispatch('auth/fetchUser', null, { root: true });
+        if (rootState.auth.user) {
+          dispatch('fetchBookmarks');
+          await dispatch('fetchUserRecipes');
+        }
+        commit('TOGGLE_BOOKMARKS_SPINNER', false);
+        commit('TOGGLE_SEARCH_SPINNER', false);
 
-        dispatch('fetchBookmarks');
-        await dispatch('fetchUserRecipes');
-
-        console.log(router);
-
-        dispatch('searchRecipes', router.app._route.query.query);
+        // console.log(router);
+        if (router.app._route.query.query)
+          dispatch('searchRecipes', {
+            query: router.app._route.query.query,
+            reloadingPage: true,
+          });
 
         // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
-        if (loggingIn) return;
+        // if (loggingIn) return;
 
-        dispatch('renderRecipe', {
-          id: router.app._route.params.id,
-        });
+        if (router.app._route.params.id)
+          dispatch('renderRecipe', {
+            id: router.app._route.params.id,
+          });
       } catch (err) {
         console.log(err);
       }
     },
 
     // FIXME doesn't go back to original search result page after reloading (e.g. to Page 2)
-    async searchRecipes({ commit, state }, query) {
+    async searchRecipes({ commit, state }, { query, reloadingPage = false }) {
       try {
         commit('TOGGLE_SEARCH_SPINNER', true);
 
-        // router.push({ name: 'recipe', query: { query: query } });
-        router.push({ query: { query: query } });
+        // NOTE This prevents the router from replacing the query with the same query during page reloads, something which results in a redundancy error.
+        if (!reloadingPage) router.push({ query: { query: query } });
 
-        console.log(state.userRecipes);
+        // console.log(state.userRecipes);
         // NOTE Remove 'split' below if I want to include partial-word results
         const matchingUserRecipes = state.userRecipes.filter(recipe =>
           recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
@@ -236,10 +247,10 @@ export default {
       try {
         // console.log(id);
         commit('TOGGLE_RECIPE_SPINNER', true);
+
         const [userRecipe] = state.userRecipes.filter(
           recipe => recipe.id === id
         );
-
         if (userRecipe) commit('CREATE_RECIPE_OBJECT', userRecipe);
         else {
           const res = await axios.get(`${API_URL}${id}`);
@@ -255,7 +266,7 @@ export default {
 
     async fetchUserRecipes({ commit, rootState }) {
       try {
-        console.log(rootState);
+        // console.log(rootState);
 
         commit('TOGGLE_RECIPE_SPINNER', true);
         const docRef = doc(db, 'users', rootState.auth.user.uid);
@@ -280,7 +291,7 @@ export default {
       }
     },
 
-    async uploadUserRecipe({ commit, rootState }, recipe) {
+    async uploadUserRecipe({ commit, rootState, dispatch }, recipe) {
       try {
         const userRecipe = { ...recipe, bookmarked: false };
         const docRef = doc(db, 'users', rootState.auth.user.uid);
@@ -291,18 +302,28 @@ export default {
         // REVIEW add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
         console.log('Successfully uploaded user recipe to server!');
         commit('ADD_USER_RECIPE', userRecipe);
+        // REVIEW maybe add a conditional...if the query matches any word in the recipe title, then dispatch below
+        dispatch('searchRecipes', { query: router.app._route.query.query });
       } catch (err) {
         console.error(`Failed to upload user recipe to server: ${err}`);
       }
     },
 
-    async deleteUserRecipe({ commit, rootState }, recipe) {
+    async deleteUserRecipe({ commit, rootState, dispatch }, recipe) {
       try {
         const docRef = doc(db, 'users', rootState.auth.user.uid);
         await updateDoc(docRef, {
           uploadedRecipes: arrayRemove(recipe),
         });
         commit('DELETE_USER_RECIPE', recipe);
+
+        router.push({
+          name: 'recipe',
+          params: { id: null },
+        });
+
+        dispatch('searchRecipes', { query: router.app._route.query.query });
+        // TODO OR/AND dispatch something to the Recipe view that says the recipe has been deleted?
       } catch (err) {
         console.error(`Failed to remove user recipe from server: ${err}`);
       }

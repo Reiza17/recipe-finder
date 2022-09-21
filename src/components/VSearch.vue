@@ -1,8 +1,5 @@
 <template>
-  <form
-    class="search"
-    @submit.prevent="$store.dispatch('home/searchRecipes', query)"
-  >
+  <form class="search" @submit.prevent="submitSearch">
     <input
       type="text"
       class="search__field"
@@ -27,6 +24,12 @@ export default {
       icons: require('@/assets/images/icons.svg'),
       query: '',
     };
+  },
+  methods: {
+    submitSearch() {
+      this.$store.dispatch('home/searchRecipes', { query: this.query });
+      this.query = '';
+    },
   },
 };
 </script>
@@ -67,7 +70,7 @@ export default {
       width: auto;
 
       &::placeholder {
-        color: white;
+        color: $color-grey-light-3;
       }
     }
   }

@@ -1,18 +1,15 @@
 <template>
   <div>
-    <div
+    <!-- NOTE the router method  -->
+    <!-- <div
       @click="
         $router.push({ name: 'recipe', params: { id: $route.params.id } })
       "
       class="overlay"
-    ></div>
+    ></div> -->
+    <div @click="toggleLoginModal" class="overlay"></div>
     <div class="login-window">
-      <button
-        @click="
-          $router.push({ name: 'recipe', params: { id: $route.params.id } })
-        "
-        class="btn--close-modal"
-      >
+      <button @click="toggleLoginModal" class="btn--close-modal">
         &times;
       </button>
       <div class="message">
@@ -33,15 +30,21 @@
       <div class="error" v-if="error">
         <p>{{ error }}</p>
       </div>
+      <!-- FIXME change router-link -->
       <p>
-        New to Reciper Finder?
-        <router-link to="/register" class="bottom-link"> SIGN UP </router-link>
+        New to Recipe Finder?
+        <a href="" @click.prevent="switchToRegisterModal" class="bottom-link">
+          SIGN UP
+        </a>
       </p>
     </div>
   </div>
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex';
+const { mapMutations } = createNamespacedHelpers('home');
+
 export default {
   data() {
     return {
@@ -55,6 +58,14 @@ export default {
     },
   },
   methods: {
+    ...mapMutations({
+      toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
+      toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
+    }),
+    switchToRegisterModal() {
+      this.toggleLoginModal();
+      this.toggleRegisterModal();
+    },
     login() {
       this.$store.dispatch('auth/login', {
         email: this.email,

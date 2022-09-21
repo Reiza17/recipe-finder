@@ -7,8 +7,10 @@
           <VHeader />
           <VSearchResults />
           <VRecipe />
+          <VUploadRecipe v-if="uploadRecipeModal" />
+          <VLogin v-if="loginModal" />
+          <VRegister v-if="registerModal" />
         </div>
-        <!-- <VUploadRecipe v-if="uploadRecipeModal" /> -->
         <router-view />
       </body>
     </html>
@@ -19,9 +21,11 @@
 import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
-// import VUploadRecipe from '@/components/VUploadRecipe.vue';
-// import { createNamespacedHelpers } from 'vuex';
-// const { mapGetters, mapMutations } = createNamespacedHelpers('home');
+import VUploadRecipe from '@/components/VUploadRecipe.vue';
+import VLogin from '@/components/VLogin.vue';
+import VRegister from '@/components/VRegister.vue';
+import { createNamespacedHelpers } from 'vuex';
+const { mapGetters } = createNamespacedHelpers('home');
 
 export default {
   name: 'VHome',
@@ -29,12 +33,14 @@ export default {
     VHeader,
     VSearchResults,
     VRecipe,
-    // VUploadRecipe,
+    VUploadRecipe,
+    VLogin,
+    VRegister,
   },
 
-  // computed: {
-  //   ...mapGetters(['uploadRecipeModal']),
-  // },
+  computed: {
+    ...mapGetters(['uploadRecipeModal', 'loginModal', 'registerModal']),
+  },
   // methods: {
   //   ...mapMutations({
   //     setStoredBookmarks: 'SET_STORED_BOOKMARKS',
@@ -42,15 +48,12 @@ export default {
   //   }),
   // },
 
-  // NOTE could put elsewhere; not sure
-  // created() {
-  //   this.$store.dispatch('home/searchRecipes');
+  created() {
+    // const storage = localStorage.getItem('bookmarks');
+    // if (storage) this.setStoredBookmarks(JSON.parse(storage));
 
-  //   // const storage = localStorage.getItem('bookmarks');
-  //   // if (storage) this.setStoredBookmarks(JSON.parse(storage));
-
-  //   // this.$store.dispatch('fetchUserRecipes');
-  // },
+    this.$store.dispatch('home/init');
+  },
 };
 </script>
 

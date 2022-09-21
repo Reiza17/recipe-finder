@@ -1,9 +1,9 @@
 <template>
   <div class="search-results">
-    <div v-if="!$route.query.query && !$route.params.id"></div>
+    <div v-if="!$route.query.query"></div>
     <VLoadingSpinner v-else-if="loadingSearchResults" />
     <VRecipePreview
-      v-else-if="!loadingSearchResults && searchResults.length > 0"
+      v-else-if="!loadingSearchResults && $route.query.query"
       :recipes="searchResultsDisplay"
       :resultsActive="true"
     />
@@ -16,7 +16,7 @@
       <p>No recipes found for your query. Please try again!</p>
     </div>
 
-    <div v-if="!loadingSearchResults" class="pagination">
+    <div v-if="!loadingSearchResults && $route.query.query" class="pagination">
       <!-- Page 1, and there are other pages -->
       <button
         v-if="searchResultsCurrentPage === 1 && numPages > 1"
@@ -108,9 +108,6 @@ export default {
     ...mapMutations({ updatePagination: 'UPDATE_PAGINATION' }),
   },
 
-  mounted() {
-    console.log(this.$route);
-  },
   // methods: {
   //   renderRecipe() {
   //     this.$store.dispatch('renderRecipe');
