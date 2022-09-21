@@ -2,10 +2,10 @@
 import Vue from 'vue';
 import VHome from '@/views/VHome.vue';
 import VueRouter from 'vue-router';
-import VRegister from '@/views/VRegister.vue';
-import VLogin from '@/views/VLogin.vue';
-import VUploadRecipe from '@/components/VUploadRecipe.vue';
-import { auth } from '@/firebaseInit';
+// import VRegister from '@/views/VRegister.vue';
+// import VLogin from '@/views/VLogin.vue';
+// import VUploadRecipe from '@/components/VUploadRecipe.vue';
+// import { auth } from '@/firebaseInit';
 
 Vue.use(VueRouter);
 
@@ -15,22 +15,22 @@ const routes = [
     name: 'home',
     component: VHome,
     children: [
-      {
-        path: '/upload',
-        name: 'upload',
-        component: VUploadRecipe,
-        meta: { requiresAuth: true },
-      },
-      {
-        path: '/login',
-        name: 'login',
-        component: VLogin,
-      },
-      {
-        path: '/register',
-        name: 'register',
-        component: VRegister,
-      },
+      // {
+      //   path: '/upload',
+      //   name: 'upload',
+      //   component: VUploadRecipe,
+      //   meta: { requiresAuth: true },
+      // },
+      // {
+      //   path: '/login',
+      //   name: 'login',
+      //   component: VLogin,
+      // },
+      // {
+      //   path: '/register',
+      //   name: 'register',
+      //   component: VRegister,
+      // },
       {
         path: ':id',
         name: 'recipe',
@@ -86,10 +86,10 @@ function hasRecipeParams(route) {
 }
 
 router.beforeEach((to, from, next) => {
-  console.log(from.params.id);
-  console.log(hasRecipeParams(to));
-  console.log(hasRecipeParams(from));
-  if (!hasRecipeParams(to) && hasRecipeParams(from)) {
+  // console.log(from.params.id);
+  // console.log(hasRecipeParams(to));
+  // console.log(hasRecipeParams(from));
+  if (hasRecipeParams(from) && !hasRecipeParams(to)) {
     next({ ...to, params: { id: from.params.id } });
   } else {
     next();
@@ -97,28 +97,27 @@ router.beforeEach((to, from, next) => {
 });
 
 router.beforeEach((to, from, next) => {
-  // console.log(from);
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const isAuthenticated = auth.currentUser;
-  if (requiresAuth && !isAuthenticated) {
-    next('/register');
-  } else if (
-    isAuthenticated &&
-    (to.name === 'register' || to.name === 'login')
-  ) {
-    next('/');
+  // const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  // const isAuthenticated = auth.currentUser;
+  // if (requiresAuth && !isAuthenticated) {
+  //   next('/register');
+  // } else if (
+  //   isAuthenticated &&
+  //   (to.name === 'register' || to.name === 'login')
+  // ) {
+  //   next('/');
+  // } else {
+  // NOTE If user reloads the page, it will retain the previous search results in the search panel. To remove this functionality, simply replace the code block below with the params codeblock above;
+  if (hasQueryParams(from) && !hasQueryParams(to)) {
+    next({
+      ...to,
+      // params: { id: from.params.id },
+      query: { query: from.query.query },
+    });
   } else {
-    // If user reloads the page, it will retain the previous search results in the search panel. To remove this functionality, simply replace the code block below with the params codeblock above;
-    if (hasQueryParams(from) && !hasQueryParams(to)) {
-      next({
-        ...to,
-        // params: { id: from.params.id },
-        query: { query: from.query.query },
-      });
-    } else {
-      next();
-    }
+    next();
   }
+  // }
 });
 
 export default router;

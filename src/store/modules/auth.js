@@ -18,7 +18,7 @@ export default {
   },
 
   getters: {
-    user: state => state.user,
+    loggedIn: state => state.user,
     registerErrorMessage: state => state.registerErrorMessage,
     loginErrorMessage: state => state.loginErrorMessage,
   },
@@ -57,8 +57,11 @@ export default {
           uploadedRecipes: [],
           bookmarks: [],
         });
+
+        commit('home/TOGGLE_REGISTER_MODAL', null, { root: true });
       } catch (error) {
-        if (error.code === 'auth/email-already-in-use')
+        // FIXME this code for email already exists doesn't work
+        if (error.code === 'auth/email-already-exists')
           state.registerErrorMessage = 'Email already in use';
         if (error.code === 'auth/weak-password')
           state.registerErrorMessage = 'Password too weak';
@@ -66,18 +69,24 @@ export default {
 
         return;
       }
-      commit('SET_USER', auth.currentUser);
 
-      router.push('/');
-      // NOTE Alternative syntax below. Would have to also add "dispatch" as a parameter (refer to official docs)
-      // router.replace({ name: 'home' });
+      commit('SET_USER', auth.currentUser);
+      // NOTE including the params means it will redirect back to the same recipe
+      router.push({
+        name: 'recipe',
+        params: { id: router.app._route.params.id },
+      });
+      // router.push('/');
+
+      location.reload();
     },
 
-    async login({ commit, state, dispatch }, details) {
+    async login({ commit, state }, details) {
       const { email, password } = details;
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        commit('home/TOGGLE_LOGIN_MODAL', null, { root: true });
       } catch (error) {
         if (
           error.code === 'auth/user-not-found' ||
@@ -92,7 +101,6 @@ export default {
 
       commit('SET_USER', auth.currentUser);
       // NOTE including the params means it will redirect back to the same recipe
-
       router.push({
         name: 'recipe',
         params: { id: router.app._route.params.id },
@@ -100,7 +108,6 @@ export default {
       // router.push('/');
 
       location.reload();
-      dispatch('home/init', true, null, { root: true });
     },
 
     // signOut() {
@@ -108,18 +115,30 @@ export default {
     //     this.$router.replace({ name: 'login' });
     //   });
     // },
-    async logout({ commit, dispatch }) {
+    async logout({ commit }) {
       await signOut(auth);
 
       commit('CLEAR_USER');
 
+      console.log(router);
       // NOTE Include below only if we want user redirected to login or home
       // router.push('login');
-      // router.push('/');
 
-      // NOTE dispatching the init here allows the state to remain
+      // router.push({
+      //   name: 'home',
+      // });
+
+      // Clears the URL
+      router.replace({
+        name: 'home',
+        params: { id: null },
+        query: { query: undefined },
+      });
+
       location.reload();
-      dispatch('home/init', null, { root: true });
+
+      // NOTE This line and location.reload() will keep the same search results and recipe view
+      // dispatch('home/init', null, { root: true });
     },
 
     // setupFirebase() {
@@ -139,7 +158,6 @@ export default {
     // REVIEW The 'async' next to user below might not actually be necessary. Test this.
     fetchUser({ commit }) {
       auth.onAuthStateChanged(async user => {
-        console.log(user);
         if (!user) {
           commit('CLEAR_USER');
         } else {

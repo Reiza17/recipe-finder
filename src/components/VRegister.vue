@@ -1,18 +1,15 @@
 <template>
   <div>
-    <div
+    <!-- NOTE the router method  -->
+    <!-- <div
       @click="
         $router.push({ name: 'recipe', params: { id: $route.params.id } })
       "
       class="overlay"
-    ></div>
+    ></div> -->
+    <div @click="toggleRegisterModal" class="overlay"></div>
     <div class="register-window">
-      <button
-        @click="
-          $router.push({ name: 'recipe', params: { id: $route.params.id } })
-        "
-        class="btn--close-modal"
-      >
+      <button @click="toggleRegisterModal" class="btn--close-modal">
         &times;
       </button>
       <div class="message">
@@ -34,13 +31,18 @@
       </div>
       <p>
         Already have an account?
-        <router-link to="/login" class="bottom-link"> LOG IN </router-link>
+        <a href="" @click.prevent="switchToLoginModal" class="bottom-link"
+          >LOG IN</a
+        >
       </p>
     </div>
   </div>
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex';
+const { mapMutations } = createNamespacedHelpers('home');
+
 export default {
   data() {
     return {
@@ -54,6 +56,16 @@ export default {
     },
   },
   methods: {
+    ...mapMutations({
+      toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
+      toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
+    }),
+
+    switchToLoginModal() {
+      this.toggleRegisterModal();
+      this.toggleLoginModal();
+    },
+
     register() {
       this.$store.dispatch('auth/register', {
         email: this.email,

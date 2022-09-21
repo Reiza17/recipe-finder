@@ -8,18 +8,18 @@
       <ul class="nav__list">
         <VUserRecipes v-if="loggedIn" />
         <li class="nav__item">
-          <router-link to="/upload" class="nav__btn">
+          <button @click="conditionallyOpenUploadRecipeModal" class="nav__btn">
             <svg class="nav__icon">
               <use href="@/assets/images/icons.svg#icon-edit"></use>
             </svg>
             <span>Add recipe</span>
-          </router-link>
+          </button>
         </li>
         <VBookmarks />
         <li class="nav__item" v-if="!loggedIn">
-          <router-link to="/login" class="nav__btn">
+          <button @click="toggleLoginModal" class="nav__btn">
             <span>Log In</span>
-          </router-link>
+          </button>
         </li>
         <li class="nav__item" v-if="!loggedIn">
           <!-- <router-link :to="{ name: 'Home' }">
@@ -28,9 +28,9 @@
               <span>Home</span>
             </v-btn>
           </router-link> -->
-          <router-link to="/register" class="nav__btn">
+          <button @click="toggleRegisterModal" class="nav__btn">
             <span>Sign Up</span>
-          </router-link>
+          </button>
         </li>
         <li class="nav__item" v-else>
           <!-- <button class="nav__btn" @click="toggleUploadRecipeModal">
@@ -64,11 +64,20 @@ export default {
   },
   computed: {
     loggedIn() {
-      return this.$store.getters['auth/user'];
+      return this.$store.getters['auth/loggedIn'];
     },
   },
   methods: {
-    ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
+    ...mapMutations({
+      toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+      toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
+      toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
+    }),
+
+    conditionallyOpenUploadRecipeModal() {
+      if (!this.loggedIn) this.toggleRegisterModal();
+      else this.toggleUploadRecipeModal();
+    },
   },
 };
 </script>

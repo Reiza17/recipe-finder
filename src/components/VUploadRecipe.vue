@@ -7,19 +7,15 @@
       "
       class="overlay"
     ></div> -->
-    <div
+    <!-- <div
       @click="
         $router.push({ name: 'recipe', params: { id: $route.params.id } })
       "
       class="overlay"
-    ></div>
+    ></div> -->
+    <div @click="toggleUploadRecipeModal" class="overlay"></div>
     <div class="add-recipe-window">
-      <button
-        @click="
-          $router.push({ name: 'recipe', params: { id: $route.params.id } })
-        "
-        class="btn--close-modal"
-      >
+      <button @click="toggleUploadRecipeModal" class="btn--close-modal">
         &times;
       </button>
       <form @submit.prevent="submitForm" class="upload">
@@ -285,16 +281,16 @@ export default {
     },
 
     confirmStayInDirtyForm() {
-      return this.v$.formData.$anyDirty && !this.confirmLeave();
+      return this.v$.formData.$anyDirty && !this.confirmLeaveDirtyForm();
     },
 
-    confirmLeave() {
+    confirmLeaveDirtyForm() {
       return window.confirm(
         '⚠ You have unsaved changes. Do you really want to leave?'
       );
     },
 
-    checkLeaveWindow(e) {
+    checkIfStayInDirtyForm(e) {
       if (this.confirmStayInDirtyForm()) {
         // NOTE default message is 'Changes you made may not be saved', and is unchangeable
         e.returnValue = '';
@@ -311,11 +307,11 @@ export default {
   },
 
   created() {
-    window.addEventListener('beforeunload', this.checkLeaveWindow);
+    window.addEventListener('beforeunload', this.checkIfStayInDirtyForm);
   },
 
   beforeDestroy() {
-    window.removeEventListener('beforeunload', this.checkLeaveWindow);
+    window.removeEventListener('beforeunload', this.checkIfStayInDirtyForm);
   },
 
   // NOTE below watcher could be useful if I want to alter a variable's value depending on changes in anyDirty
@@ -329,8 +325,8 @@ export default {
 
   // beforeRouteLeave(to, from, next) {
   //   if (!this.formSubmitted && this.v$.formData.$anyDirty) {
-  //     let confirmLeave = window.confirm('Close page without saving data?');
-  //     if (confirmLeave) {
+  //     let confirmLeaveDirtyForm = window.confirm('Close page without saving data?');
+  //     if (confirmLeaveDirtyForm) {
   //       this.canceledFormSubmit = true;
   //       next();
   //     } else {

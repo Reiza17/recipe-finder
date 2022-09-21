@@ -1,11 +1,14 @@
 <template>
   <div class="recipe">
-    <VLoadingSpinner v-if="loadingRecipe" />
-
-    <div
-      class="message"
-      v-else-if="!this.$route.params.id && !Object.keys(this.recipe).length"
-    >
+    <div v-if="!$route.params.id && $route.query.query" class="message">
+      <div>
+        <svg>
+          <use :href="`${icons}#icon-smile`"></use>
+        </svg>
+      </div>
+      <p>Click on a recipe!</p>
+    </div>
+    <div v-else-if="!$route.params.id && !$route.query.query" class="message">
       <div>
         <svg>
           <use :href="`${icons}#icon-smile`"></use>
@@ -13,6 +16,8 @@
       </div>
       <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
+
+    <VLoadingSpinner v-else-if="loadingRecipe" />
 
     <div v-else>
       <figure class="recipe__fig">
@@ -178,7 +183,7 @@ export default {
       // 'searchQuery',
     ]),
     loggedIn() {
-      return this.$store.getters['auth/user'];
+      return this.$store.getters['auth/loggedIn'];
     },
     // validRecipe() {
     //   if (Object.keys(this.recipe).length) return true;
@@ -192,12 +197,14 @@ export default {
       toggleRecipeSpinner: 'TOGGLE_RECIPE_SPINNER',
       toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
       toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
+      toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
     },
     bookmarkRecipe() {
-      if (!this.loggedIn) this.$router.push({ name: 'register' });
+      // if (!this.loggedIn) this.$router.push({ name: 'register' });
+      if (!this.loggedIn) this.toggleRegisterModal();
       else this.$store.dispatch('home/toggleBookmark', this.recipe);
     },
     deleteUserRecipe() {
