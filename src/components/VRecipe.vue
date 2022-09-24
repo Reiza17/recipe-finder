@@ -77,7 +77,7 @@
         </button>
         <button
           v-if="recipe.user_generated"
-          @click="editUserRecipe"
+          @click="toggleEditRecipeModal"
           class="btn--round"
         >
           <svg class="">
@@ -198,6 +198,7 @@ export default {
       toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
       toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
+      toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
@@ -210,9 +211,9 @@ export default {
     deleteUserRecipe() {
       this.$store.dispatch('home/deleteUserRecipe', this.recipe);
     },
-    editUserRecipe() {
-      this.$store.dispatch('home/editUserRecipe', this.recipe);
-    },
+    // editUserRecipe() {
+    //   this.$store.dispatch('home/toggleEditRecipeModal', this.recipe);
+    // },
 
     // TODO move this to either App.vue, VHome.vue, upon login, or upon user state change.
     // Concerns: if I put this in App, it would render the recipe even if I begin in another tab, thereby using resources and slowing things down. Or maybe that doesn't matter?

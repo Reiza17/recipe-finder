@@ -8,7 +8,7 @@
       <ul class="nav__list">
         <VUserRecipes v-if="loggedIn" />
         <li class="nav__item">
-          <button @click="conditionallyOpenUploadRecipeModal" class="nav__btn">
+          <button @click="openUploadRecipeModal" class="nav__btn">
             <svg class="nav__icon">
               <use href="@/assets/images/icons.svg#icon-edit"></use>
             </svg>
@@ -74,7 +74,7 @@ export default {
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),
 
-    conditionallyOpenUploadRecipeModal() {
+    openUploadRecipeModal() {
       if (!this.loggedIn) this.toggleRegisterModal();
       else this.toggleUploadRecipeModal();
     },

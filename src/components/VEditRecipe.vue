@@ -13,9 +13,9 @@
       "
       class="overlay"
     ></div> -->
-    <div @click="toggleUploadRecipeModal" class="overlay"></div>
+    <div @click="toggleEditRecipeModal" class="overlay"></div>
     <div class="add-recipe-window">
-      <button @click="toggleUploadRecipeModal" class="btn--close-modal">
+      <button @click="toggleEditRecipeModal" class="btn--close-modal">
         &times;
       </button>
       <form @submit.prevent="submitForm" class="upload">
@@ -25,7 +25,8 @@
           <label>Title</label>
           <div class="upload__field">
             <input
-              v-model="formData.title"
+              v-model.lazy="formData.title"
+              id="title"
               name="title"
               type="text"
               @blur="v$.formData.title.$touch"
@@ -46,7 +47,7 @@
           <label>URL</label>
           <div class="upload__field">
             <input
-              v-model="formData.source_url"
+              v-model.lazy="formData.source_url"
               name="source_url"
               type="text"
               @blur="v$.formData.source_url.$touch"
@@ -68,7 +69,7 @@
           <label>Image URL</label>
           <div class="upload__field">
             <input
-              v-model="formData.image_url"
+              v-model.lazy="formData.image_url"
               name="image"
               type="text"
               @blur="v$.formData.image_url.$touch"
@@ -86,7 +87,7 @@
           <label>Publisher</label>
           <div class="upload__field">
             <input
-              v-model="formData.publisher"
+              v-model.lazy="formData.publisher"
               name="publisher"
               type="text"
               @blur="v$.formData.publisher.$touch"
@@ -101,7 +102,7 @@
           <label>Prep time</label>
           <div class="upload__field">
             <input
-              v-model="formData.cooking_time"
+              v-model.lazy="formData.cooking_time"
               name="cooking_time"
               type="number"
               min="1"
@@ -118,7 +119,7 @@
           <label>Servings</label>
           <div class="upload__field">
             <input
-              v-model="formData.servings"
+              v-model.lazy="formData.servings"
               name="servings"
               type="number"
               min="1"
@@ -141,7 +142,7 @@
           >
             <label>Ingredient {{ index + 1 }}</label>
             <input
-              v-model="ingredient.quantity"
+              v-model.lazy="ingredient.quantity"
               type="number"
               step="any"
               min="0.01"
@@ -149,13 +150,13 @@
               name="ingredient_quantity"
             />
             <input
-              v-model="ingredient.unit"
+              v-model.lazy="ingredient.unit"
               type="text"
               placeholder="unit"
               name="ingredient_unit"
             />
             <input
-              v-model="ingredient.description"
+              v-model.lazy="ingredient.description"
               type="text"
               placeholder="description"
               name="ingredient_description"
@@ -181,13 +182,14 @@
 
 <script>
 import { createNamespacedHelpers } from 'vuex';
-const { mapMutations } = createNamespacedHelpers('home');
+const { mapMutations, mapGetters } = createNamespacedHelpers('home');
 import useVuelidate from '@vuelidate/core';
 import { required, url } from '@vuelidate/validators';
-import uniqid from 'uniqid';
+// import uniqid from 'uniqid';
+import _ from 'lodash';
 
 export default {
-  name: 'VUploadRecipe',
+  name: 'VEditRecipe',
 
   setup() {
     return { v$: useVuelidate() };
@@ -202,28 +204,18 @@ export default {
       // NOTE For alternative way to display errors
       // formErrorsExist: false,
       // formEmpty: true,
-      formData: {
-        id: uniqid(),
-        user_generated: true,
-        title: 'TEST RECIPE',
-        publisher: 'TEST17',
-        source_url:
-          'https://www.closetcooking.com/chicken-fajita-grilled-cheese/',
-        image_url:
-          'https://images.unsplash.com/photo-1583224994076-ae951d019af7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-        servings: 2,
-        cooking_time: 25,
-        ingredients: [
-          { quantity: 0.5, unit: 'kg', description: 'rice' },
-          { quantity: 1, unit: 'tsp', description: 'coriander seeds' },
-          { quantity: 50, unit: 'oz', description: 'butter' },
-          { quantity: 2, unit: 'free-range', description: 'eggs' },
-          { quantity: 2, unit: 'pieces', description: 'bread' },
-          { quantity: 1, unit: 'cup', description: 'grated romano cheese' },
-        ],
-      },
+      formData: null,
+      title: 'Test',
     };
   },
+  computed: {
+    ...mapGetters(['recipe']),
+  },
+  // watch: {
+  //   recipe: function(recipe) {
+  //     this.formData = { ...recipe}
+  //   }
+  // },
   validations() {
     return {
       formData: {
@@ -240,19 +232,13 @@ export default {
             description: { required },
           },
         ],
-        date_created: '',
+        date_modified: '',
       },
     };
   },
 
   methods: {
-    ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
-
-    // validateFormClientSide() {
-    //   {
-
-    //   }
-    // },
+    ...mapMutations({ toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL' }),
 
     async submitForm() {
       // is loading
@@ -267,9 +253,9 @@ export default {
         console.log('Passed client-side validation!');
         // is loading
         // console.log(this.formData.id);
-        this.formData.date_created = Date.now();
+        this.formData.date_modified = Date.now();
         this.formSubmitted = true;
-        await this.$store.dispatch('home/uploadUserRecipe', this.formData);
+        await this.$store.dispatch('home/editUserRecipe', this.formData);
         // is not loading
         // successful upload message
       } catch (err) {
@@ -306,6 +292,8 @@ export default {
 
   created() {
     window.addEventListener('beforeunload', this.checkIfStayInDirtyForm);
+    // NOTE this allows cancelling the edit to restore the original recipe
+    this.formData = _.cloneDeep(this.recipe);
   },
 
   beforeDestroy() {
@@ -319,33 +307,6 @@ export default {
   //       console.log('change detected! ');
   //     },
   //   },
-  // },
-
-  // beforeRouteLeave(to, from, next) {
-  //   if (!this.formSubmitted && this.v$.formData.$anyDirty) {
-  //     let confirmLeaveDirtyForm = window.confirm('Close page without saving data?');
-  //     if (confirmLeaveDirtyForm) {
-  //       this.canceledFormSubmit = true;
-  //       next();
-  //     } else {
-  //       next(from);
-  //     }
-  //   }
-  //   next();
-  // },
-
-  // submitForm() {
-  //   db.collection('data')
-  //     .add(JSON.stringify(this.formData))
-  //     .then(() => {
-  //       alert('Recipe successfully created!');
-  //       // this.user.name = '';
-  //       // this.user.email = '';
-  //       // this.user.phone = '';
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //     });
   // },
 };
 </script>

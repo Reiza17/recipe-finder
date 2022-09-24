@@ -112,7 +112,7 @@ router.beforeEach((to, from, next) => {
     next({
       ...to,
       // params: { id: from.params.id },
-      query: { query: from.query.query },
+      query: { query: from.query.query, page: from.query.page },
     });
   } else {
     next();

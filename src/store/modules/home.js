@@ -29,9 +29,10 @@ export default {
     loadingRecipe: false,
     loadingBookmarks: false,
     loadingUserRecipes: false,
-    uploadRecipeModal: false,
     loginModal: false,
     registerModal: false,
+    uploadRecipeModal: false,
+    editRecipeModal: false,
   },
 
   getters: {
@@ -51,9 +52,10 @@ export default {
     loadingSearchResults: state => state.loadingSearchResults,
     loadingRecipe: state => state.loadingRecipe,
     loadingBookmarks: state => state.loadingBookmarks,
-    uploadRecipeModal: state => state.uploadRecipeModal,
     loginModal: state => state.loginModal,
     registerModal: state => state.registerModal,
+    uploadRecipeModal: state => state.uploadRecipeModal,
+    editRecipeModal: state => state.editRecipeModal,
   },
 
   mutations: {
@@ -61,9 +63,10 @@ export default {
       state.previousURL = pageName;
     },
 
-    CREATE_SEARCH_RESULTS(state, results) {
+    CREATE_SEARCH_RESULTS(state, { results, page = 1 }) {
+      console.log(page);
       state.search.results = results;
-      state.search.page = 1;
+      state.search.page = page;
     },
 
     TOGGLE_SEARCH_SPINNER(state, boolean) {
@@ -72,6 +75,12 @@ export default {
 
     UPDATE_PAGINATION(state, amount) {
       state.search.page += amount;
+      router.push({
+        query: {
+          query: router.app._route.query.query,
+          page: state.search.page,
+        },
+      });
     },
 
     CREATE_RECIPE_OBJECT(state, data) {
@@ -139,9 +148,22 @@ export default {
       console.log(state.userRecipes);
     },
 
+    EDIT_USER_RECIPE(state, recipe) {
+      // REVIEW test out below option. Supposedly might fail to update Vue reactively
+      // state.userRecipes.map(userRecipe => {
+      //   if (userRecipe.id === recipe.id) {
+      //     userRecipe = recipe;
+      //   }
+      // });
+      const recipeIndex = state.userRecipes.findIndex(
+        userRecipe => userRecipe.id === recipe.id
+      );
+      state.userRecipes.splice(recipeIndex, 1, recipe);
+    },
+
     DELETE_USER_RECIPE(state, recipe) {
       const recipeIndex = state.userRecipes.findIndex(
-        userRecipes => userRecipes.id === recipe.id
+        userRecipe => userRecipe.id === recipe.id
       );
       state.userRecipes.splice(recipeIndex, 1);
 
@@ -149,10 +171,9 @@ export default {
       Object.keys(recipe).forEach(key => delete recipe[key]);
     },
 
-    EDIT_USER_RECIPE(state, recipe) {
+    TOGGLE_EDIT_USER_RECIPE_MODAL(state) {
       // console.log(recipe.id);
-      state.userRecipes.unshift(recipe);
-      console.log(state.userRecipes);
+      state.editRecipeModal = !state.editRecipeModal;
     },
 
     SET_USER_RECIPES(state, recipes) {
@@ -183,6 +204,7 @@ export default {
         if (router.app._route.query.query)
           dispatch('searchRecipes', {
             query: router.app._route.query.query,
+            page: router.app._route.query.page,
             reloadingPage: true,
           });
 
@@ -198,13 +220,16 @@ export default {
       }
     },
 
-    // FIXME doesn't go back to original search result page after reloading (e.g. to Page 2)
-    async searchRecipes({ commit, state }, { query, reloadingPage = false }) {
+    async searchRecipes(
+      { commit, state },
+      { query, page = 1, reloadingPage = false }
+    ) {
       try {
         commit('TOGGLE_SEARCH_SPINNER', true);
 
-        // NOTE This prevents the router from replacing the query with the same query during page reloads, something which results in a redundancy error.
-        if (!reloadingPage) router.push({ query: { query: query } });
+        // NOTE This prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
+        if (!reloadingPage)
+          router.push({ query: { query: query, page: page } });
 
         // console.log(state.userRecipes);
         // NOTE Remove 'split' below if I want to include partial-word results
@@ -235,7 +260,10 @@ export default {
           ...bookmarkedSearchResults,
           ...nonBookmarkedSearchResults,
         ];
-        commit('CREATE_SEARCH_RESULTS', filteredResults);
+        commit('CREATE_SEARCH_RESULTS', {
+          results: filteredResults,
+          page: +page,
+        });
         commit('TOGGLE_SEARCH_SPINNER', false);
       } catch (err) {
         console.error(`Error searching for recipes: ${err}`);
@@ -252,6 +280,8 @@ export default {
           recipe => recipe.id === id
         );
         if (userRecipe) commit('CREATE_RECIPE_OBJECT', userRecipe);
+        // REVIEW can I load faster? as in, if it's already been loaded before, I just render it quickly.
+        // BUG if I click between two recipes too fast, then it will render the wrong one
         else {
           const res = await axios.get(`${API_URL}${id}`);
           commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
@@ -303,9 +333,35 @@ export default {
         console.log('Successfully uploaded user recipe to server!');
         commit('ADD_USER_RECIPE', userRecipe);
         // REVIEW maybe add a conditional...if the query matches any word in the recipe title, then dispatch below
+        // FIXME nav redundancy errors resulting probably from the below actions
         dispatch('searchRecipes', { query: router.app._route.query.query });
+        dispatch('renderRecipe', { query: router.app._route.query.query });
       } catch (err) {
         console.error(`Failed to upload user recipe to server: ${err}`);
+      }
+    },
+
+    async editUserRecipe({ commit, state, rootState, dispatch }, recipe) {
+      try {
+        const userRecipes = [...state.userRecipes];
+
+        const recipeIndex = userRecipes.findIndex(
+          userRecipe => userRecipe.id === recipe.id
+        );
+        userRecipes.splice(recipeIndex, 1, recipe);
+
+        const docRef = doc(db, 'users', rootState.auth.user.uid);
+        await updateDoc(docRef, {
+          uploadedRecipes: userRecipes,
+        });
+
+        commit('EDIT_USER_RECIPE', recipe);
+
+        dispatch('renderRecipe', {
+          id: router.app._route.params.id,
+        });
+      } catch (err) {
+        console.error(`Failed to edit user recipe: ${err}`);
       }
     },
 
@@ -326,19 +382,6 @@ export default {
         // TODO OR/AND dispatch something to the Recipe view that says the recipe has been deleted?
       } catch (err) {
         console.error(`Failed to remove user recipe from server: ${err}`);
-      }
-    },
-
-    // FIXME placeholder
-    async editUserRecipe({ commit, rootState }, recipe) {
-      try {
-        const docRef = doc(db, 'users', rootState.auth.user.uid);
-        await updateDoc(docRef, {
-          recipes: arrayRemove(recipe),
-        });
-        commit('DELETE_USER_RECIPE', recipe);
-      } catch (err) {
-        console.error(`Failed to begin edit for user recipe: ${err}`);
       }
     },
 

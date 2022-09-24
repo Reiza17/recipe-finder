@@ -8,6 +8,7 @@
           <VSearchResults />
           <VRecipe />
           <VUploadRecipe v-if="uploadRecipeModal" />
+          <VEditRecipe v-if="editRecipeModal" />
           <VLogin v-if="loginModal" />
           <VRegister v-if="registerModal" />
         </div>
@@ -22,6 +23,7 @@ import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
 import VUploadRecipe from '@/components/VUploadRecipe.vue';
+import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
 import VRegister from '@/components/VRegister.vue';
 import { createNamespacedHelpers } from 'vuex';
@@ -34,12 +36,18 @@ export default {
     VSearchResults,
     VRecipe,
     VUploadRecipe,
+    VEditRecipe,
     VLogin,
     VRegister,
   },
 
   computed: {
-    ...mapGetters(['uploadRecipeModal', 'loginModal', 'registerModal']),
+    ...mapGetters([
+      'uploadRecipeModal',
+      'editRecipeModal',
+      'loginModal',
+      'registerModal',
+    ]),
   },
   // methods: {
   //   ...mapMutations({
