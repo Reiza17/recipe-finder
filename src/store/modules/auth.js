@@ -71,11 +71,6 @@ export default {
       }
 
       commit('SET_USER', auth.currentUser);
-      // NOTE including the params means it will redirect back to the same recipe
-      router.push({
-        name: 'recipe',
-        params: { id: router.app._route.params.id },
-      });
       // router.push('/');
 
       location.reload();
@@ -100,11 +95,6 @@ export default {
       // commit('home/TOGGLE_RECIPE_SPINNER', null, { root: true });
 
       commit('SET_USER', auth.currentUser);
-      // NOTE including the params means it will redirect back to the same recipe
-      router.push({
-        name: 'recipe',
-        params: { id: router.app._route.params.id },
-      });
       // router.push('/');
 
       location.reload();

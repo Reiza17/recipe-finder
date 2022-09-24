@@ -22,6 +22,7 @@ Vue.config.productionTip = false;
 
 let app;
 
+// NOTE necessary for clearing the state after user logs out
 auth.onAuthStateChanged(user => {
   console.log('User', user);
   if (!app) {
