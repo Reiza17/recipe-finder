@@ -1,6 +1,9 @@
 <template>
   <div class="recipe">
-    <div v-if="!$route.params.id && $route.query.query" class="message">
+    <div v-if="renderRecipeError" class="message">
+      <p>{{ renderRecipeError }}</p>
+    </div>
+    <div v-else-if="!$route.params.id && $route.query.query" class="message">
       <div>
         <svg>
           <use :href="`${icons}#icon-smile`"></use>
@@ -180,6 +183,7 @@ export default {
       'recipe',
       'recipeBookmarked',
       'loadingRecipe',
+      'renderRecipeError',
       // 'searchQuery',
     ]),
     loggedIn() {

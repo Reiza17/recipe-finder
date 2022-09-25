@@ -33,6 +33,7 @@ export default {
     registerModal: false,
     uploadRecipeModal: false,
     editRecipeModal: false,
+    renderRecipeError: null,
   },
 
   getters: {
@@ -56,6 +57,7 @@ export default {
     registerModal: state => state.registerModal,
     uploadRecipeModal: state => state.uploadRecipeModal,
     editRecipeModal: state => state.editRecipeModal,
+    renderRecipeError: state => state.renderRecipeError,
   },
 
   mutations: {
@@ -88,6 +90,10 @@ export default {
       if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
         state.recipe.bookmarked = true;
       else state.recipe.bookmarked = false;
+    },
+
+    SHOW_RENDER_RECIPE_ERROR_MESSAGE(state, message) {
+      state.renderRecipeError = message;
     },
 
     TOGGLE_RECIPE_SPINNER(state, boolean) {
@@ -274,13 +280,14 @@ export default {
     async renderRecipe({ commit, state }, { id }) {
       try {
         // console.log(id);
+        commit('SHOW_RENDER_RECIPE_ERROR_MESSAGE', null);
         commit('TOGGLE_RECIPE_SPINNER', true);
 
         const [userRecipe] = state.userRecipes.filter(
           recipe => recipe.id === id
         );
         if (userRecipe) commit('CREATE_RECIPE_OBJECT', userRecipe);
-        // REVIEW can I load faster? as in, if it's already been loaded before, I just render it quickly.
+        // REVIEW can I load faster? as in, if it's already been loaded before, I just render it quickly. One suggested way is to store already loaded recipes into an array. And if the id of it matches any in that array, skip the API call. That's a somewhat hacky method, but others do it and it works.
         // BUG if I click between two recipes too fast, then it will render the wrong one
         else {
           const res = await axios.get(`${API_URL}${id}`);
@@ -288,8 +295,30 @@ export default {
         }
         commit('TOGGLE_RECIPE_SPINNER', false);
       } catch (err) {
+        console.log(err);
         console.error(`Error loading recipe: ${err}`);
-        // FIXME need to do something about the errors for failing to fetch user data when not logged in
+        if (err.response.status === 400)
+          commit(
+            'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
+            "This recipe isn't available"
+          );
+        else if (err.response.status === 429)
+          commit(
+            'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
+            'You have sent too many requests for recipes. Please try again in an hour.'
+          );
+        // REVIEW can add more messages for other types of errors
+        else if (!err.status) {
+          commit(
+            'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
+            'There was a network connection problem. Please check your connection and try reloading the page.'
+          );
+        } else {
+          commit(
+            'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
+            'Oops! Something went wrong. Please try reloading the page.'
+          );
+        }
         commit('TOGGLE_RECIPE_SPINNER', false);
       }
     },
@@ -332,9 +361,12 @@ export default {
         // REVIEW add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
         console.log('Successfully uploaded user recipe to server!');
         commit('ADD_USER_RECIPE', userRecipe);
-        // REVIEW maybe add a conditional...if the query matches any word in the recipe title, then dispatch below
-        // FIXME nav redundancy errors resulting probably from the below actions
-        dispatch('searchRecipes', { query: router.app._route.query.query });
+
+        dispatch('searchRecipes', {
+          query: router.app._route.query.query,
+          page: router.app._route.query.page,
+          reloadingPage: true,
+        });
         dispatch('renderRecipe', { query: router.app._route.query.query });
       } catch (err) {
         console.error(`Failed to upload user recipe to server: ${err}`);
