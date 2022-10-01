@@ -11,6 +11,8 @@ import {
   arrayRemove,
 } from 'firebase/firestore';
 import { db } from '@/firebaseInit';
+// import { TIMEOUT_SEC } from '@/common/config.js';
+// import { timeout } from '@/common/helpers.js';
 
 export default {
   namespaced: true,
@@ -66,7 +68,6 @@ export default {
     },
 
     CREATE_SEARCH_RESULTS(state, { results, page = 1 }) {
-      console.log(page);
       state.search.results = results;
       state.search.page = page;
     },
@@ -235,7 +236,7 @@ export default {
 
         // NOTE This prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
         if (!reloadingPage)
-          router.push({ query: { query: query, page: page } });
+          router.push({ query: { query: query, page: page } }).catch(() => {});
 
         // console.log(state.userRecipes);
         // NOTE Remove 'split' below if I want to include partial-word results
@@ -297,6 +298,7 @@ export default {
       } catch (err) {
         console.log(err);
         console.error(`Error loading recipe: ${err}`);
+        // TODO improve and streamline the error handling process
         if (err.response.status === 400)
           commit(
             'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
@@ -350,26 +352,51 @@ export default {
       }
     },
 
-    async uploadUserRecipe({ commit, rootState, dispatch }, recipe) {
+    async uploadUserRecipe({ commit, rootState, dispatch }, { recipe, id }) {
       try {
         const userRecipe = { ...recipe, bookmarked: false };
         const docRef = doc(db, 'users', rootState.auth.user.uid);
+
         await updateDoc(docRef, {
           uploadedRecipes: arrayUnion(userRecipe),
         });
-        // const docRef = await addDoc(collection(db, 'recipes'), recipe);
-        // REVIEW add successful upload condition, such as: if (docRef.id).. else throw error. But perhaps this is unnecessary because maybe an unsuccessful upload would automatically trigger an error, thereby jumping straight to catch.
+
+        // REVIEW this timeout is not useful, because there's no way to cancel pending writes to firestore, meaning even after timeout throws an error, the user's network will keep trying to upload the data to firestore (and if successful, the user recipes will not be updated on the client-side). Stack overflow solution: Use (firestore) security rules to ensure that only valid transitions are allowed. A typical approach here could be to add a (client-side) timestamp to each write operation, and reject (firestore) writes where the timestamp is too old.
+        // const uploadRec = async function () {
+        //   await updateDoc(docRef, {
+        //     uploadedRecipes: arrayUnion(userRecipe),
+        //   });
+        //   return true;
+        // };
+
+        // const res = await Promise.race([uploadRec(), timeout(TIMEOUT_SEC)]);
+        // console.log(res);
+        // if (!res) throw new Error('10 seconds have passed...');
+
+        // TODO add 'Your recipe has been uploaded!' toast. Toast should appear on home, because the upload window should disappear as soon as the upload is successful (improving load speed/UX)
         console.log('Successfully uploaded user recipe to server!');
+
         commit('ADD_USER_RECIPE', userRecipe);
 
-        dispatch('searchRecipes', {
-          query: router.app._route.query.query,
-          page: router.app._route.query.page,
-          reloadingPage: true,
-        });
-        dispatch('renderRecipe', { query: router.app._route.query.query });
+        router
+          .push({
+            name: 'recipe',
+            params: { id: id },
+          })
+          .catch(() => {});
+
+        if (router.app._route.query.query)
+          dispatch('searchRecipes', {
+            query: router.app._route.query.query,
+            page: router.app._route.query.page,
+            reloadingPage: true,
+          });
       } catch (err) {
-        console.error(`Failed to upload user recipe to server: ${err}`);
+        // console.error(`Failed to upload user recipe to server: ${err}`);
+        // TODO add 'There was a problem uploading the recipe. Please try again.' (prob makes more sense as text in the modal instead of a toast)
+        // TODO prob need to add something that saves the draft (client-side, maybe as a cookie?), so that they don't lose everything, which would suck
+        // throw err;
+        console.log(err);
       }
     },
 
@@ -405,10 +432,13 @@ export default {
         });
         commit('DELETE_USER_RECIPE', recipe);
 
-        router.push({
-          name: 'recipe',
-          params: { id: null },
-        });
+        // NOTE push to 'home' instead of 'recipe', as the latter expects a defined param
+        router
+          .push({
+            name: 'home',
+            params: { id: null },
+          })
+          .catch(() => {});
 
         dispatch('searchRecipes', { query: router.app._route.query.query });
         // TODO OR/AND dispatch something to the Recipe view that says the recipe has been deleted?

@@ -17,6 +17,8 @@ import router from './router';
 // import firebase from 'firebase/compat/app';
 import { auth } from './firebaseInit';
 import '@/assets/sass/style.scss';
+import Vuelidate from 'vuelidate';
+Vue.use(Vuelidate);
 
 Vue.config.productionTip = false;
 
