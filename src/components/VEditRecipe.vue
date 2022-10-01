@@ -192,15 +192,18 @@
               >
             </p>
 
-            <!-- NOTE need prevent default on click events for removing and adding ingredients, as otherwise they would trigger the form submission -->
+            <!-- NOTE need prevent default on click events for removing and adding ingredients, as otherwise they would trigger the form submission. Also, need type="button" attribute, or pressing Enter will trigger this method. -->
             <button
+              type="button"
               v-if="formData.ingredients.length > 1"
               @click.prevent="removeIngredient(ingredient.$model)"
             >
               Remove ingredient
             </button>
           </div>
-          <button @click.prevent="addIngredient">Add ingredient</button>
+          <button type="button" @click.prevent="addIngredient">
+            Add ingredient
+          </button>
         </div>
 
         <button type="submit" :disabled="formSubmitted" class="btn upload__btn">
