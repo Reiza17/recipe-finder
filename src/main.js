@@ -16,7 +16,11 @@ import store from './store';
 import router from './router';
 // import firebase from 'firebase/compat/app';
 import { auth } from './firebaseInit';
-import '@/assets/sass/style.scss';
+// REVIEW can comment these out
+import '@/assets/sass/custom.scss';
+// import 'bootstrap/dist/css/bootstrap.css';
+// import 'bootstrap/dist/js/bootstrap.js';
+
 import Vuelidate from 'vuelidate';
 Vue.use(Vuelidate);
 

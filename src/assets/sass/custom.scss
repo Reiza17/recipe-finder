@@ -1,0 +1,51 @@
+//custom.scss
+
+//We have to import the functions first to use map.merge()
+
+@import 'bootstrap/scss/functions';
+
+// $primary: teal;
+$primary: #eb1700;
+$secondary: #eb1700;
+$btn-border-radius: 10rem;
+$font-size-root: 52.5%;
+$font-family-sans-serif: DD-TTNorms, -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+  'Segoe UI Emoji', 'Segoe UI Symbol';
+$font-weight-base: 400;
+// $display-font-family: 'Nunito Sans', sans-serif;
+// $display-font-style:  null !default;
+
+// $font-size-root: 1rem;
+// $font-size-base:              1rem !default; // Assumes the browser default, typically `16px`
+// $font-size-sm:                $font-size-base * .875 !default;
+// $font-size-lg:                $font-size-base * 1.25 !default;
+
+// We have to import the variables beforehand to
+//use the variable $grid-breakpoints.
+// Otherwise, compiler will show error - '$grid-breakpoints
+//undefined.'
+
+@import 'bootstrap/scss/variables';
+
+// $btn-border-radius: 10rem;
+
+// $new-breakpoints: (
+//   xl: 1280px,
+//   xxl: 1600px,
+// );
+
+// $grid-breakpoints: map-merge($grid-breakpoints, $new-breakpoints);
+
+// $new-container-max-widths: (
+//   xl: 1220px,
+//   xxl: 1520px,
+// );
+
+// $container-max-widths: map-merge(
+//   $container-max-widths,
+//   $new-container-max-widths
+// );
+
+// @import '../../node_modules/bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/bootstrap';

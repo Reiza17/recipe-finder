@@ -61,9 +61,9 @@ export default {
     height: 100%;
     font-family: inherit;
     color: inherit;
-    font-size: 1.4rem;
+    font-size: 15px;
     font-weight: 700;
-    text-transform: uppercase;
+    // text-transform: uppercase;
     background: none;
     border: none;
     cursor: pointer;

@@ -119,15 +119,16 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/sass/style.scss';
 
-.search-results-container {
-  padding: 3rem 0;
-  display: flex;
+.search-results {
+  // padding: 3rem 0;
+  // display: flex;
   flex-direction: column;
+  min-width: 300px;
 }
 
 .pagination {
   margin-top: auto;
-  padding: 0 3.5rem;
+  // padding: 0 3.5rem;
 
   &::after {
     content: '';

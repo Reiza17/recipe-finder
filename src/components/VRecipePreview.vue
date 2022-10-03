@@ -126,12 +126,14 @@ export default {
     }
 
     &:hover {
-      background-color: $color-grey-light-1;
+      background-color: rgb(247, 247, 247);
       transform: translateY(-2px);
+      border-radius: 8px;
     }
 
     &--active {
-      background-color: $color-grey-light-1;
+      background-color: rgb(247, 247, 247);
+      border-radius: 8px;
     }
   }
 
@@ -180,7 +182,7 @@ export default {
   &__title {
     grid-column: 1/-1;
     font-size: 1.45rem;
-    color: $color-primary;
+    color: black;
     text-transform: uppercase;
     font-weight: 600;
 

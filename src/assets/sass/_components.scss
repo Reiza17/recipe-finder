@@ -1,5 +1,5 @@
 %btn {
-  background-image: $gradient;
+  // background-image: $gradient;
   border-radius: 10rem;
   border: none;
   text-transform: uppercase;
@@ -22,19 +22,19 @@
   }
 }
 
-.btn {
-  @extend %btn;
+// .btn {
+//   @extend %btn;
 
-  padding: 1.5rem 4rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+//   padding: 1.5rem 4rem;
+//   font-size: 1.5rem;
+//   font-weight: 600;
 
-  svg {
-    height: 2.25rem;
-    width: 2.25rem;
-    fill: currentColor;
-  }
-}
+//   svg {
+//     height: 2.25rem;
+//     width: 2.25rem;
+//     fill: currentColor;
+//   }
+// }
 
 .btn--small {
   &,
