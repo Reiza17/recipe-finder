@@ -26,83 +26,91 @@
       <figure class="recipe__fig">
         <img :src="recipe.image_url" :alt="recipe.title" class="recipe__img" />
         <h1 class="recipe__title">
-          <span>{{ recipe.title }}</span>
+          <span>{{ recipe.title.toLowerCase() }}</span>
         </h1>
       </figure>
 
-      <div class="recipe__details">
-        <div class="recipe__info">
-          <svg class="recipe__info-icon">
-            <use :href="`${icons}#icon-clock`"></use>
-          </svg>
-          <span class="recipe__info-data recipe__info-data--minutes">{{
-            recipe.cooking_time
-          }}</span>
-          <span class="recipe__info-text">minutes</span>
-        </div>
-        <div class="recipe__info">
-          <svg class="recipe__info-icon">
-            <use :href="`${icons}#icon-users`"></use>
-          </svg>
-          <span class="recipe__info-data recipe__info-data--people">{{
-            recipe.servings
-          }}</span>
-          <span class="recipe__info-text">servings</span>
+      <div
+        class="recipe__details justify-content-between flex-wrap-reverse gap-5"
+      >
+        <div class="d-flex flex-row">
+          <div class="recipe__info">
+            <svg class="recipe__info-icon">
+              <use :href="`${icons}#icon-clock`"></use>
+            </svg>
+            <span class="recipe__info-data recipe__info-data--minutes">{{
+              recipe.cooking_time
+            }}</span>
+            <span class="recipe__info-text">minutes</span>
+          </div>
+          <div class="recipe__info">
+            <svg class="recipe__info-icon">
+              <use :href="`${icons}#icon-users`"></use>
+            </svg>
+            <span class="recipe__info-data recipe__info-data--people">{{
+              recipe.servings
+            }}</span>
+            <span class="recipe__info-text">servings</span>
 
-          <div class="recipe__info-buttons">
-            <button
-              class="btn--tiny btn--update-servings"
-              @click="updateServings(-1)"
-            >
-              <svg>
-                <use :href="`${icons}#icon-minus-circle`"></use>
-              </svg>
-            </button>
-            <button
-              class="btn--tiny btn--update-servings"
-              @click="updateServings(1)"
-            >
-              <svg>
-                <use :href="`${icons}#icon-plus-circle`"></use>
-              </svg>
-            </button>
+            <div class="recipe__info-buttons">
+              <button
+                class="btn--tiny btn--update-servings"
+                @click="updateServings(-1)"
+              >
+                <svg>
+                  <use :href="`${icons}#icon-minus-circle`"></use>
+                </svg>
+              </button>
+              <button
+                class="btn--tiny btn--update-servings"
+                @click="updateServings(1)"
+              >
+                <svg>
+                  <use :href="`${icons}#icon-plus-circle`"></use>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <button
-          v-if="recipe.user_generated"
-          @click="deleteUserRecipe"
-          class="btn--round"
-        >
-          <svg class="">
-            <use :href="`${icons}#icon-delete`"></use>
-          </svg>
-        </button>
-        <button
-          v-if="recipe.user_generated"
-          @click="toggleEditRecipeModal"
-          class="btn--round"
-        >
-          <svg class="">
-            <use :href="`${icons}#icon-edit`"></use>
-          </svg>
-        </button>
-        <div v-if="recipe.user_generated" class="recipe__user-generated">
-          <svg>
-            <use :href="`${icons}#icon-user`"></use>
-          </svg>
+        <div class="d-flex flex-row">
+          <button
+            v-if="recipe.user_generated"
+            @click="deleteUserRecipe"
+            class="btn--round"
+          >
+            <svg class="">
+              <use :href="`${icons}#icon-delete`"></use>
+            </svg>
+          </button>
+          <button
+            v-if="recipe.user_generated"
+            @click="toggleEditRecipeModal"
+            class="btn--round"
+          >
+            <svg class="">
+              <use :href="`${icons}#icon-edit`"></use>
+            </svg>
+          </button>
+          <div v-if="recipe.user_generated" class="recipe__user-generated">
+            <svg>
+              <use :href="`${icons}#icon-user`"></use>
+            </svg>
+          </div>
+          <button
+            v-if="!recipe.user_generated"
+            @click="bookmarkRecipe"
+            class="btn--round btn--bookmark"
+          >
+            <svg class="">
+              <use
+                :href="`${icons}#icon-bookmark${
+                  recipeBookmarked ? '-fill' : ''
+                }`"
+              ></use>
+            </svg>
+          </button>
         </div>
-        <button
-          v-if="!recipe.user_generated"
-          @click="bookmarkRecipe"
-          class="btn--round btn--bookmark"
-        >
-          <svg class="">
-            <use
-              :href="`${icons}#icon-bookmark${recipeBookmarked ? '-fill' : ''}`"
-            ></use>
-          </svg>
-        </button>
       </div>
 
       <div class="recipe__ingredients">
@@ -169,8 +177,8 @@ export default {
   },
   watch: {
     '$route.params'(newValue) {
-      console.log(newValue);
-      console.log(this.$route);
+      // console.log(newValue);
+      // console.log(this.$route);
 
       if (newValue.id)
         this.$store.dispatch('home/renderRecipe', {
@@ -496,11 +504,11 @@ export default {
       position: absolute;
       top: 0;
       left: 0;
-      background-image: linear-gradient(
-        to right bottom,
-        $color-grad-1,
-        $color-grad-2
-      );
+      // background-image: linear-gradient(
+      //   to right bottom,
+      //   $color-grad-1,
+      //   $color-grad-2
+      // );
       opacity: 0.6;
     }
   }
@@ -508,33 +516,49 @@ export default {
   &__img {
     width: 100%;
     display: block;
-    height: 100%;
+    height: 90%;
     object-fit: cover;
+    border-radius: 15px;
   }
 
   &__title {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translate(-50%, 20%) skewY(-6deg);
-    color: #fff;
-    font-weight: 700;
-    font-size: 3.25rem;
-    text-transform: uppercase;
-    width: 50%;
-    line-height: 1.95;
-    text-align: center;
+    // position: absolute;
+    // bottom: 0;
+    // left: 50%;
+    // transform: translate(-50%, 20%) skewY(-6deg);
+    // color: #fff;
+    // font-weight: 700;
+    // font-size: 3.25rem;
+    // text-transform: uppercase;
+    // width: 50%;
+    // line-height: 1.95;
+    // text-align: center;
 
-    span {
-      -webkit-box-decoration-break: clone;
-      box-decoration-break: clone;
-      padding: 1.3rem 2rem;
-      background-image: linear-gradient(
-        to right bottom,
-        $color-grad-1,
-        $color-grad-2
-      );
-    }
+    font-size: 40px;
+    font-family: DD-TTNorms, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+      'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-weight: 700;
+    line-height: 48px;
+    letter-spacing: -0.04ch;
+    text-transform: capitalize;
+    color: rgb(25, 25, 25);
+    margin: 25px 0 0 0;
+    // text-align: center;
+    padding: 0px;
+    display: block;
+    font-variant-ligatures: no-common-ligatures;
+
+    // span {
+    //   -webkit-box-decoration-break: clone;
+    //   box-decoration-break: clone;
+    //   padding: 1.3rem 2rem;
+    //   background-image: linear-gradient(
+    //     to right bottom,
+    //     $color-grad-1,
+    //     $color-grad-2
+    //   );
+    // }
 
     @media only screen and (max-width: $bp-medium) {
       width: 70%;
@@ -545,8 +569,8 @@ export default {
   // DETAILS
   &__details {
     display: flex;
-    align-items: center;
-    padding: 7.5rem 8rem 3.5rem 8rem;
+    // align-items: center;
+    padding: 7.5rem 0 3.5rem 0;
   }
 
   &__info {
@@ -604,10 +628,11 @@ export default {
     padding: 5rem 8rem;
     font-size: 1.6rem;
     line-height: 1.4;
-    background-color: $color-grey-light-2;
+    background-color: rgb(247, 247, 247);
     display: flex;
     flex-direction: column;
     align-items: center;
+    border-radius: 15px;
   }
 
   &__ingredient-list {

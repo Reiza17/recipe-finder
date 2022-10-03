@@ -1,10 +1,21 @@
 <template>
-  <header class="header">
-    <img src="@/assets/images/logo.png" alt="Logo" class="header__logo" />
+  <header class="navbar flex-wrap-reverse gap-4">
+    <div class="d-flex flex-row align-items-center flex-grow-1 ms-5">
+      <a class="navbar-brand d-flex flex-row align-items-center me-5" href="/">
+        <img
+          src="@/assets/images/forklift.svg"
+          alt="Logo"
+          width="40"
+          height="40"
+          class="d-inline-block me-3"
+        />
+        <p class="logo-text">Forklift</p>
+      </a>
+      <!-- <img src="" alt="Logo" class="logo me-5" /> -->
+      <VSearch />
+    </div>
 
-    <VSearch />
-
-    <nav class="nav">
+    <nav class="nav ms-4">
       <ul class="nav__list">
         <VUserRecipes v-if="loggedIn" />
         <li class="nav__item">
@@ -85,19 +96,38 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/sass/style.scss';
 
-.header {
-  grid-area: head;
-  background-color: $color-grey-light-1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  &__logo {
-    margin-left: 4rem;
-    height: 4.6rem;
-    display: block;
+@media all and (max-width: 576px) {
+  .logo-text {
+    display: none;
   }
 }
+
+// .logo {
+//   margin-left: 3rem;
+//   height: 4.6rem;
+//   display: block;
+// }
+.logo-text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: large;
+  color: teal;
+  font-weight: bold;
+  letter-spacing: 0.2rem;
+  text-transform: uppercase;
+}
+// .d-flex {
+// grid-area: head;
+// background-color: $color-grey-light-1;
+// display: flex;
+// align-items: center;
+// justify-content: space-between;
+
+// &__logo {
+//   margin-left: 4rem;
+//   height: 4.6rem;
+//   display: block;
+// }
+// }
 
 .nav {
   align-self: stretch;
@@ -117,9 +147,9 @@ export default {
     height: 100%;
     font-family: inherit;
     color: inherit;
-    font-size: 1.4rem;
+    font-size: 15px;
     font-weight: 700;
-    text-transform: uppercase;
+    // text-transform: uppercase;
     background: none;
     border: none;
     cursor: pointer;
