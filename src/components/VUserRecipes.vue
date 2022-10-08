@@ -5,7 +5,7 @@
       <svg class="nav__icon">
         <use :href="`${icons}#icon-user`"></use>
       </svg>
-      <span>My recipes</span>
+      <span class="nav__label">My recipes</span>
     </button>
     <div class="bookmarks">
       <ul class="bookmarks__list">
@@ -76,7 +76,8 @@ export default {
     svg {
       height: 2.4rem;
       width: 2.4rem;
-      fill: $color-primary;
+      // fill: $color-primary;
+      fill: black;
       margin-right: 0.7rem;
       transform: translateY(-1px);
     }
@@ -89,6 +90,12 @@ export default {
       background-color: $color-grey-light-2;
     }
   }
+
+  &__label {
+    @media all and (max-width: 984px) {
+      display: none;
+    }
+  }
 }
 
 .bookmarks {
@@ -99,7 +106,7 @@ export default {
   z-index: 10;
   width: 40rem;
   background-color: #fff;
-  box-shadow: 0 0.8rem 5rem 2rem rgba($color-grey-dark-1, 0.1);
+  // box-shadow: 0 0.8rem 5rem 2rem rgba($color-grey-dark-1, 0.1);
 
   visibility: hidden;
   opacity: 0;

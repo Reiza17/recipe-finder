@@ -1,5 +1,5 @@
 <template>
-  <div class="search-results">
+  <div class="search-container">
     <div v-if="!$route.query.query"></div>
     <VLoadingSpinner v-else-if="loadingSearchResults" />
     <VRecipePreview
@@ -119,11 +119,16 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/sass/style.scss';
 
-.search-results {
+.search-container {
   // padding: 3rem 0;
   // display: flex;
   flex-direction: column;
-  min-width: 300px;
+  // min-width: 140px;
+
+  @media only screen and (max-width: 648px) {
+    border-top: 1px solid rgb(231, 231, 231);
+    padding-top: 5px;
+  }
 }
 
 .pagination {

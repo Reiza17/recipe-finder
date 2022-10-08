@@ -2,9 +2,9 @@
   <li class="nav__item">
     <button class="nav__btn nav__btn--bookmarks">
       <svg class="nav__icon">
-        <use :href="`${icons}#icon-bookmark`"></use>
+        <use :href="`${icons}#icon-favorite-fill`"></use>
       </svg>
-      <span>Bookmarks</span>
+      <span class="nav_label">Bookmarks</span>
     </button>
     <div class="bookmarks">
       <ul class="bookmarks__list">
@@ -51,6 +51,12 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/sass/style.scss';
 
+@media all and (max-width: 984px) {
+  .nav_label {
+    display: none;
+  }
+}
+
 .nav {
   &__item {
     position: relative;
@@ -75,7 +81,7 @@ export default {
     svg {
       height: 2.4rem;
       width: 2.4rem;
-      fill: $color-primary;
+      fill: black;
       margin-right: 0.7rem;
       transform: translateY(-1px);
     }
@@ -98,7 +104,7 @@ export default {
   z-index: 10;
   width: 40rem;
   background-color: #fff;
-  box-shadow: 0 0.8rem 5rem 2rem rgba($color-grey-dark-1, 0.1);
+  // box-shadow: 0 0.8rem 5rem 2rem rgba($color-grey-dark-1, 0.1);
 
   visibility: hidden;
   opacity: 0;

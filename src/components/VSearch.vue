@@ -73,7 +73,7 @@ export default {
 
 .search .fa-magnifying-glass {
   position: absolute;
-  top: 23px;
+  top: 22px;
   left: 16px;
 }
 
