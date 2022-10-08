@@ -14,19 +14,35 @@
           <img :src="result.image_url" :alt="result.title" />
         </figure>
         <div class="preview__data">
-          <h4 class="preview__title">{{ result.title }}</h4>
+          <h4
+            class="preview__title"
+            :class="{
+              'preview__title--active': result.id === $route.params.id,
+            }"
+          >
+            {{ result.title }}
+          </h4>
           <p class="preview__publisher">{{ result.publisher }}</p>
           <div v-if="result.user_generated">
             <div v-if="resultsActive" class="preview__user-generated">
-              <svg>
+              <!-- <svg>
                 <use :href="`${icons}#icon-user`"></use>
-              </svg>
+              </svg> -->
+              <h4>
+                <span class="badge bg-primary text-uppercase">Personal</span>
+              </h4>
             </div>
           </div>
           <div v-if="isBookmarked(result.id)">
-            <div v-if="resultsActive" class="preview__bookmarked btn--round">
+            <div
+              v-if="resultsActive"
+              class="preview__bookmarked btn--round"
+              :class="{
+                'preview__bookmarked--active': result.id === $route.params.id,
+              }"
+            >
               <svg>
-                <use :href="`${icons}#icon-bookmark-fill`"></use>
+                <use :href="`${icons}#icon-favorite-fill`"></use>
               </svg>
             </div>
           </div>
@@ -50,7 +66,7 @@
           <div v-if="isBookmarked(result.id)">
             <div v-if="resultsActive" class="preview__bookmarked btn--round">
               <svg>
-                <use :href="`${icons}#icon-bookmark-fill`"></use>
+                <use :href="`${icons}#icon-favorite-fill`"></use>
               </svg>
             </div>
           </div>
@@ -126,13 +142,13 @@ export default {
     }
 
     &:hover {
-      background-color: rgb(247, 247, 247);
+      background-color: #efeff2;
       transform: translateY(-2px);
       border-radius: 8px;
     }
 
     &--active {
-      background-color: rgb(247, 247, 247);
+      background-color: #efeff2;
       border-radius: 8px;
     }
   }
@@ -188,9 +204,13 @@ export default {
 
     // NOTE This is how text is truncated!
     text-overflow: ellipsis;
-    max-width: 25rem;
+    max-width: 40rem;
     white-space: nowrap;
     overflow: hidden;
+
+    &--active {
+      font-weight: 800;
+    }
   }
 
   &__publisher {
@@ -201,7 +221,7 @@ export default {
   }
 
   &__user-generated {
-    background-color: darken($color-grey-light-2, 2%);
+    // background-color: darken($color-grey-light-2, 2%);
 
     display: flex;
     align-items: center;
@@ -210,18 +230,25 @@ export default {
     width: 2rem;
     border-radius: 10rem;
 
+    .badge {
+      letter-spacing: 0.5px;
+    }
     // margin-left: auto;
     // margin-right: 1.75rem;
 
-    svg {
-      height: 1.2rem;
-      width: 1.2rem;
-      fill: $color-primary;
-    }
+    // &--active {
+    //   background-color: white;
+    // }
+
+    // svg {
+    //   height: 1.2rem;
+    //   width: 1.2rem;
+    //   fill: $color-primary;
+    // }
   }
 
   &__bookmarked {
-    background-color: darken($color-grey-light-2, 2%);
+    // background-color: darken($color-grey-light-2, 2%);
 
     display: flex;
     align-items: center;
@@ -230,10 +257,13 @@ export default {
     width: 2rem;
     border-radius: 10rem;
 
+    &--active {
+      background-color: white;
+    }
+
     svg {
-      height: 1.2rem;
-      width: 1.2rem;
-      fill: #fff;
+      height: 1.5rem;
+      width: 1.5rem;
     }
   }
 

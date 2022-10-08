@@ -2,13 +2,13 @@
   <!-- <div id="app"> -->
   <div id="home">
     <html>
-      <body>
+      <body class="min-vh-100">
         <!-- <VHeader /> -->
-        <VHeader class="navbar sticky-top p-4"></VHeader>
-        <div class="container min-vh-100">
-          <div class="row">
-            <VSearchResults class="col-sm-3" />
-            <VRecipe class="col-sm-9" />
+        <VHeader />
+        <div class="container-fluid">
+          <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
+            <VSearchResults class="col-sm-3 search-results" />
+            <VRecipe class="col-sm-9 recipe" />
             <VUploadRecipe v-if="uploadRecipeModal" />
             <VEditRecipe v-if="editRecipeModal" />
             <VLogin v-if="loginModal" />
@@ -79,17 +79,36 @@ export default {
 
 html {
   box-sizing: border-box;
-  font-size: 50.5%;
+  // font-size: 50.5%;
 
   // 980px
-  @media only screen and (max-width: 61.25em) {
-    font-size: 50%;
+  // @media only screen and (max-width: 61.25em) {
+  //   font-size: 50%;
+  // }
+}
+
+// .container-fluid {
+//   margin: auto;
+// }
+
+// TODO add new classes and change names to them here
+.search-results {
+  min-width: 260px;
+  // max-width: 365px;
+  margin-bottom: 2rem;
+
+  @media only screen and (max-width: 648px) {
+    // min-width: 260px;
+    width: 100%;
   }
 }
 
-.navbar {
-  background-color: white;
+.recipe {
+  flex: 1 1 100px;
+  min-width: 372px;
+  max-width: 928px;
 }
+
 // body {
 //   font-family: 'Nunito Sans', sans-serif;
 //   font-weight: 400;
@@ -101,27 +120,27 @@ html {
 //   // min-height: calc(100vh - 2 * 4vw);
 // }
 
-.container-fluid {
-  // max-width: 120rem;
-  min-height: 117rem;
-  // margin: 4vw auto;
-  //   background-color: #fff;
-  //   border-radius: 9px;
-  // overflow: hidden;
-  // box-shadow: 0 2rem 6rem 0.5rem rgba($color-grey-dark-1, 0.2);
+// .container {
+//   // max-width: 120rem;
+//   min-height: 117rem;
+//   // margin: 4vw auto;
+//   //   background-color: #fff;
+//   //   border-radius: 9px;
+//   // overflow: hidden;
+//   // box-shadow: 0 2rem 6rem 0.5rem rgba($color-grey-dark-1, 0.2);
 
-  //   display: grid;
-  //   // grid-template-rows: 10rem minmax(100rem, auto);
-  //   grid-template-columns: 1fr 2fr;
-  //   // grid-template-areas:
-  //   //   'head head'
-  //   //   'list recipe';
+//   //   display: grid;
+//   //   // grid-template-rows: 10rem minmax(100rem, auto);
+//   //   grid-template-columns: 1fr 2fr;
+//   //   // grid-template-areas:
+//   //   //   'head head'
+//   //   //   'list recipe';
 
-  //   // @media only screen and (max-width: $bp-large) {
-  //   //   max-width: 100%;
-  //   //   margin: 0;
-  //   //   border-radius: 0;
-  //   // }
-}
+//   //   // @media only screen and (max-width: $bp-large) {
+//   //   //   max-width: 100%;
+//   //   //   margin: 0;
+//   //   //   border-radius: 0;
+//   //   // }
+// }
 //
 </style>

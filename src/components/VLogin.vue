@@ -23,7 +23,7 @@
           <input type="password" placeholder="password" v-model="password" />
         </div>
         <button class="btn submit__btn">
-          <span>Log In</span>
+          <span>Continue</span>
         </button>
       </form>
       <!-- TODO need to add validation display -->

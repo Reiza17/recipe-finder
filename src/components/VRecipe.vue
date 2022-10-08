@@ -25,10 +25,60 @@
     <div v-else>
       <figure class="recipe__fig">
         <img :src="recipe.image_url" :alt="recipe.title" class="recipe__img" />
-        <h1 class="recipe__title">
-          <span>{{ recipe.title.toLowerCase() }}</span>
-        </h1>
       </figure>
+
+      <div class="d-flex flex-row justify-content-between mb-2">
+        <h1 class="recipe__title d-flex flex-row">
+          <span>{{ recipe.title.toLowerCase() }}</span>
+          <div v-if="recipe.user_generated" title="You created this recipe">
+            <!-- <svg>
+              <use :href="`${icons}#icon-user`"></use>
+            </svg> -->
+            <h4>
+              <span class="badge bg-primary text-uppercase">Personal</span>
+            </h4>
+          </div>
+        </h1>
+
+        <div class="d-flex flex-row align-items-end">
+          <button
+            v-if="recipe.user_generated"
+            @click="deleteUserRecipe"
+            class="btn--round"
+            title="Delete this recipe"
+          >
+            <svg>
+              <use :href="`${icons}#icon-delete`"></use>
+            </svg>
+          </button>
+          <button
+            v-if="recipe.user_generated"
+            @click="toggleEditRecipeModal"
+            class="btn--round"
+            title="Edit this recipe"
+          >
+            <svg>
+              <use :href="`${icons}#icon-edit`"></use>
+            </svg>
+          </button>
+          <button
+            v-if="!recipe.user_generated"
+            @click="bookmarkRecipe"
+            class="btn--round"
+            :title="`${
+              recipeBookmarked ? 'Unsave this recipe' : 'Save this recipe'
+            }`"
+          >
+            <svg class="btn--bookmark">
+              <use
+                :href="`${icons}#icon-favorite${
+                  recipeBookmarked ? '-fill' : ''
+                }`"
+              ></use>
+            </svg>
+          </button>
+        </div>
+      </div>
 
       <div
         class="recipe__details justify-content-between flex-wrap-reverse gap-5"
@@ -43,6 +93,7 @@
             }}</span>
             <span class="recipe__info-text">minutes</span>
           </div>
+
           <div class="recipe__info">
             <svg class="recipe__info-icon">
               <use :href="`${icons}#icon-users`"></use>
@@ -71,45 +122,6 @@
               </button>
             </div>
           </div>
-        </div>
-
-        <div class="d-flex flex-row">
-          <button
-            v-if="recipe.user_generated"
-            @click="deleteUserRecipe"
-            class="btn--round"
-          >
-            <svg class="">
-              <use :href="`${icons}#icon-delete`"></use>
-            </svg>
-          </button>
-          <button
-            v-if="recipe.user_generated"
-            @click="toggleEditRecipeModal"
-            class="btn--round"
-          >
-            <svg class="">
-              <use :href="`${icons}#icon-edit`"></use>
-            </svg>
-          </button>
-          <div v-if="recipe.user_generated" class="recipe__user-generated">
-            <svg>
-              <use :href="`${icons}#icon-user`"></use>
-            </svg>
-          </div>
-          <button
-            v-if="!recipe.user_generated"
-            @click="bookmarkRecipe"
-            class="btn--round btn--bookmark"
-          >
-            <svg class="">
-              <use
-                :href="`${icons}#icon-bookmark${
-                  recipeBookmarked ? '-fill' : ''
-                }`"
-              ></use>
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -143,11 +155,11 @@
           >. Please check out directions at their website.
         </p>
         <a
-          class="btn--small recipe__btn"
+          class="btn btn-outline-success"
           :href="recipe.source_url"
           target="_blank"
         >
-          <span>Directions</span>
+          <span>Directions </span>
           <svg class="search__icon">
             <use :href="`${icons}#icon-arrow-right`"></use>
           </svg>
@@ -261,33 +273,31 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/sass/style.scss';
 
-%btn {
-  background-image: $gradient;
-  border-radius: 10rem;
-  border: none;
-  text-transform: uppercase;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s;
+// %btn {
+//   // background-image: $gradient;
+//   border-radius: 10rem;
+//   border: none;
+//   text-transform: uppercase;
+//   color: #fff;
+//   cursor: pointer;
+//   display: flex;
+//   align-items: center;
+//   transition: all 0.2s;
 
-  &:hover {
-    transform: scale(1.05);
-  }
+//   &:hover {
+//     transform: scale(1.05);
+//   }
 
-  &:focus {
-    outline: none;
-  }
+//   &:focus {
+//     outline: none;
+//   }
 
-  & > *:first-child {
-    margin-right: 1rem;
-  }
-}
+//   & > *:first-child {
+//     margin-right: 1rem;
+//   }
+// }
 
 .btn {
-  @extend %btn;
-
   padding: 1.5rem 4rem;
   font-size: 1.5rem;
   font-weight: 600;
@@ -303,12 +313,12 @@ export default {
   &,
   &:link,
   &:visited {
-    @extend %btn;
-
     font-size: 1.4rem;
     font-weight: 600;
     padding: 1.25rem 2.25rem;
     text-decoration: none;
+    color: black;
+    border: 1px solid;
 
     svg {
       height: 1.75rem;
@@ -318,12 +328,18 @@ export default {
   }
 }
 
+@media all and (max-width: 984px) {
+  .nav_label {
+    display: none;
+  }
+}
+
 .btn--inline {
-  color: $color-primary;
+  // color: $color-primary;
   font-size: 1.3rem;
   font-weight: 600;
   border: none;
-  background-color: $color-grey-light-1;
+  // background-color: $color-grey-light-1;
   padding: 0.8rem 1.2rem;
   border-radius: 10rem;
   cursor: pointer;
@@ -344,8 +360,8 @@ export default {
   }
 
   &:hover {
-    color: $color-grad-2;
-    background-color: $color-grey-light-2;
+    // color: $color-grad-2;
+    // background-color: $color-grey-light-2;
   }
 
   &:focus {
@@ -354,9 +370,12 @@ export default {
 }
 
 .btn--round {
-  background-image: $gradient;
+  // background-image: $gradient;
+  // background-color: white;
+  background-color: #efeff2;
   border-radius: 50%;
   border: none;
+  // border: 2px solid black;
   cursor: pointer;
   height: 4.5rem;
   width: 4.5rem;
@@ -367,6 +386,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media only screen and (max-width: 767px) {
+    height: 3.15rem;
+    width: 3.15rem;
+  }
 
   &:hover {
     transform: scale(1.07);
@@ -379,7 +403,18 @@ export default {
   svg {
     height: 2.5rem;
     width: 2.5rem;
-    fill: #fff;
+    fill: black;
+
+    @media only screen and (max-width: 767px) {
+      height: 1.75rem;
+      width: 1.75rem;
+    }
+  }
+
+  .btn--bookmark {
+    fill: white;
+    stroke: red;
+    stroke-width: 3px;
   }
 }
 
@@ -402,12 +437,12 @@ export default {
   }
 
   &:hover svg {
-    fill: $color-grad-2;
+    // fill: $color-grad-2;
     transform: translateY(-1px);
   }
 
   &:active svg {
-    fill: $color-grad-2;
+    // fill: $color-grad-2;
     transform: translateY(0);
   }
 
@@ -416,10 +451,15 @@ export default {
   }
 }
 
+.badge {
+  letter-spacing: 0.5px;
+  margin: 0 8px;
+}
+
 .heading--2 {
   font-size: 2rem;
   font-weight: 700;
-  color: $color-primary;
+  color: black;
   text-transform: uppercase;
   margin-bottom: 2.5rem;
   text-align: center;
@@ -428,7 +468,7 @@ export default {
 
 .link:link,
 .link:visited {
-  color: $color-grey-dark-2;
+  // color: $color-grey-dark-2;
 }
 
 .spinner {
@@ -438,7 +478,7 @@ export default {
   svg {
     height: 6rem;
     width: 6rem;
-    fill: $color-primary;
+    // fill: $color-primary;
     animation: rotate 2s infinite linear;
   }
 }
@@ -470,7 +510,7 @@ export default {
   svg {
     height: 3rem;
     width: 3rem;
-    fill: $color-primary;
+    // fill: $color-primary;
     transform: translateY(-0.3rem);
   }
 
@@ -486,12 +526,12 @@ export default {
 /// From _recipe.scss
 
 .recipe {
-  background-color: $color-grey-light-1;
+  background-color: white;
 
   ///////////
   // FIGURE
   &__fig {
-    height: 32rem;
+    max-height: 240px;
     position: relative;
     // transform: scale(1.04) translateY(-1px);
     transform-origin: top;
@@ -511,14 +551,24 @@ export default {
       // );
       opacity: 0.6;
     }
+
+    @media only screen and (max-width: 767px) {
+      // height: 60%;
+      max-height: 200px;
+    }
   }
 
   &__img {
     width: 100%;
     display: block;
-    height: 90%;
+    max-height: 240px;
     object-fit: cover;
-    border-radius: 15px;
+    border-radius: 16px;
+
+    @media only screen and (max-width: 767px) {
+      // height: 60%;
+      max-height: 200px;
+    }
   }
 
   &__title {
@@ -534,12 +584,12 @@ export default {
     // line-height: 1.95;
     // text-align: center;
 
-    font-size: 40px;
+    font-size: 36px;
     font-family: DD-TTNorms, -apple-system, BlinkMacSystemFont, 'Segoe UI',
       Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
       'Segoe UI Emoji', 'Segoe UI Symbol';
     font-weight: 700;
-    line-height: 48px;
+    // line-height: 48px;
     letter-spacing: -0.04ch;
     text-transform: capitalize;
     color: rgb(25, 25, 25);
@@ -560,8 +610,11 @@ export default {
     //   );
     // }
 
-    @media only screen and (max-width: $bp-medium) {
-      width: 70%;
+    // @media only screen and (max-width: $bp-medium) {
+    //   width: 70%;
+    // }
+    @media only screen and (max-width: 767px) {
+      font-size: 22px;
     }
   }
 
@@ -570,14 +623,13 @@ export default {
   &__details {
     display: flex;
     // align-items: center;
-    padding: 7.5rem 0 3.5rem 0;
+    padding: 1rem 0 3.5rem 0;
   }
 
   &__info {
     font-size: 1.65rem;
     text-transform: uppercase;
     display: flex;
-    align-items: center;
 
     &:not(:last-child) {
       margin-right: 4.5rem;
@@ -608,17 +660,28 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 4rem;
-    width: 4rem;
-    border-radius: 10rem;
+    height: 4.5rem;
+    width: 4.5rem;
+    border-radius: 8rem;
 
     margin-left: auto;
     margin-right: 1.75rem;
 
+    @media only screen and (max-width: 767px) {
+      height: 3.15rem;
+      width: 3.15rem;
+    }
+
     svg {
-      height: 2.25rem;
-      width: 2.25rem;
-      fill: $color-primary;
+      height: 2.5rem;
+      width: 2.5rem;
+      // fill: $color-grad-2;
+      fill: black;
+
+      @media only screen and (max-width: 767px) {
+        height: 1.75rem;
+        width: 1.75rem;
+      }
     }
   }
 
@@ -628,11 +691,11 @@ export default {
     padding: 5rem 8rem;
     font-size: 1.6rem;
     line-height: 1.4;
-    background-color: rgb(247, 247, 247);
+    background-color: #efeff2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-radius: 15px;
+    border-radius: 12px;
   }
 
   &__ingredient-list {

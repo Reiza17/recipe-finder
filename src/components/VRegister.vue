@@ -8,33 +8,75 @@
       class="overlay"
     ></div> -->
     <div @click="toggleRegisterModal" class="overlay"></div>
-    <div class="register-window">
+    <div class="register-modal">
       <button @click="toggleRegisterModal" class="btn--close-modal">
         &times;
       </button>
-      <div class="message">
-        <p>Sign up to upload or bookmark recipes!</p>
-      </div>
-      <form @submit.prevent="register">
-        <div class="email">
-          <input type="email" v-model="email" placeholder="email" />
+      <div class="modal-content">
+        <div class="modal-header">
+          <p>Sign up to upload or bookmark recipes!</p>
         </div>
-        <div class="password">
-          <input type="password" v-model="password" placeholder="password" />
+        <form @submit.prevent="register">
+          <div
+            class="form-floating mb-4"
+            :class="{ 'form-group--error': $v.email.$error }"
+          >
+            <input
+              type="email"
+              class="form-control"
+              id="floatingEmail"
+              placeholder="name@example.com"
+              v-model.trim="email"
+              @input="delayTouch($v.email)"
+            />
+            <label for="floatingEmail">Email</label>
+          </div>
+          <div v-if="$v.email.$error" class="error mb-4">
+            <div v-if="!$v.email.required">
+              Please enter an email address to continue.
+            </div>
+            <div v-if="!$v.email.email">Not a valid email address.</div>
+          </div>
+          <div
+            class="form-floating mb-3"
+            :class="{ 'form-group--error': $v.password.$error }"
+          >
+            <input
+              type="password"
+              class="form-control"
+              id="floatingPassword"
+              placeholder="name@example.com"
+              v-model="password"
+              @input="delayTouch($v.password)"
+            />
+            <label for="floatingPassword">Password</label>
+          </div>
+          <div v-if="$v.password.$error" class="error mb-4">
+            <div v-if="!$v.password.required">
+              Please enter a password to continue.
+            </div>
+            <div v-if="!$v.password.minLength">
+              Please enter at least 6 characters.
+            </div>
+          </div>
+          <button
+            class="btn btn-primary btn--submit"
+            type="submit"
+            :disabled="$v.$invalid"
+          >
+            <span>Continue</span>
+          </button>
+        </form>
+        <div class="error" v-if="error">
+          <p>{{ error }}</p>
         </div>
-        <button class="btn submit__btn" type="submit">
-          <span>Sign Up</span>
-        </button>
-      </form>
-      <div class="error" v-if="error">
-        <p>{{ error }}</p>
+        <p class="bottom-text">
+          Already have an account?
+          <a href="" @click.prevent="switchToLoginModal" class="bottom-link"
+            >LOG IN</a
+          >
+        </p>
       </div>
-      <p>
-        Already have an account?
-        <a href="" @click.prevent="switchToLoginModal" class="bottom-link"
-          >LOG IN</a
-        >
-      </p>
     </div>
   </div>
 </template>
@@ -42,6 +84,8 @@
 <script>
 import { createNamespacedHelpers } from 'vuex';
 const { mapMutations } = createNamespacedHelpers('home');
+import { required, email, minLength } from 'vuelidate/lib/validators';
+const touchMap = new WeakMap();
 
 export default {
   data() {
@@ -49,6 +93,10 @@ export default {
       email: '',
       password: '',
     };
+  },
+  validations: {
+    email: { required, email },
+    password: { required, minLength: minLength(6) },
   },
   computed: {
     error() {
@@ -60,6 +108,14 @@ export default {
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
       toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
     }),
+
+    delayTouch($v) {
+      $v.$reset();
+      if (touchMap.has($v)) {
+        clearTimeout(touchMap.get($v));
+      }
+      touchMap.set($v, setTimeout($v.$touch, 1000));
+    },
 
     switchToLoginModal() {
       this.toggleRegisterModal();
@@ -100,14 +156,14 @@ export default {
   transition: all 0.5s;
 }
 
-.register-window {
+.register-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100rem;
+  width: 75rem;
   background-color: white;
-  border-radius: 5px;
+  border-radius: 12px;
 
   padding: 5rem 6rem;
   box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.411);
@@ -116,7 +172,7 @@ export default {
 
   .btn--close-modal {
     font-family: inherit;
-    color: inherit;
+    color: #6c757d;
     position: absolute;
     top: 0.5rem;
     right: 1.6rem;
@@ -126,36 +182,60 @@ export default {
     background: none;
   }
 
-  input {
-    width: 300px;
-    padding: 10px;
-    margin: 10px;
-    margin-left: 40px;
-    font-size: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+  .form-floating {
+    color: #78818a;
+    font-size: 14px;
+    font-weight: 500;
+
+    input {
+      font-family: Noto Sans, sans-serif;
+    }
   }
 
-  .submit__btn {
-    width: 300px;
-    padding: 10px;
-    margin: 10px;
-    margin-left: 40px;
-    border-radius: 16px;
-    text-align: center;
+  .form-group--error {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+  }
+
+  .form-control {
+    font-size: 14px;
+    font-weight: 500;
+    height: 48px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #fcfcfb;
+  }
+
+  .form-control:focus {
+    border-color: rgba(0, 0, 0, 0.2);
+    border-width: 0.5px;
+    box-shadow: none;
+  }
+
+  .btn--submit {
+    width: 100%;
+    min-height: 35px;
+    padding: 5px 10px;
+    margin: 10px 0 20px;
+    border-radius: 6px;
 
     span {
-      margin: auto;
+      font-size: 14px;
+      font-weight: 600;
       letter-spacing: 0.5px;
     }
   }
 
-  .message {
-    max-width: 40rem;
-    display: flex;
+  .modal-content {
+    max-width: 280px;
+    margin-left: 40px;
+  }
 
+  .modal-header {
+    // max-width: 40rem;
+    // display: flex;
+    margin-bottom: 30px;
     p {
-      margin: 0px 0px 20px 40px;
       font-size: 2.2rem;
       line-height: 1.5;
       font-weight: 600;
@@ -164,8 +244,7 @@ export default {
 
   .error {
     width: 300px;
-    margin-left: 40px;
-    margin-top: 20px;
+    margin: 2px 0 5px 8px;
     font-size: 1.5rem;
     color: #d30000;
 
@@ -174,20 +253,19 @@ export default {
     }
   }
 
-  p {
-    margin-top: 20px;
-    margin-left: 40px;
-    font-size: 1.5rem;
-  }
+  .bottom-text {
+    font-family: Noto Sans, sans-serif;
+    font-size: 13px;
 
-  .bottom-link {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    line-height: 24px;
-    text-transform: uppercase;
-    color: #0079d3;
-    text-decoration: none;
+    .bottom-link {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 24px;
+      text-transform: uppercase;
+      color: #0079d3;
+      text-decoration: none;
+    }
   }
 }
 </style>

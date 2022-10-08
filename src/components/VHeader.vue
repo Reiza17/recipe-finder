@@ -1,9 +1,11 @@
 <template>
-  <header class="navbar flex-wrap-reverse gap-4">
+  <header
+    class="navbar sticky-top p-3 flex-wrap-reverse justify-content-end gap-4"
+  >
     <div class="d-flex flex-row align-items-center flex-grow-1 ms-5">
       <a class="navbar-brand d-flex flex-row align-items-center me-5" href="/">
         <img
-          src="@/assets/images/forklift.svg"
+          src="@/assets/images/logo.svg"
           alt="Logo"
           width="40"
           height="40"
@@ -23,7 +25,7 @@
             <svg class="nav__icon">
               <use href="@/assets/images/icons.svg#icon-edit"></use>
             </svg>
-            <span>Add recipe</span>
+            <span class="nav_label">Add recipe</span>
           </button>
         </li>
         <VBookmarks />
@@ -96,12 +98,24 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/sass/style.scss';
 
-@media all and (max-width: 576px) {
+@media all and (max-width: 752px) {
   .logo-text {
     display: none;
   }
 }
+@media all and (max-width: 984px) {
+  .nav_label {
+    display: none;
+  }
+}
 
+.navbar {
+  background-color: white;
+  border-bottom: 1px solid rgb(231, 231, 231);
+  margin-bottom: 20px;
+  // TODO can remove below once I use bootstrap's modal
+  z-index: 10;
+}
 // .logo {
 //   margin-left: 3rem;
 //   height: 4.6rem;
@@ -110,7 +124,7 @@ export default {
 .logo-text {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: large;
-  color: teal;
+  color: #eb1700;
   font-weight: bold;
   letter-spacing: 0.2rem;
   text-transform: uppercase;
@@ -164,7 +178,8 @@ export default {
     svg {
       height: 2.4rem;
       width: 2.4rem;
-      fill: $color-primary;
+      // fill: $color-primary;
+      fill: black;
       margin-right: 0.7rem;
       transform: translateY(-1px);
     }
