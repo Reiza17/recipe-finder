@@ -18,8 +18,10 @@
         </div>
         <form @submit.prevent="register">
           <div
-            class="form-floating mb-4"
-            :class="{ 'form-group--error': $v.email.$error }"
+            class="form-floating"
+            :class="{
+              'form-group--input-error': $v.email.$error,
+            }"
           >
             <input
               type="email"
@@ -28,18 +30,19 @@
               placeholder="name@example.com"
               v-model.trim="email"
               @input="delayTouch($v.email)"
+              @blur="$store.commit('auth/CLEAR_AUTH_MESSAGE')"
             />
             <label for="floatingEmail">Email</label>
           </div>
-          <div v-if="$v.email.$error" class="error mb-4">
+          <div v-if="$v.email.$error" class="error">
             <div v-if="!$v.email.required">
               Please enter an email address to continue.
             </div>
-            <div v-if="!$v.email.email">Not a valid email address.</div>
+            <div v-if="!$v.email.email">Not a valid email address</div>
           </div>
           <div
-            class="form-floating mb-3"
-            :class="{ 'form-group--error': $v.password.$error }"
+            class="form-floating mt-4"
+            :class="{ 'form-group--input-error': $v.password.$error }"
           >
             <input
               type="password"
@@ -51,12 +54,12 @@
             />
             <label for="floatingPassword">Password</label>
           </div>
-          <div v-if="$v.password.$error" class="error mb-4">
+          <div v-if="$v.password.$error" class="error">
             <div v-if="!$v.password.required">
-              Please enter a password to continue.
+              Please enter a password to continue
             </div>
             <div v-if="!$v.password.minLength">
-              Please enter at least 6 characters.
+              Password must be at least 6 characters
             </div>
           </div>
           <button
@@ -64,11 +67,26 @@
             type="submit"
             :disabled="$v.$invalid"
           >
-            <span>Continue</span>
+            <span
+              class="spinner-border spinner-border"
+              role="status"
+              aria-hidden="true"
+              v-if="isAuthenticating"
+            ></span>
+            <svg v-else-if="successfulAuth" class="checkmark-icon">
+              <use :href="`${icons}#icon-check`"></use>
+            </svg>
+            <span v-else>Continue</span>
           </button>
         </form>
-        <div class="error" v-if="error">
-          <p>{{ error }}</p>
+        <div
+          v-if="authMessage"
+          :class="{
+            'auth-message': successfulAuth,
+            'auth-error-message': !successfulAuth,
+          }"
+        >
+          <p>{{ authMessage }}</p>
         </div>
         <p class="bottom-text">
           Already have an account?
@@ -90,8 +108,10 @@ const touchMap = new WeakMap();
 export default {
   data() {
     return {
+      icons: require('@/assets/images/icons.svg'),
       email: '',
       password: '',
+      isLoading: null,
     };
   },
   validations: {
@@ -99,8 +119,14 @@ export default {
     password: { required, minLength: minLength(6) },
   },
   computed: {
-    error() {
-      return this.$store.getters['auth/registerErrorMessage'];
+    authMessage() {
+      return this.$store.getters['auth/authMessage'];
+    },
+    successfulAuth() {
+      return this.$store.getters['auth/successfulAuth'];
+    },
+    isAuthenticating() {
+      return this.$store.getters['auth/isAuthenticating'];
     },
   },
   methods: {
@@ -136,7 +162,7 @@ export default {
   },
   // REVIEW is this a good way to reset the authentication error message?
   beforeDestroy() {
-    this.$store.commit('auth/CLEAR_REGISTRATION_ERROR');
+    this.$store.commit('auth/CLEAR_AUTH_MESSAGE');
   },
 };
 </script>
@@ -192,11 +218,6 @@ export default {
     }
   }
 
-  .form-group--error {
-    margin-bottom: 0 !important;
-    font-size: 14px;
-  }
-
   .form-control {
     font-size: 14px;
     font-weight: 500;
@@ -212,11 +233,17 @@ export default {
     box-shadow: none;
   }
 
+  .form-group--input-error {
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid red;
+  }
+
   .btn--submit {
     width: 100%;
     min-height: 35px;
     padding: 5px 10px;
-    margin: 10px 0 20px;
+    margin-top: 20px;
     border-radius: 6px;
 
     span {
@@ -243,17 +270,25 @@ export default {
   }
 
   .error {
-    width: 300px;
-    margin: 2px 0 5px 8px;
+    margin: 2px 0 0 8px;
     font-size: 1.5rem;
     color: #d30000;
+  }
 
-    p {
-      margin: auto;
-    }
+  .auth-message {
+    margin: 5px 0;
+    font-size: 1.5rem;
+    color: #287eff;
+  }
+
+  .auth-error-message {
+    margin: 5px 0;
+    font-size: 1.5rem;
+    color: #d30000;
   }
 
   .bottom-text {
+    margin-top: 12px;
     font-family: Noto Sans, sans-serif;
     font-size: 13px;
 
@@ -266,6 +301,15 @@ export default {
       color: #0079d3;
       text-decoration: none;
     }
+  }
+
+  .checkmark-icon {
+    height: 2.5rem;
+    width: 2.5rem;
+    fill: white;
+    outline: white;
+    stroke: white;
+    stroke-width: 1px;
   }
 }
 </style>

@@ -13,36 +13,55 @@ export default {
 
   state: {
     user: null,
-    registerErrorMessage: '',
+    authMessage: '',
+    successfulAuth: null,
     loginErrorMessage: '',
+    isAuthenticating: null,
   },
 
   getters: {
     loggedIn: state => state.user,
-    registerErrorMessage: state => state.registerErrorMessage,
     loginErrorMessage: state => state.loginErrorMessage,
+    authMessage: state => state.authMessage,
+    successfulAuth: state => state.successfulAuth,
+    isAuthenticating: state => state.isAuthenticating,
   },
 
   mutations: {
+    SET_AUTH_MESSAGE(state, message) {
+      state.authMessage = message;
+    },
+    CLEAR_AUTH_MESSAGE(state) {
+      state.authMessage = '';
+    },
+
+    SET_LOGIN_ERROR(state, message) {
+      state.loginErrorMessage = message;
+    },
     CLEAR_LOGIN_ERROR(state) {
       state.loginErrorMessage = '';
     },
 
-    CLEAR_REGISTRATION_ERROR(state) {
-      state.registerErrorMessage = '';
+    SET_SUCCESSFUL_AUTH(state, message) {
+      state.successfulAuth = true;
+      state.authMessage = message;
     },
 
     SET_USER(state, user) {
       state.user = user;
     },
-
     CLEAR_USER(state) {
       state.user = null;
+    },
+
+    TOGGLE_AUTH_SPINNER(state, boolean) {
+      state.isAuthenticating = boolean;
     },
   },
 
   actions: {
-    async register({ commit, state }, details) {
+    async register({ commit }, details) {
+      commit('TOGGLE_AUTH_SPINNER', true);
       const { email, password } = details;
 
       try {
@@ -58,46 +77,58 @@ export default {
           bookmarks: [],
         });
 
-        commit('home/TOGGLE_REGISTER_MODAL', null, { root: true });
+        commit('TOGGLE_AUTH_SPINNER', false);
+        commit(
+          'SET_SUCCESSFUL_AUTH',
+          'You have successfully signed up. You will soon be redirected.'
+        );
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       } catch (error) {
-        // FIXME this code for email already exists doesn't work
-        if (error.code === 'auth/email-already-exists')
-          state.registerErrorMessage = 'Email already in use';
+        commit('TOGGLE_AUTH_SPINNER', false);
+        if (error.code === 'auth/email-already-in-use')
+          return commit('SET_AUTH_MESSAGE', 'Email already in use');
         if (error.code === 'auth/weak-password')
-          state.registerErrorMessage = 'Password too weak';
-        else state.registerErrorMessage = 'Something went wrong';
-
-        return;
+          return commit('SET_AUTH_MESSAGE', 'Password too weak');
+        else return commit('SET_AUTH_MESSAGE', 'Something went wrong');
       }
 
       commit('SET_USER', auth.currentUser);
-      // router.push('/');
-
-      location.reload();
     },
 
-    async login({ commit, state }, details) {
+    async login({ commit }, details) {
+      commit('TOGGLE_AUTH_SPINNER', true);
       const { email, password } = details;
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        commit('home/TOGGLE_LOGIN_MODAL', null, { root: true });
+
+        commit('TOGGLE_AUTH_SPINNER', false);
+        commit(
+          'SET_SUCCESSFUL_AUTH',
+          'You are now logged in. You will soon be redirected.'
+        );
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       } catch (error) {
+        console.log(error.code);
+        commit('TOGGLE_AUTH_SPINNER', false);
         if (
           error.code === 'auth/user-not-found' ||
           error.code === 'auth/wrong-password'
         )
-          state.loginErrorMessage = 'Incorrect username or password';
-        else state.loginErrorMessage = 'Something went wrong';
-        return;
+          return commit('SET_AUTH_MESSAGE', 'Incorrect username or password');
+        else if (error.code === 'auth/too-many-requests')
+          return commit(
+            'SET_AUTH_MESSAGE',
+            'There have been too many login attempts. Please try again later.'
+          );
+        else return commit('SET_AUTH_MESSAGE', 'Something went wrong');
       }
 
-      // commit('home/TOGGLE_RECIPE_SPINNER', null, { root: true });
-
       commit('SET_USER', auth.currentUser);
-      // router.push('/');
-
-      location.reload();
     },
 
     // signOut() {

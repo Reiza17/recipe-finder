@@ -8,35 +8,94 @@
       class="overlay"
     ></div> -->
     <div @click="toggleLoginModal" class="overlay"></div>
-    <div class="login-window">
+    <div class="login-modal">
       <button @click="toggleLoginModal" class="btn--close-modal">
         &times;
       </button>
-      <div class="message">
-        <p>Log in</p>
-      </div>
-      <form @submit.prevent="login">
-        <div class="login">
-          <input type="text" placeholder="email" v-model="email" />
+      <div class="modal-content">
+        <div class="modal-header">
+          <p>Log In</p>
         </div>
-        <div class="password">
-          <input type="password" placeholder="password" v-model="password" />
+        <form @submit.prevent="login">
+          <div
+            class="form-floating"
+            :class="{
+              'form-group--input-error': inputError($v.email.$error),
+            }"
+          >
+            <input
+              type="email"
+              class="form-control"
+              id="floatingEmail"
+              placeholder="name@example.com"
+              v-model.trim="email"
+              @input="delayTouch($v.email)"
+              @blur="$store.commit('auth/CLEAR_AUTH_MESSAGE')"
+            />
+            <label for="floatingEmail">Email</label>
+          </div>
+          <div v-if="$v.email.$error" class="error">
+            <div v-if="!$v.email.required">
+              Please enter an email address to continue.
+            </div>
+            <div v-if="!$v.email.email">Not a valid email address</div>
+          </div>
+          <div
+            v-if="authMessage.includes('Incorrect') && !successfulAuth"
+            class="error mb-4"
+          >
+            {{ authMessage }}
+          </div>
+          <div
+            class="form-floating mt-4"
+            :class="{
+              'form-group--input-error': inputError($v.password.$error),
+            }"
+          >
+            <input
+              type="password"
+              class="form-control"
+              id="floatingPassword"
+              placeholder="name@example.com"
+              v-model="password"
+              @input="delayTouch($v.password)"
+            />
+            <label for="floatingPassword">Password</label>
+          </div>
+          <div v-if="$v.password.$error" class="error">
+            <div v-if="!$v.password.required">
+              Please enter a password to continue
+            </div>
+          </div>
+          <button class="btn btn-primary btn--submit" type="submit">
+            <span
+              class="spinner-border spinner-border"
+              role="status"
+              aria-hidden="true"
+              v-if="isAuthenticating"
+            ></span>
+            <svg v-else-if="successfulAuth" class="checkmark-icon">
+              <use :href="`${icons}#icon-check`"></use>
+            </svg>
+            <span v-else>Continue</span>
+          </button>
+        </form>
+        <div
+          v-if="successfulAuth || authMessage.includes('attempts')"
+          :class="{
+            'auth-message': successfulAuth,
+            'auth-error-message': !successfulAuth,
+          }"
+        >
+          <p>{{ authMessage }}</p>
         </div>
-        <button class="btn submit__btn">
-          <span>Continue</span>
-        </button>
-      </form>
-      <!-- TODO need to add validation display -->
-      <div class="error" v-if="error">
-        <p>{{ error }}</p>
+        <p class="bottom-text">
+          New to Recipe Finder?
+          <a href="" @click.prevent="switchToRegisterModal" class="bottom-link">
+            SIGN UP
+          </a>
+        </p>
       </div>
-      <!-- FIXME change router-link -->
-      <p>
-        New to Recipe Finder?
-        <a href="" @click.prevent="switchToRegisterModal" class="bottom-link">
-          SIGN UP
-        </a>
-      </p>
     </div>
   </div>
 </template>
@@ -44,17 +103,31 @@
 <script>
 import { createNamespacedHelpers } from 'vuex';
 const { mapMutations } = createNamespacedHelpers('home');
+import { required, email } from 'vuelidate/lib/validators';
+const touchMap = new WeakMap();
 
 export default {
   data() {
     return {
+      icons: require('@/assets/images/icons.svg'),
       email: '',
       password: '',
+      isLoading: null,
     };
   },
+  validations: {
+    email: { required, email },
+    password: { required },
+  },
   computed: {
-    error() {
-      return this.$store.getters['auth/loginErrorMessage'];
+    authMessage() {
+      return this.$store.getters['auth/authMessage'];
+    },
+    successfulAuth() {
+      return this.$store.getters['auth/successfulAuth'];
+    },
+    isAuthenticating() {
+      return this.$store.getters['auth/isAuthenticating'];
     },
   },
   methods: {
@@ -62,31 +135,41 @@ export default {
       toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),
+
+    delayTouch($v) {
+      $v.$reset();
+      if (touchMap.has($v)) {
+        clearTimeout(touchMap.get($v));
+      }
+      touchMap.set($v, setTimeout($v.$touch, 1000));
+    },
+
+    inputError(error) {
+      return error || (this.authMessage && !this.successfulAuth);
+    },
+
     switchToRegisterModal() {
       this.toggleLoginModal();
       this.toggleRegisterModal();
     },
+
     login() {
       this.$store.dispatch('auth/login', {
         email: this.email,
         password: this.password,
       });
+      // this.$v.$reset();
     },
     // NOTE does the same as below
     // exit() {
     //   this.$router.push({ name: 'home' });
-    //   this.$store.commit('auth/CLEAR_LOGIN_ERROR');
+    //   this.$store.commit('auth/CLEAR_REGISTRATION_ERROR');
     // },
   },
   // REVIEW is this a good way to reset the authentication error message?
   beforeDestroy() {
-    this.$store.commit('auth/CLEAR_LOGIN_ERROR');
+    this.$store.commit('auth/CLEAR_AUTH_MESSAGE');
   },
-  // beforeRouteEnter(to, from, next) {
-  //   console.log(from.name);
-  //   this.$store.dispatch('home/setPreviousURL', from.name);
-  //   next();
-  // },
 };
 </script>
 
@@ -105,14 +188,15 @@ export default {
   transition: all 0.5s;
 }
 
-.login-window {
+.login-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100rem;
+  width: 75rem;
   background-color: white;
-  border-radius: 5px;
+  border-radius: 12px;
+
   padding: 5rem 6rem;
   box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.411);
   z-index: 1000;
@@ -120,7 +204,7 @@ export default {
 
   .btn--close-modal {
     font-family: inherit;
-    color: inherit;
+    color: #6c757d;
     position: absolute;
     top: 0.5rem;
     right: 1.6rem;
@@ -130,36 +214,61 @@ export default {
     background: none;
   }
 
-  input {
-    width: 300px;
-    padding: 10px;
-    margin: 10px;
-    margin-left: 40px;
-    font-size: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+  .form-floating {
+    color: #78818a;
+    font-size: 14px;
+    font-weight: 500;
+
+    input {
+      font-family: Noto Sans, sans-serif;
+    }
   }
 
-  .submit__btn {
-    width: 300px;
-    padding: 10px;
-    margin: 10px;
-    margin-left: 40px;
-    border-radius: 16px;
-    text-align: center;
+  .form-control {
+    font-size: 14px;
+    font-weight: 500;
+    height: 48px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #fcfcfb;
+  }
+
+  .form-control:focus {
+    border-color: rgba(0, 0, 0, 0.2);
+    border-width: 0.5px;
+    box-shadow: none;
+  }
+
+  .form-group--input-error {
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid red;
+  }
+
+  .btn--submit {
+    width: 100%;
+    min-height: 35px;
+    padding: 5px 10px;
+    margin-top: 20px;
+    border-radius: 6px;
 
     span {
-      margin: auto;
+      font-size: 14px;
+      font-weight: 600;
       letter-spacing: 0.5px;
     }
   }
 
-  .message {
-    max-width: 40rem;
-    display: flex;
+  .modal-content {
+    max-width: 280px;
+    margin-left: 40px;
+  }
 
+  .modal-header {
+    // max-width: 40rem;
+    // display: flex;
+    margin-bottom: 30px;
     p {
-      margin: 0px 0px 20px 40px;
       font-size: 2.2rem;
       line-height: 1.5;
       font-weight: 600;
@@ -167,31 +276,46 @@ export default {
   }
 
   .error {
-    width: 300px;
-    margin-left: 40px;
-    margin-top: 20px;
+    margin: 2px 0 0 8px;
     font-size: 1.5rem;
     color: #d30000;
+  }
 
-    p {
-      margin: auto;
+  .auth-message {
+    margin: 5px 0;
+    font-size: 1.5rem;
+    color: #287eff;
+  }
+
+  .auth-error-message {
+    margin: 5px 0;
+    font-size: 1.5rem;
+    color: #d30000;
+  }
+
+  .bottom-text {
+    margin-top: 12px;
+    font-family: Noto Sans, sans-serif;
+    font-size: 13px;
+
+    .bottom-link {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 24px;
+      text-transform: uppercase;
+      color: #0079d3;
+      text-decoration: none;
     }
   }
 
-  p {
-    margin-top: 20px;
-    margin-left: 40px;
-    font-size: 1.5rem;
-  }
-
-  .bottom-link {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    line-height: 24px;
-    text-transform: uppercase;
-    color: #0079d3;
-    text-decoration: none;
+  .checkmark-icon {
+    height: 2.5rem;
+    width: 2.5rem;
+    fill: white;
+    outline: white;
+    stroke: white;
+    stroke-width: 1px;
   }
 }
 </style>
