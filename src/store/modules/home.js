@@ -38,7 +38,6 @@ export default {
     uploadRecipeModal: false,
     uploadingRecipe: false,
     successfulUpload: '',
-    uploadRecipeMessage: '',
     toastMessage: '',
   },
 
@@ -66,7 +65,6 @@ export default {
     uploadRecipeModal: state => state.uploadRecipeModal,
     uploadingRecipe: state => state.uploadingRecipe,
     successfulUpload: state => state.successfulUpload,
-    uploadRecipeMessage: state => state.uploadRecipeMessage,
     toastMessage: state => state.toastMessage,
   },
 
@@ -159,14 +157,6 @@ export default {
 
     SET_SUCCESSFUL_UPLOAD(state, msg) {
       state.successfulUpload = msg;
-    },
-
-    SET_UPLOAD_MESSAGE(state, message) {
-      state.uploadRecipeMessage = message;
-    },
-
-    CLEAR_UPLOAD_MESSAGE(state) {
-      state.uploadRecipeMessage = '';
     },
 
     TOGGLE_USER_RECIPES_SPINNER(state, boolean) {
@@ -403,8 +393,6 @@ export default {
 
         commit('TOGGLE_UPLOAD_SPINNER', false);
 
-        commit('SET_SUCCESSFUL_UPLOAD', 'Your recipe has been uploaded!');
-
         commit('ADD_USER_RECIPE', userRecipe);
 
         router
@@ -421,6 +409,7 @@ export default {
             reloadingPage: true,
           });
         commit('TOGGLE_UPLOAD_RECIPE_MODAL');
+        commit('SET_SUCCESSFUL_UPLOAD', 'The recipe has been uploaded!');
       } catch (err) {
         console.log(err);
         commit('TOGGLE_UPLOAD_SPINNER', false);
@@ -458,7 +447,7 @@ export default {
           id: router.app._route.params.id,
         });
         commit('TOGGLE_EDIT_USER_RECIPE_MODAL');
-        commit('SET_SUCCESSFUL_UPLOAD', true);
+        commit('SET_SUCCESSFUL_UPLOAD', 'The recipe has been edited!');
       } catch (err) {
         console.log(err);
         commit('TOGGLE_UPLOAD_SPINNER', false);

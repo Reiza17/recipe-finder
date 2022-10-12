@@ -308,11 +308,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters([
-      'uploadingRecipe',
-      'successfulUpload',
-      'uploadRecipeMessage',
-    ]),
+    ...mapGetters(['uploadingRecipe', 'successfulUpload']),
   },
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),

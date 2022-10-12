@@ -146,6 +146,7 @@
         <div>
           <h3 class="upload__heading">Ingredients</h3>
           <div
+            class="d-flex"
             v-for="(ingredient, index) of $v.formData.ingredients.$each.$iter"
             :key="ingredient.id"
           >
@@ -286,12 +287,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters([
-      'recipe',
-      'uploadingRecipe',
-      'successfulUpload',
-      'uploadRecipeMessage',
-    ]),
+    ...mapGetters(['recipe', 'uploadingRecipe', 'successfulUpload']),
   },
   methods: {
     ...mapMutations({ toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL' }),
