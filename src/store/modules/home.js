@@ -33,9 +33,12 @@ export default {
     loadingUserRecipes: false,
     loginModal: false,
     registerModal: false,
-    uploadRecipeModal: false,
     editRecipeModal: false,
     renderRecipeError: null,
+    uploadRecipeModal: false,
+    uploadingRecipe: false,
+    successfulUpload: null,
+    uploadRecipeMessage: '',
   },
 
   getters: {
@@ -57,9 +60,12 @@ export default {
     loadingBookmarks: state => state.loadingBookmarks,
     loginModal: state => state.loginModal,
     registerModal: state => state.registerModal,
-    uploadRecipeModal: state => state.uploadRecipeModal,
     editRecipeModal: state => state.editRecipeModal,
     renderRecipeError: state => state.renderRecipeError,
+    uploadRecipeModal: state => state.uploadRecipeModal,
+    uploadingRecipe: state => state.uploadingRecipe,
+    successfulUpload: state => state.successfulUpload,
+    uploadRecipeMessage: state => state.uploadRecipeMessage,
   },
 
   mutations: {
@@ -115,10 +121,6 @@ export default {
       state.loadingBookmarks = boolean;
     },
 
-    TOGGLE_USER_RECIPES_SPINNER(state, boolean) {
-      state.loadingUserRecipes = boolean;
-    },
-
     SET_STORED_BOOKMARKS(state, bookmarks) {
       // NOTE uses reverse() so that newly bookmarked/uploaded recipes are at the top, similar to newly "Liked" videos on Youtube. In reality, it's probably better to use a timestamp and sort().
       state.bookmarks = bookmarks.reverse();
@@ -147,6 +149,26 @@ export default {
 
     TOGGLE_UPLOAD_RECIPE_MODAL(state) {
       state.uploadRecipeModal = !state.uploadRecipeModal;
+    },
+
+    TOGGLE_UPLOAD_SPINNER(state, boolean) {
+      state.uploadingRecipe = boolean;
+    },
+
+    SET_SUCCESSFUL_UPLOAD(state, boolean) {
+      state.successfulUpload = boolean;
+    },
+
+    SET_UPLOAD_MESSAGE(state, message) {
+      state.uploadRecipeMessage = message;
+    },
+
+    CLEAR_UPLOAD_MESSAGE(state) {
+      state.uploadRecipeMessage = '';
+    },
+
+    TOGGLE_USER_RECIPES_SPINNER(state, boolean) {
+      state.loadingUserRecipes = boolean;
     },
 
     ADD_USER_RECIPE(state, recipe) {
@@ -353,6 +375,8 @@ export default {
     },
 
     async uploadUserRecipe({ commit, rootState, dispatch }, { recipe, id }) {
+      commit('TOGGLE_UPLOAD_SPINNER', true);
+
       try {
         const userRecipe = { ...recipe, bookmarked: false };
         const docRef = doc(db, 'users', rootState.auth.user.uid);
@@ -374,7 +398,10 @@ export default {
         // if (!res) throw new Error('10 seconds have passed...');
 
         // TODO add 'Your recipe has been uploaded!' toast. Toast should appear on home, because the upload window should disappear as soon as the upload is successful (improving load speed/UX)
-        console.log('Successfully uploaded user recipe to server!');
+
+        commit('TOGGLE_UPLOAD_SPINNER', false);
+
+        commit('SET_SUCCESSFUL_UPLOAD', true);
 
         commit('ADD_USER_RECIPE', userRecipe);
 
@@ -391,12 +418,17 @@ export default {
             page: router.app._route.query.page,
             reloadingPage: true,
           });
+        commit('TOGGLE_UPLOAD_RECIPE_MODAL');
       } catch (err) {
-        // console.error(`Failed to upload user recipe to server: ${err}`);
-        // TODO add 'There was a problem uploading the recipe. Please try again.' (prob makes more sense as text in the modal instead of a toast)
+        console.log(err);
+        commit('TOGGLE_UPLOAD_SPINNER', false);
+        return commit(
+          'SET_UPLOAD_MESSAGE',
+          'There was a problem uploading the recipe. Please try again'
+        );
+
         // TODO prob need to add something that saves the draft (client-side, maybe as a cookie?), so that they don't lose everything, which would suck
         // throw err;
-        console.log(err);
       }
     },
 

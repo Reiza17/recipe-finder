@@ -13,6 +13,7 @@
             <VEditRecipe v-if="editRecipeModal" />
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
+            <VToast v-if="successfulUpload" />
           </div>
         </div>
         <router-view />
@@ -29,6 +30,7 @@ import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
 import VRegister from '@/components/VRegister.vue';
+import VToast from '@/components/VToast.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters } = createNamespacedHelpers('home');
 
@@ -42,6 +44,7 @@ export default {
     VEditRecipe,
     VLogin,
     VRegister,
+    VToast,
   },
 
   computed: {
@@ -50,6 +53,7 @@ export default {
       'editRecipeModal',
       'loginModal',
       'registerModal',
+      'successfulUpload',
     ]),
   },
   // methods: {

@@ -29,8 +29,11 @@
 
       <div class="d-flex flex-row justify-content-between mb-2">
         <h1 class="recipe__title d-flex flex-row">
-          <span>{{ recipe.title.toLowerCase() }}</span>
-          <div v-if="recipe.user_generated" title="You created this recipe">
+          <span>{{ recipe.title }}</span>
+          <div
+            v-if="recipe.user_generated"
+            title="This recipe was created by you"
+          >
             <!-- <svg>
               <use :href="`${icons}#icon-user`"></use>
             </svg> -->
@@ -204,7 +207,6 @@ export default {
       'recipeBookmarked',
       'loadingRecipe',
       'renderRecipeError',
-      // 'searchQuery',
     ]),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
@@ -260,7 +262,6 @@ export default {
     // this.init();
     // this.renderNewRecipe();
     // this.$store.dispatch('home/reloadSearchResults');
-    // console.log(this.searchQuery);
     // document.addEventListener('visibilitychange', () => {
     //   if (document.visibilityState === 'hidden') {
     //     this.$store.dispatch('home/uploadBookmarks');
@@ -359,10 +360,10 @@ export default {
     margin: 0 0.4rem;
   }
 
-  &:hover {
-    // color: $color-grad-2;
-    // background-color: $color-grey-light-2;
-  }
+  // &:hover {
+  //   // color: $color-grad-2;
+  //   // background-color: $color-grey-light-2;
+  // }
 
   &:focus {
     outline: none;
@@ -464,11 +465,6 @@ export default {
   margin-bottom: 2.5rem;
   text-align: center;
   // transform: skewY(-3deg);
-}
-
-.link:link,
-.link:visited {
-  // color: $color-grey-dark-2;
 }
 
 .spinner {
