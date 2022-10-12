@@ -84,17 +84,16 @@ export default {
         );
         setTimeout(() => {
           location.reload();
-        }, 1000);
+        }, 1500);
+        commit('SET_USER', auth.currentUser);
       } catch (error) {
         commit('TOGGLE_AUTH_SPINNER', false);
         if (error.code === 'auth/email-already-in-use')
-          return commit('SET_AUTH_MESSAGE', 'Email already in use');
+          commit('SET_AUTH_MESSAGE', 'Email already in use');
         if (error.code === 'auth/weak-password')
-          return commit('SET_AUTH_MESSAGE', 'Password too weak');
-        else return commit('SET_AUTH_MESSAGE', 'Something went wrong');
+          commit('SET_AUTH_MESSAGE', 'Password too weak');
+        else commit('SET_AUTH_MESSAGE', 'Something went wrong');
       }
-
-      commit('SET_USER', auth.currentUser);
     },
 
     async login({ commit }, details) {
@@ -111,24 +110,22 @@ export default {
         );
         setTimeout(() => {
           location.reload();
-        }, 1000);
+        }, 1500);
+        commit('SET_USER', auth.currentUser);
       } catch (error) {
-        console.log(error.code);
         commit('TOGGLE_AUTH_SPINNER', false);
         if (
           error.code === 'auth/user-not-found' ||
           error.code === 'auth/wrong-password'
         )
-          return commit('SET_AUTH_MESSAGE', 'Incorrect username or password');
+          commit('SET_AUTH_MESSAGE', 'Incorrect username or password');
         else if (error.code === 'auth/too-many-requests')
-          return commit(
+          commit(
             'SET_AUTH_MESSAGE',
             'There have been too many login attempts. Please try again later.'
           );
-        else return commit('SET_AUTH_MESSAGE', 'Something went wrong');
+        else commit('SET_AUTH_MESSAGE', 'Something went wrong');
       }
-
-      commit('SET_USER', auth.currentUser);
     },
 
     // signOut() {

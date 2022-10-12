@@ -68,12 +68,12 @@
             :disabled="$v.$invalid"
           >
             <span
-              class="spinner-border spinner-border"
+              class="spinner-border"
               role="status"
               aria-hidden="true"
               v-if="isAuthenticating"
             ></span>
-            <svg v-else-if="successfulAuth" class="checkmark-icon">
+            <svg v-else-if="successfulAuth" class="icon">
               <use :href="`${icons}#icon-check`"></use>
             </svg>
             <span v-else>Continue</span>
@@ -246,6 +246,15 @@ export default {
     margin-top: 20px;
     border-radius: 6px;
 
+    .icon {
+      height: 2.5rem;
+      width: 2.5rem;
+      fill: white;
+      outline: white;
+      stroke: white;
+      stroke-width: 1px;
+    }
+
     span {
       font-size: 14px;
       font-weight: 600;
@@ -301,15 +310,6 @@ export default {
       color: #0079d3;
       text-decoration: none;
     }
-  }
-
-  .checkmark-icon {
-    height: 2.5rem;
-    width: 2.5rem;
-    fill: white;
-    outline: white;
-    stroke: white;
-    stroke-width: 1px;
   }
 }
 </style>
