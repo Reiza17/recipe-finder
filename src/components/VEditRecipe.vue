@@ -143,7 +143,7 @@
           <button @click.prevent="addIngredient">Add ingredient</button>
         </div> -->
 
-        <div class="upload__column">
+        <div>
           <h3 class="upload__heading">Ingredients</h3>
           <div
             v-for="(ingredient, index) of $v.formData.ingredients.$each.$iter"
@@ -194,6 +194,7 @@
 
             <!-- NOTE need prevent default on click events for removing and adding ingredients, as otherwise they would trigger the form submission. Also, need type="button" attribute, or pressing Enter will trigger this method. -->
             <button
+              class="btn btn-outline-danger btn-lg"
               type="button"
               v-if="formData.ingredients.length > 1"
               @click.prevent="removeIngredient(ingredient.$model)"
@@ -201,16 +202,35 @@
               Remove ingredient
             </button>
           </div>
-          <button type="button" @click.prevent="addIngredient">
+          <button
+            class="btn btn-outline-success btn-lg"
+            type="button"
+            @click.prevent="addIngredient"
+          >
             Add ingredient
           </button>
         </div>
 
-        <button type="submit" :disabled="formSubmitted" class="btn upload__btn">
-          <svg>
-            <use :href="`${icons}#icon-upload-cloud`"></use>
+        <button
+          type="submit"
+          :disabled="formSubmitted"
+          class="btn btn-success upload__btn"
+        >
+          <span
+            class="spinner-border"
+            role="status"
+            aria-hidden="true"
+            v-if="uploadingRecipe"
+          ></span>
+          <svg v-else-if="successfulUpload" class="icon">
+            <use :href="`${icons}#icon-check`"></use>
           </svg>
-          <span>Submit</span>
+          <div v-else>
+            <svg class="icon">
+              <use :href="`${icons}#icon-upload-cloud`"></use>
+            </svg>
+            <span>Submit</span>
+          </div>
         </button>
       </form>
     </div>
@@ -222,6 +242,7 @@ import { createNamespacedHelpers } from 'vuex';
 const { mapMutations, mapGetters } = createNamespacedHelpers('home');
 import { required, url, minLength } from 'vuelidate/lib/validators';
 import uniqid from 'uniqid';
+import { startCase, lowerCase } from 'lodash';
 import _ from 'lodash';
 
 export default {
@@ -238,9 +259,6 @@ export default {
       // formEmpty: true,
       formData: null,
     };
-  },
-  computed: {
-    ...mapGetters(['recipe']),
   },
   // watch: {
   //   recipe: function(recipe) {
@@ -267,7 +285,14 @@ export default {
       date_created: '',
     },
   },
-
+  computed: {
+    ...mapGetters([
+      'recipe',
+      'uploadingRecipe',
+      'successfulUpload',
+      'uploadRecipeMessage',
+    ]),
+  },
   methods: {
     ...mapMutations({ toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL' }),
 
@@ -302,6 +327,7 @@ export default {
         console.log('Passed client-side validation!');
         // TODO start loading bar or spinner
         this.formData.date_modified = Date.now();
+        this.formData.title = startCase(lowerCase(this.formData.title));
 
         await this.$store.dispatch('home/editUserRecipe', this.formData);
         // TODO end loading bar or spinner
@@ -340,6 +366,7 @@ export default {
 
   created() {
     window.addEventListener('beforeunload', this.checkIfStayInDirtyForm);
+    this.$store.commit('home/SET_SUCCESSFUL_UPLOAD', false);
     // NOTE this allows cancelling the edit to restore the original recipe
     this.formData = _.cloneDeep(this.recipe);
   },
@@ -452,9 +479,34 @@ export default {
   }
 
   &__btn {
+    display: flex;
     grid-column: 1 / -1;
     justify-self: center;
+    align-items: center;
+    justify-content: center;
     padding: 1.5rem 4rem;
+
+    min-width: 200px;
+    min-height: 35px;
+    padding: 5px 10px;
+    margin-top: 20px;
+    // border-radius: 6px;
+
+    .icon {
+      margin-right: 5px;
+      height: 2.5rem;
+      width: 2.5rem;
+      fill: white;
+      outline: white;
+      stroke: white;
+      stroke-width: 1px;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
   }
 
   &__error {

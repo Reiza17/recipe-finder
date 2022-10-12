@@ -37,8 +37,9 @@ export default {
     renderRecipeError: null,
     uploadRecipeModal: false,
     uploadingRecipe: false,
-    successfulUpload: null,
+    successfulUpload: '',
     uploadRecipeMessage: '',
+    toastMessage: '',
   },
 
   getters: {
@@ -66,6 +67,7 @@ export default {
     uploadingRecipe: state => state.uploadingRecipe,
     successfulUpload: state => state.successfulUpload,
     uploadRecipeMessage: state => state.uploadRecipeMessage,
+    toastMessage: state => state.toastMessage,
   },
 
   mutations: {
@@ -155,8 +157,8 @@ export default {
       state.uploadingRecipe = boolean;
     },
 
-    SET_SUCCESSFUL_UPLOAD(state, boolean) {
-      state.successfulUpload = boolean;
+    SET_SUCCESSFUL_UPLOAD(state, msg) {
+      state.successfulUpload = msg;
     },
 
     SET_UPLOAD_MESSAGE(state, message) {
@@ -401,7 +403,7 @@ export default {
 
         commit('TOGGLE_UPLOAD_SPINNER', false);
 
-        commit('SET_SUCCESSFUL_UPLOAD', true);
+        commit('SET_SUCCESSFUL_UPLOAD', 'Your recipe has been uploaded!');
 
         commit('ADD_USER_RECIPE', userRecipe);
 
@@ -433,6 +435,8 @@ export default {
     },
 
     async editUserRecipe({ commit, state, rootState, dispatch }, recipe) {
+      commit('TOGGLE_UPLOAD_SPINNER', true);
+
       try {
         const userRecipes = [...state.userRecipes];
 
@@ -446,13 +450,22 @@ export default {
           uploadedRecipes: userRecipes,
         });
 
+        commit('TOGGLE_UPLOAD_SPINNER', false);
+
         commit('EDIT_USER_RECIPE', recipe);
 
         dispatch('renderRecipe', {
           id: router.app._route.params.id,
         });
+        commit('TOGGLE_EDIT_USER_RECIPE_MODAL');
+        commit('SET_SUCCESSFUL_UPLOAD', true);
       } catch (err) {
-        console.error(`Failed to edit user recipe: ${err}`);
+        console.log(err);
+        commit('TOGGLE_UPLOAD_SPINNER', false);
+        return commit(
+          'SET_UPLOAD_MESSAGE',
+          'There was a problem submitting the edited recipe. Please try again'
+        );
       }
     },
 

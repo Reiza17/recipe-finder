@@ -8,7 +8,7 @@
     aria-atomic="true"
   >
     <div class="d-flex">
-      <div class="toast-body">Your recipe has been uploaded!</div>
+      <div class="toast-body">{{ toastMessage }}</div>
       <button
         type="button"
         class="btn-close btn-close-white m-auto"
@@ -37,6 +37,11 @@ export default {
     return {
       toast: null,
     };
+  },
+  computed: {
+    toastMessage() {
+      return this.$store.getters['home/successfulUpload'];
+    },
   },
   mounted() {
     this.toast = new Toast(this.$refs.el);
