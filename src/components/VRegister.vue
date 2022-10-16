@@ -48,7 +48,7 @@
               type="password"
               class="form-control"
               id="floatingPassword"
-              placeholder="name@example.com"
+              placeholder="password"
               v-model="password"
               @input="delayTouch($v.password)"
             />

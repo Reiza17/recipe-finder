@@ -13,7 +13,7 @@
             <VEditRecipe v-if="editRecipeModal" />
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
-            <VToast v-if="successfulUpload" />
+            <VToast v-if="toastMessage" />
           </div>
         </div>
         <router-view />
@@ -53,7 +53,7 @@ export default {
       'editRecipeModal',
       'loginModal',
       'registerModal',
-      'successfulUpload',
+      'toastMessage',
     ]),
   },
   // methods: {

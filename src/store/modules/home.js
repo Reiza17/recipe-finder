@@ -37,8 +37,8 @@ export default {
     renderRecipeError: null,
     uploadRecipeModal: false,
     uploadingRecipe: false,
-    successfulUpload: '',
     toastMessage: '',
+    toastTimeout: null,
   },
 
   getters: {
@@ -64,7 +64,6 @@ export default {
     renderRecipeError: state => state.renderRecipeError,
     uploadRecipeModal: state => state.uploadRecipeModal,
     uploadingRecipe: state => state.uploadingRecipe,
-    successfulUpload: state => state.successfulUpload,
     toastMessage: state => state.toastMessage,
   },
 
@@ -155,8 +154,16 @@ export default {
       state.uploadingRecipe = boolean;
     },
 
-    SET_SUCCESSFUL_UPLOAD(state, msg) {
-      state.successfulUpload = msg;
+    SET_TOAST_MESSAGE(state, msg) {
+      state.toastMessage = '';
+      setTimeout(() => {
+        state.toastMessage = msg;
+      }, 1);
+
+      clearTimeout(state.toastTimeout);
+      state.toastTimeout = setTimeout(() => {
+        state.toastMessage = '';
+      }, 3500);
     },
 
     TOGGLE_USER_RECIPES_SPINNER(state, boolean) {
@@ -389,8 +396,6 @@ export default {
         // console.log(res);
         // if (!res) throw new Error('10 seconds have passed...');
 
-        // TODO add 'Your recipe has been uploaded!' toast. Toast should appear on home, because the upload window should disappear as soon as the upload is successful (improving load speed/UX)
-
         commit('TOGGLE_UPLOAD_SPINNER', false);
 
         commit('ADD_USER_RECIPE', userRecipe);
@@ -409,7 +414,7 @@ export default {
             reloadingPage: true,
           });
         commit('TOGGLE_UPLOAD_RECIPE_MODAL');
-        commit('SET_SUCCESSFUL_UPLOAD', 'The recipe has been uploaded!');
+        commit('SET_TOAST_MESSAGE', 'The recipe has been uploaded');
       } catch (err) {
         console.log(err);
         commit('TOGGLE_UPLOAD_SPINNER', false);
@@ -447,7 +452,7 @@ export default {
           id: router.app._route.params.id,
         });
         commit('TOGGLE_EDIT_USER_RECIPE_MODAL');
-        commit('SET_SUCCESSFUL_UPLOAD', 'The recipe has been edited!');
+        commit('SET_TOAST_MESSAGE', 'The recipe has been edited');
       } catch (err) {
         console.log(err);
         commit('TOGGLE_UPLOAD_SPINNER', false);
@@ -475,7 +480,7 @@ export default {
           .catch(() => {});
 
         dispatch('searchRecipes', { query: router.app._route.query.query });
-        // TODO OR/AND dispatch something to the Recipe view that says the recipe has been deleted?
+        commit('SET_TOAST_MESSAGE', 'The recipe has been deleted');
       } catch (err) {
         console.error(`Failed to remove user recipe from server: ${err}`);
       }
@@ -506,13 +511,14 @@ export default {
           updateDoc(docRef, {
             bookmarks: arrayUnion(recipe),
           });
+          commit('SET_TOAST_MESSAGE', "You've saved this recipe");
         } else {
           // NOTE the mutation below actually changes the recipe (setting its 'bookmarked' property to 'false'), meaning it becomes different from the object in the backend. Having this discrepancy means the backend cannot remove the object, as they need to exactly match. Therefore, need to dispatch action to backend FIRST before committing the mutation.
           updateDoc(docRef, {
             bookmarks: arrayRemove(recipe),
           });
           commit('DELETE_BOOKMARK', recipe);
-          console.log('deleted bookmark');
+          commit('SET_TOAST_MESSAGE', "You've unsaved this recipe");
         }
       } catch (err) {
         console.error(`Failed to add/delete bookmark: ${err}`);

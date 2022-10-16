@@ -6,6 +6,7 @@
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
+    data-bs-autohide="false"
   >
     <div class="d-flex">
       <div class="toast-body">{{ toastMessage }}</div>
@@ -40,7 +41,7 @@ export default {
   },
   computed: {
     toastMessage() {
-      return this.$store.getters['home/successfulUpload'];
+      return this.$store.getters['home/toastMessage'];
     },
   },
   mounted() {

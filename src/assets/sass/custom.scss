@@ -14,9 +14,12 @@ $font-family-sans-serif: DD-TTNorms, -apple-system, BlinkMacSystemFont,
   'Segoe UI Emoji', 'Segoe UI Symbol';
 $font-weight-base: 400;
 $grid-columns: 16 !default;
-$form-floating-input-padding-t: 2rem;
-$form-floating-input-padding-b: 0.35rem;
+$form-floating-input-padding-t: 2.3rem;
+$form-floating-input-padding-b: 0.5rem;
 $btn-disabled-opacity: 0.2;
+$form-floating-label-opacity: 0.85;
+$form-floating-label-transform: scale(0.9) translateY(-0.8rem)
+  translateX(0.15rem);
 
 // $display-font-family: 'Nunito Sans', sans-serif;
 // $display-font-style:  null !default;

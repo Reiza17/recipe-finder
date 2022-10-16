@@ -226,7 +226,7 @@
           <svg v-else-if="successfulUpload" class="icon">
             <use :href="`${icons}#icon-check`"></use>
           </svg>
-          <div v-else>
+          <div class="align-items-center d-flex" v-else>
             <svg class="icon">
               <use :href="`${icons}#icon-upload-cloud`"></use>
             </svg>
@@ -308,7 +308,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['uploadingRecipe', 'successfulUpload']),
+    ...mapGetters({
+      uploadingRecipe: 'uploadingRecipe',
+      successfulUpload: 'toastMessage',
+    }),
   },
   methods: {
     ...mapMutations({ toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL' }),
@@ -387,7 +390,6 @@ export default {
 
   created() {
     window.addEventListener('beforeunload', this.checkIfStayInDirtyForm);
-    this.$store.commit('home/SET_SUCCESSFUL_UPLOAD', false);
   },
 
   beforeDestroy() {

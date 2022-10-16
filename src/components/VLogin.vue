@@ -57,7 +57,7 @@
               type="password"
               class="form-control"
               id="floatingPassword"
-              placeholder="name@example.com"
+              placeholder="password"
               v-model="password"
               @input="delayTouch($v.password)"
             />
@@ -229,7 +229,7 @@ export default {
   .form-control {
     font-size: 14px;
     font-weight: 500;
-    height: 48px;
+    height: 43px;
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     background-color: #fcfcfb;
