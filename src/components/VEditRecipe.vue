@@ -19,30 +19,35 @@
         &times;
       </button>
       <form @submit.prevent="submitForm" class="upload">
-        <div class="recipe-data">
+        <div
+          class="recipe-data border-bottom border-danger"
+          style="--bs-border-opacity: 0.5"
+        >
           <h3 class="upload__heading">Recipe data</h3>
 
           <div class="row">
             <div class="col">
               <!-- <div class="upload__field"> -->
-              <div
-                class="form-floating recipe-field"
-                :class="{
-                  'form-group--input-error': $v.formData.title.$error,
-                }"
-              >
+              <div class="form-floating recipe-field">
                 <input
                   v-model.trim="formData.title"
                   @blur="$v.formData.title.$touch"
+                  @input="$v.formData.title.$reset()"
                   name="title"
                   type="text"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': $v.formData.title.$error,
+                  }"
                   id="floatingTitle"
                   placeholder="Title"
                 />
                 <!-- NOTE Alternatively, could show  errors only after the form is submitted, rather than right after a field is modified:  -->
                 <!-- <p v-if="formErrorsExist" class="upload__error"> -->
                 <label for="floatingTitle">Title</label>
+                <p v-if="!$v.formData.title.$error" class="form-helper">
+                  E.g. Cheddar Bacon Hamburger
+                </p>
                 <p v-if="$v.formData.title.$error" class="upload__error">
                   <span v-if="!$v.formData.title.required"
                     >This field is required</span
@@ -52,22 +57,24 @@
             </div>
 
             <div class="col">
-              <div
-                class="form-floating recipe-field"
-                :class="{
-                  'form-group--input-error': $v.formData.source_url.$error,
-                }"
-              >
+              <div class="form-floating recipe-field">
                 <input
                   v-model.trim="formData.source_url"
                   @blur="$v.formData.source_url.$touch"
+                  @input="$v.formData.source_url.$reset()"
                   name="source_url"
                   type="text"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': $v.formData.source_url.$error,
+                  }"
                   id="floatingSource"
                   placeholder="https://www.example.com"
                 />
                 <label for="floatingSource">URL</label>
+                <p v-if="!$v.formData.source_url.$error" class="form-helper">
+                  E.g. https://allrecipes.com/recipe/cheddar-bacon-hamburgers/
+                </p>
                 <p v-if="$v.formData.source_url.$error" class="upload__error">
                   <span v-if="!$v.formData.source_url.required"
                     >This field is required</span
@@ -86,22 +93,24 @@
 
           <div class="row">
             <div class="col">
-              <div
-                class="form-floating recipe-field"
-                :class="{
-                  'form-group--input-error': $v.formData.publisher.$error,
-                }"
-              >
+              <div class="form-floating recipe-field">
                 <input
                   v-model.trim="formData.publisher"
                   @blur="$v.formData.publisher.$touch"
+                  @input="$v.formData.publisher.$reset()"
                   name="publisher"
                   type="text"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': $v.formData.publisher.$error,
+                  }"
                   id="floatingPublisher"
                   placeholder="Publisher"
                 />
                 <label for="floatingPublisher">Publisher</label>
+                <p v-if="!$v.formData.publisher.$error" class="form-helper">
+                  E.g. All Recipes
+                </p>
                 <p v-if="$v.formData.publisher.$error" class="upload__error">
                   <span v-if="!$v.formData.publisher.required"
                     >This field is required</span
@@ -111,24 +120,26 @@
             </div>
             <div class="col">
               <!-- <div class="upload__field"> -->
-              <div
-                class="form-floating recipe-field"
-                :class="{
-                  'form-group--input-error': $v.formData.image_url.$error,
-                }"
-              >
+              <div class="form-floating recipe-field">
                 <input
                   v-model.trim="formData.image_url"
                   @blur="$v.formData.image_url.$touch"
+                  @input="$v.formData.image_url.$reset()"
                   name="image"
                   type="text"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': $v.formData.image_url.$error,
+                  }"
                   id="floatingImageURL"
                   placeholder="https://www.example.com"
                 />
                 <!-- NOTE Alternatively, could show  errors only after the form is submitted, rather than right after a field is modified:  -->
                 <!-- <p v-if="formErrorsExist" class="upload__error"> -->
                 <label for="floatingImageURL">Image URL</label>
+                <p v-if="!$v.formData.image_url.$error" class="form-helper">
+                  E.g. https://images.unsplash.com/photo-1553979459-d2229ba7433b
+                </p>
                 <p v-if="$v.formData.image_url.$error" class="upload__error">
                   <span v-if="!$v.formData.image_url.required"
                     >This field is required</span
@@ -144,26 +155,28 @@
           <div class="row">
             <div class="col">
               <!-- <div class="upload__field"> -->
-              <div
-                class="form-floating recipe-field"
-                :class="{
-                  'form-group--input-error': $v.formData.cooking_time.$error,
-                }"
-              >
+              <div class="form-floating recipe-field">
                 <input
                   v-model.trim="formData.cooking_time"
                   min="1"
                   oninput="this.value = Math.abs(this.value) > 0 ? Math.abs(this.value) : null"
                   @blur="$v.formData.cooking_time.$touch"
+                  @input="$v.formData.cooking_time.$reset()"
                   name="cooking_time"
                   type="number"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': $v.formData.cooking_time.$error,
+                  }"
                   id="floatingCookingTime"
-                  placeholder="25"
+                  placeholder="35"
                 />
                 <!-- NOTE Alternatively, could show  errors only after the form is submitted, rather than right after a field is modified:  -->
                 <!-- <p v-if="formErrorsExist" class="upload__error"> -->
                 <label for="floatingCookingTime">Prep time</label>
+                <p v-if="!$v.formData.cooking_time.$error" class="form-helper">
+                  E.g. 25
+                </p>
                 <p v-if="$v.formData.cooking_time.$error" class="upload__error">
                   <span v-if="!$v.formData.cooking_time.required"
                     >This field is required</span
@@ -172,24 +185,26 @@
               </div>
             </div>
             <div class="col">
-              <div
-                class="form-floating recipe-field"
-                :class="{
-                  'form-group--input-error': $v.formData.servings.$error,
-                }"
-              >
+              <div class="form-floating recipe-field">
                 <input
                   v-model.trim="formData.servings"
                   min="1"
                   oninput="this.value = Math.abs(this.value) > 0 ? Math.abs(this.value) : null"
                   @blur="$v.formData.servings.$touch"
+                  @input="$v.formData.servings.$reset()"
                   name="servings"
                   type="number"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': $v.formData.servings.$error,
+                  }"
                   id="floatingServings"
                   placeholder="4"
                 />
                 <label for="floatingServings">Servings</label>
+                <p v-if="!$v.formData.servings.$error" class="form-helper">
+                  E.g. 4
+                </p>
                 <p v-if="$v.formData.servings.$error" class="upload__error">
                   <span v-if="!$v.formData.servings.required"
                     >This field is required</span
@@ -236,77 +251,80 @@
           >
             <label class="ingredient-label">Ingredient {{ +index + 1 }}</label>
 
-            <div class="col-3">
-              <div
-                class="form-floating"
-                :class="{
-                  'form-group--input-error': ingredient.quantity.$error,
-                }"
-              >
+            <div class="col-4">
+              <div class="form-floating">
                 <input
                   v-model.trim="ingredient.quantity.$model"
                   @blur="ingredient.quantity.$touch"
+                  @input="ingredient.quantity.$reset()"
                   name="ingredient_quantity"
                   type="number"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': ingredient.quantity.$error,
+                  }"
                   id="floatingIngQuantity"
                   placeholder="ingredient"
                 />
                 <label for="floatingIngQuantity">Quantity</label>
+                <p v-if="!ingredient.quantity.$error" class="form-helper">
+                  E.g. 2
+                </p>
                 <p v-if="ingredient.quantity.$error" class="upload__error">
-                  <span v-if="!ingredient.quantity.required">
-                    Enter a quantity (e.g. 3).</span
-                  >
+                  <span v-if="!ingredient.quantity.required">Required</span>
                 </p>
               </div>
             </div>
 
-            <div class="col-3">
-              <div
-                class="form-floating"
-                :class="{
-                  'form-group--input-error': ingredient.unit.$error,
-                }"
-              >
+            <div class="col-4">
+              <div class="form-floating">
                 <input
                   v-model.trim="ingredient.unit.$model"
                   @blur="ingredient.unit.$touch"
+                  @input="ingredient.unit.$reset()"
                   name="ingredient_unit"
                   type="text"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': ingredient.unit.$error,
+                  }"
                   id="floatingIngUnit"
                   placeholder="unit"
                 />
                 <label for="floatingIngUnit">Unit</label>
+                <p
+                  v-if="!ingredient.unit.$error"
+                  class="form-helper text-wrap overflow-visible"
+                >
+                  E.g. cup/kg/slices
+                </p>
                 <p v-if="ingredient.unit.$error" class="upload__error">
-                  <span v-if="!ingredient.unit.required">
-                    Enter a unit (e.g. cup/kg/slices).</span
-                  >
+                  <span v-if="!ingredient.unit.required">Required</span>
                 </p>
               </div>
             </div>
 
-            <div class="col-9">
-              <div
-                class="form-floating"
-                :class="{
-                  'form-group--input-error': ingredient.description.$error,
-                }"
-              >
+            <div class="col-7">
+              <div class="form-floating">
                 <input
                   v-model.trim="ingredient.description.$model"
                   @blur="ingredient.description.$touch"
+                  @input="ingredient.description.$reset()"
                   name="ingredient_description"
                   type="text"
                   class="form-control"
+                  :class="{
+                    'form-group--input-error': ingredient.description.$error,
+                  }"
                   id="floatingIngDescription"
                   placeholder="description"
                 />
                 <label for="floatingIngDescription">Description</label>
+                <p v-if="!ingredient.description.$error" class="form-helper">
+                  E.g. sugar/rice/cheese
+                </p>
                 <p v-if="ingredient.description.$error" class="upload__error">
-                  <span v-if="!ingredient.description.required">
-                    Enter a description (e.g. sugar/rice/cheese).</span
-                  >
+                  <span v-if="!ingredient.description.required">Required</span>
                 </p>
               </div>
             </div>
@@ -564,18 +582,19 @@ export default {
   flex: 1 1 100px;
 
   .recipe-data {
-    margin-bottom: 35px;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
   }
 
   .ingredients {
-    margin-bottom: 45px;
+    margin-bottom: 60px;
   }
 
   .row {
     column-gap: 10px;
-    row-gap: 22px;
+    row-gap: 30px;
     display: flex;
-    margin-bottom: 22px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
   }
 
@@ -614,7 +633,6 @@ export default {
     font-weight: 500;
     height: 43px;
     width: 100%;
-
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     background-color: #fcfcfb;
@@ -626,9 +644,18 @@ export default {
     border-width: 0.5px;
     box-shadow: none;
   }
+  .form-helper {
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 1rem;
+    position: absolute;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    overflow: hidden;
+  }
 
   .form-group--input-error {
-    font-size: 14px;
     border-radius: 6px;
     border: 1px solid red;
   }
@@ -679,8 +706,8 @@ export default {
     }
 
     svg {
-      height: 3.3rem;
-      width: 3.3rem;
+      height: 3rem;
+      width: 3rem;
       fill: rgba(213, 77, 82, 1);
     }
   }
@@ -792,6 +819,7 @@ export default {
     color: red;
     font-size: 12px;
     position: absolute;
+    margin-left: 1rem;
     // text-transform: uppercase;
   }
 
