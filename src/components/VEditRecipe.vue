@@ -19,10 +19,7 @@
         &times;
       </button>
       <form @submit.prevent="submitForm" class="upload">
-        <div
-          class="recipe-data border-bottom border-danger"
-          style="--bs-border-opacity: 0.5"
-        >
+        <div class="recipe-data border-bottom border-danger border-opacity-50">
           <h3 class="upload__heading">Recipe data</h3>
 
           <div class="row">
@@ -259,6 +256,8 @@
                   @input="ingredient.quantity.$reset()"
                   name="ingredient_quantity"
                   type="number"
+                  step="any"
+                  min="0.01"
                   class="form-control"
                   :class="{
                     'form-group--input-error': ingredient.quantity.$error,
@@ -355,7 +354,7 @@
 
         <button
           type="submit"
-          :disabled="formSubmitted"
+          :disabled="$v.$invalid"
           class="btn btn-outline-success upload__btn"
         >
           <span

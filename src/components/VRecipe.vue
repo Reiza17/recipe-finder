@@ -3,6 +3,22 @@
     <div v-if="renderRecipeError" class="message">
       <p>{{ renderRecipeError }}</p>
     </div>
+    <div
+      v-else-if="
+        (!$route.params.id && !$route.query.query) ||
+        (!$route.params.id &&
+          $route.query.query &&
+          !Object.keys(searchResultsDisplay).length)
+      "
+      class="message"
+    >
+      <div>
+        <svg>
+          <use :href="`${icons}#icon-smile`"></use>
+        </svg>
+      </div>
+      <p>Start by searching for a recipe or an ingredient. Have fun!</p>
+    </div>
     <div v-else-if="!$route.params.id && $route.query.query" class="message">
       <div>
         <svg>
@@ -10,14 +26,6 @@
         </svg>
       </div>
       <p>Click on a recipe!</p>
-    </div>
-    <div v-else-if="!$route.params.id && !$route.query.query" class="message">
-      <div>
-        <svg>
-          <use :href="`${icons}#icon-smile`"></use>
-        </svg>
-      </div>
-      <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
 
     <VLoadingSpinner v-else-if="loadingRecipe" />
@@ -191,13 +199,10 @@ export default {
     };
   },
   watch: {
-    '$route.params'(newValue) {
-      // console.log(newValue);
-      // console.log(this.$route);
-
-      if (newValue.id)
+    '$route.params.id'(newValue) {
+      if (newValue)
         this.$store.dispatch('home/renderRecipe', {
-          id: newValue.id,
+          id: newValue,
         });
     },
   },
@@ -207,6 +212,7 @@ export default {
       'recipeBookmarked',
       'loadingRecipe',
       'renderRecipeError',
+      'searchResultsDisplay',
     ]),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];

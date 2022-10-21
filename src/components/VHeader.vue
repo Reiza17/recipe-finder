@@ -19,13 +19,13 @@
 
     <nav class="nav ms-4">
       <ul class="nav__list">
-        <VUserRecipes v-if="loggedIn" />
+        <!-- <VUserRecipes v-if="loggedIn" /> -->
         <li class="nav__item">
-          <button @click="openUploadRecipeModal" class="nav__btn">
+          <button @click="toggleUserRecipesView" class="nav__btn">
             <svg class="nav__icon">
-              <use href="@/assets/images/icons.svg#icon-edit"></use>
+              <use :href="`${icons}#icon-user`"></use>
             </svg>
-            <span class="nav_label">Add recipe</span>
+            <span class="nav_label">My Recipes</span>
           </button>
         </li>
         <VBookmarks />
@@ -64,7 +64,7 @@
 <script>
 import VSearch from '@/components/VSearch.vue';
 import VBookmarks from '@/components/VBookmarks.vue';
-import VUserRecipes from '@/components/VUserRecipes.vue';
+// import VUserRecipes from '@/components/VUserRecipes.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapMutations } = createNamespacedHelpers('home');
 
@@ -73,7 +73,12 @@ export default {
   components: {
     VSearch,
     VBookmarks,
-    VUserRecipes,
+    // VUserRecipes,
+  },
+  data() {
+    return {
+      icons: require('@/assets/images/icons.svg'),
+    };
   },
   computed: {
     loggedIn() {
@@ -82,7 +87,8 @@ export default {
   },
   methods: {
     ...mapMutations({
-      toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+      // toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+      toggleUserRecipesView: 'TOGGLE_USER_RECIPES_VIEW',
       toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),

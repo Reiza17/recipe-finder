@@ -39,6 +39,8 @@ export default {
     uploadingRecipe: false,
     toastMessage: '',
     toastTimeout: null,
+    // User recipes view variables
+    userRecipesView: false,
   },
 
   getters: {
@@ -65,6 +67,8 @@ export default {
     uploadRecipeModal: state => state.uploadRecipeModal,
     uploadingRecipe: state => state.uploadingRecipe,
     toastMessage: state => state.toastMessage,
+    // User recipes view variables
+    userRecipesView: state => state.userRecipesView,
   },
 
   mutations: {
@@ -144,6 +148,10 @@ export default {
 
     TOGGLE_REGISTER_MODAL(state) {
       state.registerModal = !state.registerModal;
+    },
+
+    TOGGLE_USER_RECIPES_VIEW(state) {
+      state.userRecipesView = !state.userRecipesView;
     },
 
     TOGGLE_UPLOAD_RECIPE_MODAL(state) {
@@ -255,7 +263,7 @@ export default {
       try {
         commit('TOGGLE_SEARCH_SPINNER', true);
 
-        // NOTE This prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
+        // NOTE The guard clause prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
         if (!reloadingPage)
           router.push({ query: { query: query, page: page } }).catch(() => {});
 

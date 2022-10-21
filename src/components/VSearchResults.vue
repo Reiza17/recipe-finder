@@ -2,19 +2,22 @@
   <div class="search-container">
     <div v-if="!$route.query.query"></div>
     <VLoadingSpinner v-else-if="loadingSearchResults" />
-    <VRecipePreview
-      v-else-if="!loadingSearchResults && $route.query.query"
-      :recipes="searchResultsDisplay"
-      :resultsActive="true"
-    />
-    <div v-else class="error">
+    <div v-else-if="!Object.keys(searchResultsDisplay).length" class="error">
       <div>
         <svg>
           <use :href="`${icons}#icon-alert-triangle`"></use>
         </svg>
       </div>
-      <p>No recipes found for your query. Please try again!</p>
+      <div>
+        <p>No recipes for your search terms were found.</p>
+        <p>Try different keywords or more general keywords.</p>
+      </div>
     </div>
+    <VRecipePreview
+      v-else
+      :recipes="searchResultsDisplay"
+      :resultsActive="true"
+    />
 
     <div v-if="!loadingSearchResults && $route.query.query" class="pagination">
       <!-- Page 1, and there are other pages -->
@@ -127,6 +130,26 @@ export default {
   @media only screen and (max-width: 648px) {
     border-top: 1px solid rgb(231, 231, 231);
     padding-top: 5px;
+  }
+
+  .error {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 4rem 3rem;
+    display: flex;
+
+    svg {
+      height: 3rem;
+      width: 3rem;
+      fill: rgb(230, 71, 32);
+    }
+    p {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
   }
 }
 

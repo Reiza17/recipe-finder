@@ -40,13 +40,13 @@ export default {
   data() {
     return {
       icons: require('@/assets/images/icons.svg'),
-      query: '',
+      // NOTE: retains search query in search field after reloading the page
+      query: this.$route.query.query,
     };
   },
   methods: {
     submitSearch() {
       this.$store.dispatch('home/searchRecipes', { query: this.query });
-      this.query = '';
     },
   },
 };

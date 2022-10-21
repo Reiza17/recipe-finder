@@ -9,6 +9,7 @@
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VSearchResults class="col-sm-3 search-results" />
             <VRecipe class="col-sm-9 recipe" />
+            <VUserRecipes v-if="userRecipesView" />
             <VUploadRecipe v-if="uploadRecipeModal" />
             <VEditRecipe v-if="editRecipeModal" />
             <VLogin v-if="loginModal" />
@@ -26,6 +27,7 @@
 import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
+import VUserRecipes from '@/components/VUserRecipes.vue';
 import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
@@ -45,10 +47,12 @@ export default {
     VLogin,
     VRegister,
     VToast,
+    VUserRecipes,
   },
 
   computed: {
     ...mapGetters([
+      'userRecipesView',
       'uploadRecipeModal',
       'editRecipeModal',
       'loginModal',
