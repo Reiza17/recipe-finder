@@ -3,7 +3,7 @@
     class="navbar sticky-top p-3 flex-wrap-reverse justify-content-end gap-4"
   >
     <div class="d-flex flex-row align-items-center flex-grow-1 ms-5">
-      <a class="navbar-brand d-flex flex-row align-items-center me-5" href="/">
+      <a class="navbar-brand d-flex flex-row align-items-center me-4" href="/">
         <img
           src="@/assets/images/logo.svg"
           alt="Logo"
@@ -11,7 +11,7 @@
           height="40"
           class="d-inline-block me-3"
         />
-        <p class="logo-text">Forklift</p>
+        <p class="logo-text me-4">Forklift</p>
       </a>
       <!-- <img src="" alt="Logo" class="logo me-5" /> -->
       <VSearch />
@@ -20,14 +20,78 @@
     <nav class="nav ms-4">
       <ul class="nav__list">
         <!-- <VUserRecipes v-if="loggedIn" /> -->
-        <li class="nav__item">
+        <!-- <li class="nav__item">
           <button @click="toggleUserRecipesView" class="nav__btn">
+            <svg class="nav__icon">
+              <use :href="`${icons}#icon-upload-cloud`"></use>
+            </svg>
+            <span class="nav_label">Database</span>
+          </button>
+        </li> -->
+        <!-- <li class="nav__item">
+          <router-link to="/home" class="nav__btn">
+            <svg class="nav__icon">
+              <use :href="`${icons}#icon-upload-cloud`"></use>
+            </svg>
+            <span class="nav_label">Database</span>
+          </router-link>
+        </li> -->
+        <!-- <li class="nav__item">
+          <router-link to="/personal" class="nav__btn">
+            <svg class="nav__icon">
+              <use :href="`${icons}#icon-user`"></use>
+            </svg>
+            <span class="nav_label">My Recipes</span>
+          </router-link>
+        </li> -->
+        <li class="nav__item">
+          <button
+            @click="
+              $router.push({
+                name: 'recipe',
+                params: {
+                  id: $route.params.id,
+                  userRecipeId: $route.params.userRecipeId,
+                },
+                query: {
+                  query: $route.query.query,
+                  userRecipeQuery: $route.query.userRecipeQuery,
+                },
+              })
+            "
+            class="nav__btn"
+          >
+            <svg class="nav__icon">
+              <use :href="`${icons}#icon-upload-cloud`"></use>
+            </svg>
+            <span class="nav_label">Database</span>
+          </button>
+        </li>
+
+        <li class="nav__item">
+          <button
+            @click="
+              $router.push({
+                name: 'userRecipe',
+                params: {
+                  id: $route.params.id,
+                  userRecipeId: $route.params.userRecipeId,
+                },
+                query: {
+                  query: $route.query.query,
+                  userRecipeQuery: $route.query.userRecipeQuery,
+                },
+              })
+            "
+            class="nav__btn"
+          >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-user`"></use>
             </svg>
             <span class="nav_label">My Recipes</span>
           </button>
         </li>
+
         <VBookmarks />
         <li class="nav__item" v-if="!loggedIn">
           <button @click="toggleLoginModal" class="nav__btn">

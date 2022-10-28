@@ -7,7 +7,13 @@
       :key="result.id"
     >
       <router-link
-        :to="{ name: 'recipe', params: { id: result.id } }"
+        :to="{
+          name: 'recipe',
+          params: {
+            id: result.id,
+            userRecipeId: $route.params.userRecipeId,
+          },
+        }"
         class="preview__link"
       >
         <figure class="preview__fig">

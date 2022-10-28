@@ -15,18 +15,21 @@
       </div> -->
     <!-- <router-link to="/secret">Secret</router-link> -->
     <!-- </div> -->
-    <router-view />
+    <VHeader />
+    <!-- <router-link to="/home">Go to Foo</router-link>
+    <router-link to="/personal">Go to Foo</router-link> -->
+    <keep-alive><router-view /></keep-alive>
   </div>
 </template>
 
 <script>
-// import Header from './components/Top-Header';
+import VHeader from '@/components/VHeader.vue';
 
 export default {
   name: 'app',
-  // components: {
-  //   'top-header': Header,
-  // },
+  components: {
+    VHeader,
+  },
   // computed: {
   //   loggedIn() {
   //     return this.$store.getters['auth/loggedIn'];

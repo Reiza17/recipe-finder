@@ -1,5 +1,9 @@
 <template>
-  <form class="search" @submit.prevent="submitSearch">
+  <form
+    v-if="$route.name === 'recipe' || $route.name === 'home'"
+    class="search"
+    @submit.prevent="submitSearch"
+  >
     <i class="fa-solid fa-magnifying-glass fa-2xl"></i>
     <input
       type="search"
@@ -31,6 +35,15 @@
       </div>
     </div> -->
   </form>
+  <form v-else class="search" @submit.prevent="submitUserRecipeSearch">
+    <i class="fa-solid fa-magnifying-glass fa-2xl"></i>
+    <input
+      type="search"
+      class="form-control"
+      placeholder="Search among your recipes"
+      v-model="userRecipeQuery"
+    />
+  </form>
 </template>
 
 <script>
@@ -42,11 +55,17 @@ export default {
       icons: require('@/assets/images/icons.svg'),
       // NOTE: retains search query in search field after reloading the page
       query: this.$route.query.query,
+      userRecipeQuery: this.$route.query.userRecipeQuery,
     };
   },
   methods: {
     submitSearch() {
       this.$store.dispatch('home/searchRecipes', { query: this.query });
+    },
+    submitUserRecipeSearch() {
+      this.$store.dispatch('home/searchUserRecipes', {
+        query: this.userRecipeQuery,
+      });
     },
   },
 };

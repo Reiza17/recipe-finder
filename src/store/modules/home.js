@@ -19,10 +19,16 @@ export default {
 
   state: {
     recipe: {},
+    userRecipe: {},
     userRecipes: [],
     bookmarks: [],
     previousURL: '',
     search: {
+      results: [],
+      page: 1,
+      resultsPerPage: RES_PER_PAGE,
+    },
+    userRecipeSearch: {
       results: [],
       page: 1,
       resultsPerPage: RES_PER_PAGE,
@@ -47,7 +53,19 @@ export default {
     recipe: state => state.recipe,
     recipeBookmarks: state => state.bookmarks,
     recipeBookmarked: state => state.recipe.bookmarked,
+    userRecipe: state => state.userRecipe,
     userRecipes: state => state.userRecipes,
+    userRecipeSearchResults: state => state.userRecipeSearch.results,
+    userRecipeSearchResultsCurrentPage: state => state.userRecipeSearch.page,
+    userRecipeSearchResultsDisplay: state => {
+      const start =
+        (state.userRecipeSearch.page - 1) *
+        state.userRecipeSearch.resultsPerPage; // 0
+      const end =
+        state.userRecipeSearch.page * state.userRecipeSearch.resultsPerPage; // 10
+
+      return state.userRecipeSearch.results.slice(start, end);
+    },
     searchResults: state => state.search.results,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
@@ -76,9 +94,15 @@ export default {
       state.previousURL = pageName;
     },
 
+    // REVIEW should I combine these into one action instead?
     CREATE_SEARCH_RESULTS(state, { results, page = 1 }) {
       state.search.results = results;
       state.search.page = page;
+    },
+
+    CREATE_USER_RECIPE_SEARCH_RESULTS(state, { results, page = 1 }) {
+      state.userRecipeSearch.results = results;
+      state.userRecipeSearch.page = page;
     },
 
     TOGGLE_SEARCH_SPINNER(state, boolean) {
@@ -95,11 +119,21 @@ export default {
       });
     },
 
-    CREATE_RECIPE_OBJECT(state, data) {
-      state.recipe = { ...data, bookmarked: false };
-      if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
-        state.recipe.bookmarked = true;
-      else state.recipe.bookmarked = false;
+    // REVIEW should I split this into two actions instead?
+    CREATE_RECIPE_OBJECT(state, { data, userGenerated = false }) {
+      if (!userGenerated) {
+        state.recipe = { ...data, bookmarked: false };
+        if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
+          state.recipe.bookmarked = true;
+        else state.recipe.bookmarked = false;
+      } else {
+        state.userRecipe = { ...data, bookmarked: false };
+        if (
+          state.bookmarks.some(bookmark => bookmark.id === state.userRecipe.id)
+        )
+          state.userRecipe.bookmarked = true;
+        else state.userRecipe.bookmarked = false;
+      }
     },
 
     SHOW_RENDER_RECIPE_ERROR_MESSAGE(state, message) {
@@ -236,11 +270,18 @@ export default {
         commit('TOGGLE_BOOKMARKS_SPINNER', false);
         commit('TOGGLE_SEARCH_SPINNER', false);
 
-        // console.log(router);
+        console.log(router);
         if (router.app._route.query.query)
           dispatch('searchRecipes', {
             query: router.app._route.query.query,
             page: router.app._route.query.page,
+            reloadingPage: true,
+          });
+
+        if (router.app._route.query.userRecipeQuery)
+          dispatch('searchUserRecipes', {
+            query: router.app._route.query.userRecipeQuery,
+            page: router.app._route.query.userRecipeQueryPage,
             reloadingPage: true,
           });
 
@@ -250,6 +291,11 @@ export default {
         if (router.app._route.params.id)
           dispatch('renderRecipe', {
             id: router.app._route.params.id,
+          });
+
+        if (router.app._route.params.userRecipeId)
+          dispatch('renderRecipe', {
+            id: router.app._route.params.userRecipeId,
           });
       } catch (err) {
         console.log(err);
@@ -264,14 +310,26 @@ export default {
         commit('TOGGLE_SEARCH_SPINNER', true);
 
         // NOTE The guard clause prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
+        // TODO used to not have "name: 'home'"
         if (!reloadingPage)
-          router.push({ query: { query: query, page: page } }).catch(() => {});
+          router
+            .push({
+              name: 'home',
+              query: {
+                query: query,
+                page: page,
+                userRecipeQuery: router.app._route.query.userRecipeQuery,
+                userRecipeQueryPage:
+                  router.app._route.query.userRecipeQueryPage,
+              },
+            })
+            .catch(() => {});
 
         // console.log(state.userRecipes);
         // NOTE Remove 'split' below if I want to include partial-word results
-        const matchingUserRecipes = state.userRecipes.filter(recipe =>
-          recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
-        );
+        // const matchingUserRecipes = state.userRecipes.filter(recipe =>
+        //   recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
+        // );
 
         const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
         const allSearchResults = res.data.data.recipes;
@@ -292,11 +350,69 @@ export default {
         );
 
         const filteredResults = [
-          ...matchingUserRecipes,
+          // ...matchingUserRecipes,
           ...bookmarkedSearchResults,
           ...nonBookmarkedSearchResults,
         ];
         commit('CREATE_SEARCH_RESULTS', {
+          results: filteredResults,
+          page: +page,
+        });
+        commit('TOGGLE_SEARCH_SPINNER', false);
+      } catch (err) {
+        console.error(`Error searching for recipes: ${err}`);
+        commit('TOGGLE_SEARCH_SPINNER', false);
+      }
+    },
+
+    async searchUserRecipes(
+      { commit, state },
+      { query, page = 1, reloadingPage = false }
+    ) {
+      try {
+        commit('TOGGLE_SEARCH_SPINNER', true);
+
+        // NOTE The guard clause prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
+        // TODO used to not have "name: 'home'"
+        if (!reloadingPage)
+          router
+            .push({
+              name: 'personal',
+              query: {
+                query: router.app._route.query.query,
+                page: router.app._route.query.page,
+                userRecipeQuery: query,
+                userRecipeQueryPage: page,
+              },
+            })
+            .catch(() => {});
+
+        // console.log(state.userRecipes);
+        // NOTE Remove 'split' below if I want to include partial-word results
+        const allSearchResults = state.userRecipes.filter(recipe =>
+          recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
+        );
+
+        // TODO Rename variable to something better?
+        const bookmarkedSearchResults = allSearchResults.filter(recipe =>
+          state.bookmarks.some(
+            bookmarkedRecipe => bookmarkedRecipe.id === recipe.id
+          )
+        );
+
+        // TODO Rename variable to something better?
+        const nonBookmarkedSearchResults = allSearchResults.filter(
+          recipe =>
+            !state.bookmarks.some(
+              bookmarkedRecipe => bookmarkedRecipe.id === recipe.id
+            )
+        );
+
+        const filteredResults = [
+          ...bookmarkedSearchResults,
+          ...nonBookmarkedSearchResults,
+        ];
+        commit('CREATE_USER_RECIPE_SEARCH_RESULTS', {
           results: filteredResults,
           page: +page,
         });
@@ -316,12 +432,20 @@ export default {
         const [userRecipe] = state.userRecipes.filter(
           recipe => recipe.id === id
         );
-        if (userRecipe) commit('CREATE_RECIPE_OBJECT', userRecipe);
+        if (userRecipe)
+          commit('CREATE_RECIPE_OBJECT', {
+            data: userRecipe,
+            userGenerated: true,
+          });
         // REVIEW can I load faster? as in, if it's already been loaded before, I just render it quickly. One suggested way is to store already loaded recipes into an array. And if the id of it matches any in that array, skip the API call. That's a somewhat hacky method, but others do it and it works.
         // BUG if I click between two recipes too fast, then it will render the wrong one
         else {
           const res = await axios.get(`${API_URL}${id}`);
-          commit('CREATE_RECIPE_OBJECT', res.data.data.recipe);
+          console.log(res);
+          commit('CREATE_RECIPE_OBJECT', {
+            data: res.data.data.recipe,
+            userGenerated: false,
+          });
         }
         commit('TOGGLE_RECIPE_SPINNER', false);
       } catch (err) {
@@ -342,7 +466,7 @@ export default {
         else if (!err.status) {
           commit(
             'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
-            'There was a network connection problem. Please check your connection and try reloading the page.'
+            'There was a network connection problem. Please reload the page or check your connection.'
           );
         } else {
           commit(

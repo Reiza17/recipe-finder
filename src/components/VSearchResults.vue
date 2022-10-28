@@ -91,9 +91,9 @@ export default {
   computed: {
     ...mapGetters([
       'searchResults',
+      'searchResultsDisplay',
       'searchResultsCurrentPage',
       'searchResultsPerPage',
-      'searchResultsDisplay',
       'loadingSearchResults',
     ]),
     numPages() {

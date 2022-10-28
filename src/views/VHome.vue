@@ -4,12 +4,12 @@
     <html>
       <body class="min-vh-100">
         <!-- <VHeader /> -->
-        <VHeader />
+
         <div class="container-fluid">
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VSearchResults class="col-sm-3 search-results" />
             <VRecipe class="col-sm-9 recipe" />
-            <VUserRecipes v-if="userRecipesView" />
+            <!-- <VUserRecipes v-if="userRecipesView" /> -->
             <VUploadRecipe v-if="uploadRecipeModal" />
             <VEditRecipe v-if="editRecipeModal" />
             <VLogin v-if="loginModal" />
@@ -17,17 +17,16 @@
             <VToast v-if="toastMessage" />
           </div>
         </div>
-        <router-view />
       </body>
     </html>
   </div>
 </template>
 
 <script>
-import VHeader from '@/components/VHeader.vue';
+// import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
-import VUserRecipes from '@/components/VUserRecipes.vue';
+// import VUserRecipes from '@/components/VUserRecipes.vue';
 import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
@@ -39,7 +38,7 @@ const { mapGetters } = createNamespacedHelpers('home');
 export default {
   name: 'VHome',
   components: {
-    VHeader,
+    // VHeader,
     VSearchResults,
     VRecipe,
     VUploadRecipe,
@@ -47,7 +46,7 @@ export default {
     VLogin,
     VRegister,
     VToast,
-    VUserRecipes,
+    // VUserRecipes,
   },
 
   computed: {
@@ -70,8 +69,11 @@ export default {
   created() {
     // const storage = localStorage.getItem('bookmarks');
     // if (storage) this.setStoredBookmarks(JSON.parse(storage));
-
+    console.log('VHome created');
     this.$store.dispatch('home/init');
+  },
+  destroyed() {
+    console.log('VHome destroyed');
   },
 };
 </script>

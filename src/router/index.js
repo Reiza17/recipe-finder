@@ -1,6 +1,7 @@
 // import { createRouter, createWebHistory } from 'vue-router';
 import Vue from 'vue';
 import VHome from '@/views/VHome.vue';
+import VPersonal from '@/views/VPersonal.vue';
 import VueRouter from 'vue-router';
 // import VRegister from '@/views/VRegister.vue';
 // import VLogin from '@/views/VLogin.vue';
@@ -34,15 +35,27 @@ const routes = [
       {
         path: ':id',
         name: 'recipe',
+        // REVIEW evaluate purpose of below
+
         // REVIEW What exactly should I put here?
         // component:
       },
-      // {
-      //   path: '/search',
-      //   name: 'search',
-      //   // REVIEW What exactly should I put here?
-      //   // component:
-      // },
+    ],
+  },
+  {
+    // path: '/personal:userRecipeId?',
+    path: '/personal',
+    name: 'personal',
+    component: VPersonal,
+    children: [
+      {
+        path: ':userRecipeId',
+        name: 'userRecipe',
+        // REVIEW evaluate purpose of below
+
+        // REVIEW What exactly should I put here?
+        // component:
+      },
     ],
   },
 ];
@@ -77,6 +90,8 @@ const router = new VueRouter({
 //   }
 // });
 
+// TODO maybe add 4 more functions below for userRecipeId and userRecipeQuery, and delete the ones already included below
+
 function hasQueryParams(route) {
   return !!Object.keys(route.query).length;
 }
@@ -90,7 +105,13 @@ router.beforeEach((to, from, next) => {
   // console.log(hasRecipeParams(to));
   // console.log(hasRecipeParams(from));
   if (hasRecipeParams(from) && !hasRecipeParams(to)) {
-    next({ ...to, params: { id: from.params.id } });
+    next({
+      ...to,
+      params: {
+        id: from.params.id,
+        userRecipeId: from.params.userRecipeId,
+      },
+    });
   } else {
     next();
   }
@@ -112,7 +133,11 @@ router.beforeEach((to, from, next) => {
     next({
       ...to,
       // params: { id: from.params.id },
-      query: { query: from.query.query, page: from.query.page },
+      query: {
+        query: from.query.query,
+        userRecipeQuery: from.query.userRecipeQuery,
+        page: from.query.page,
+      },
     });
   } else {
     next();
