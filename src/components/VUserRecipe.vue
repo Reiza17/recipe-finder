@@ -8,7 +8,9 @@
         (!$route.params.userRecipeId && !$route.query.userRecipeQuery) ||
         (!$route.params.userRecipeId &&
           $route.query.userRecipeQuery &&
-          !Object.keys(userRecipes).length)
+          !Object.keys(userRecipes).length) ||
+        // TODO temporary fix for being unable to display a recipe upon reload
+        ($route.params.userRecipeId && !Object.keys(recipe).length)
       "
       class="message"
     >

@@ -12,7 +12,7 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'home',
     component: VHome,
     children: [
@@ -33,26 +33,21 @@ const routes = [
       //   component: VRegister,
       // },
       {
-        path: ':id',
+        path: ':id?/:userRecipeId?',
         name: 'recipe',
-        // REVIEW evaluate purpose of below
-
         // REVIEW What exactly should I put here?
         // component:
       },
     ],
   },
   {
-    // path: '/personal:userRecipeId?',
     path: '/personal',
     name: 'personal',
     component: VPersonal,
     children: [
       {
-        path: ':userRecipeId',
+        path: ':userRecipeId?/:id?',
         name: 'userRecipe',
-        // REVIEW evaluate purpose of below
-
         // REVIEW What exactly should I put here?
         // component:
       },
@@ -83,14 +78,12 @@ const router = new VueRouter({
 // });
 
 // router.beforeEach((to, from, next) => {
-//   if (!hasQueryParams(to) && hasQueryParams(from)) {
+//   if (!hasQuery(to) && hasQuery(from)) {
 //     next({ ...to, query: { query: from.query.query } });
 //   } else {
 //     next();
 //   }
 // });
-
-// TODO maybe add 4 more functions below for userRecipeId and userRecipeQuery, and delete the ones already included below
 
 function hasQueryParams(route) {
   return !!Object.keys(route.query).length;
@@ -135,8 +128,9 @@ router.beforeEach((to, from, next) => {
       // params: { id: from.params.id },
       query: {
         query: from.query.query,
-        userRecipeQuery: from.query.userRecipeQuery,
         page: from.query.page,
+        userRecipeQuery: from.query.userRecipeQuery,
+        userRecipeQueryPage: from.query.userRecipeQueryPage,
       },
     });
   } else {

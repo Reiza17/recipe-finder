@@ -3,7 +3,10 @@
     class="navbar sticky-top p-3 flex-wrap-reverse justify-content-end gap-4"
   >
     <div class="d-flex flex-row align-items-center flex-grow-1 ms-5">
-      <a class="navbar-brand d-flex flex-row align-items-center me-4" href="/">
+      <a
+        class="navbar-brand d-flex flex-row align-items-center me-4"
+        href="/home"
+      >
         <img
           src="@/assets/images/logo.svg"
           alt="Logo"
@@ -28,23 +31,55 @@
             <span class="nav_label">Database</span>
           </button>
         </li> -->
-        <!-- <li class="nav__item">
-          <router-link to="/home" class="nav__btn">
+        <li class="nav__item">
+          <router-link
+            :to="{
+              name: 'recipe',
+              params: {
+                id: $route.params.id,
+                userRecipeId: $route.params.userRecipeId,
+              },
+              query: {
+                query: $route.query.query,
+                userRecipeQuery: $route.query.userRecipeQuery,
+                page: $route.query.page,
+                userRecipeQueryPage: $route.query.userRecipeQueryPage,
+              },
+            }"
+            class="nav__btn"
+            :disabled="$route.name === 'recipe' || $route.name === 'recipe'"
+          >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-upload-cloud`"></use>
             </svg>
             <span class="nav_label">Database</span>
           </router-link>
-        </li> -->
-        <!-- <li class="nav__item">
-          <router-link to="/personal" class="nav__btn">
+        </li>
+        <li class="nav__item">
+          <router-link
+            :to="{
+              name: 'userRecipe',
+              params: {
+                id: $route.params.id,
+                userRecipeId: $route.params.userRecipeId,
+              },
+              query: {
+                query: $route.query.query,
+                userRecipeQuery: $route.query.userRecipeQuery,
+                page: $route.query.page,
+                userRecipeQueryPage: $route.query.userRecipeQueryPage,
+              },
+            }"
+            class="nav__btn"
+            :disabled="$route.name === 'userRecipe'"
+          >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-user`"></use>
             </svg>
             <span class="nav_label">My Recipes</span>
           </router-link>
-        </li> -->
-        <li class="nav__item">
+        </li>
+        <!-- <li class="nav__item">
           <button
             @click="
               $router.push({
@@ -56,10 +91,13 @@
                 query: {
                   query: $route.query.query,
                   userRecipeQuery: $route.query.userRecipeQuery,
+                  page: $route.query.page,
+                  userRecipeQueryPage: $route.query.userRecipeQueryPage,
                 },
               })
             "
             class="nav__btn"
+            :disabled="$route.name === 'recipe' || $route.name === 'recipe'"
           >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-upload-cloud`"></use>
@@ -80,17 +118,20 @@
                 query: {
                   query: $route.query.query,
                   userRecipeQuery: $route.query.userRecipeQuery,
+                  page: $route.query.page,
+                  userRecipeQueryPage: $route.query.userRecipeQueryPage,
                 },
               })
             "
             class="nav__btn"
+            :disabled="$route.name === 'userRecipe'"
           >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-user`"></use>
             </svg>
             <span class="nav_label">My Recipes</span>
           </button>
-        </li>
+        </li> -->
 
         <VBookmarks />
         <li class="nav__item" v-if="!loggedIn">

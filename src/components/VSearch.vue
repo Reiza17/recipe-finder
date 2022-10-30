@@ -1,6 +1,6 @@
 <template>
   <form
-    v-if="$route.name === 'recipe' || $route.name === 'home'"
+    v-if="$route.name === 'home' || $route.name === 'recipe'"
     class="search"
     @submit.prevent="submitSearch"
   >
@@ -35,7 +35,11 @@
       </div>
     </div> -->
   </form>
-  <form v-else class="search" @submit.prevent="submitUserRecipeSearch">
+  <form
+    v-else-if="$route.name === 'personal' || $route.name === 'userRecipe'"
+    class="search"
+    @submit.prevent="submitUserRecipeSearch"
+  >
     <i class="fa-solid fa-magnifying-glass fa-2xl"></i>
     <input
       type="search"

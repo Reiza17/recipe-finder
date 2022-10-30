@@ -288,6 +288,7 @@ export default {
         // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
         // if (loggingIn) return;
 
+        // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
         if (router.app._route.params.id)
           dispatch('renderRecipe', {
             id: router.app._route.params.id,
@@ -314,7 +315,7 @@ export default {
         if (!reloadingPage)
           router
             .push({
-              name: 'home',
+              name: 'recipe',
               query: {
                 query: query,
                 page: page,
@@ -377,7 +378,7 @@ export default {
         if (!reloadingPage)
           router
             .push({
-              name: 'personal',
+              name: 'userRecipe',
               query: {
                 query: router.app._route.query.query,
                 page: router.app._route.query.page,

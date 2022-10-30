@@ -8,7 +8,9 @@
         (!$route.params.id && !$route.query.query) ||
         (!$route.params.id &&
           $route.query.query &&
-          !Object.keys(searchResultsDisplay).length)
+          !Object.keys(searchResultsDisplay).length) ||
+        // TODO temporary fix for being unable to display a recipe upon reload
+        ($route.params.id && !Object.keys(recipe).length)
       "
       class="message"
     >
