@@ -149,8 +149,7 @@ export default {
       // Clears the URL
       router.replace({
         name: 'home',
-        params: { id: null },
-        query: { query: undefined },
+        query: { id: null, query: undefined },
       });
 
       location.reload();

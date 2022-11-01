@@ -78,6 +78,7 @@ export default {
     loadingSearchResults: state => state.loadingSearchResults,
     loadingRecipe: state => state.loadingRecipe,
     loadingBookmarks: state => state.loadingBookmarks,
+    loadingUserRecipes: state => state.loadingUserRecipes,
     loginModal: state => state.loginModal,
     registerModal: state => state.registerModal,
     editRecipeModal: state => state.editRecipeModal,
@@ -113,7 +114,6 @@ export default {
       state.search.page += amount;
       router.push({
         query: {
-          query: router.app._route.query.query,
           page: state.search.page,
         },
       });
@@ -258,7 +258,7 @@ export default {
         commit('TOGGLE_RECIPE_SPINNER', true);
         commit('TOGGLE_BOOKMARKS_SPINNER', true);
         commit('TOGGLE_USER_RECIPES_SPINNER', true);
-        commit('TOGGLE_SEARCH_SPINNER', true);
+
         // NOTE no need to toggle above spinners to false, as that's done at the end of the actions themselves
 
         // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
@@ -268,7 +268,7 @@ export default {
           await dispatch('fetchUserRecipes');
         }
         commit('TOGGLE_BOOKMARKS_SPINNER', false);
-        commit('TOGGLE_SEARCH_SPINNER', false);
+        commit('TOGGLE_USER_RECIPES_SPINNER', false);
 
         console.log(router);
         if (router.app._route.query.query)
@@ -289,14 +289,14 @@ export default {
         // if (loggingIn) return;
 
         // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
-        if (router.app._route.params.id)
+        if (router.app._route.query.id)
           dispatch('renderRecipe', {
-            id: router.app._route.params.id,
+            id: router.app._route.query.id,
           });
 
-        if (router.app._route.params.userRecipeId)
+        if (router.app._route.query.userRecipeId)
           dispatch('renderRecipe', {
-            id: router.app._route.params.userRecipeId,
+            id: router.app._route.query.userRecipeId,
           });
       } catch (err) {
         console.log(err);
@@ -315,13 +315,10 @@ export default {
         if (!reloadingPage)
           router
             .push({
-              name: 'recipe',
+              name: 'home',
               query: {
                 query: query,
                 page: page,
-                userRecipeQuery: router.app._route.query.userRecipeQuery,
-                userRecipeQueryPage:
-                  router.app._route.query.userRecipeQueryPage,
               },
             })
             .catch(() => {});
@@ -378,10 +375,8 @@ export default {
         if (!reloadingPage)
           router
             .push({
-              name: 'userRecipe',
+              name: 'personal',
               query: {
-                query: router.app._route.query.query,
-                page: router.app._route.query.page,
                 userRecipeQuery: query,
                 userRecipeQueryPage: page,
               },
@@ -536,7 +531,7 @@ export default {
         router
           .push({
             name: 'recipe',
-            params: { id: id },
+            query: { id: id },
           })
           .catch(() => {});
 
@@ -582,7 +577,7 @@ export default {
         commit('EDIT_USER_RECIPE', recipe);
 
         dispatch('renderRecipe', {
-          id: router.app._route.params.id,
+          id: router.app._route.query.id,
         });
         commit('TOGGLE_EDIT_USER_RECIPE_MODAL');
         commit('SET_TOAST_MESSAGE', 'The recipe has been edited');
@@ -608,7 +603,7 @@ export default {
         router
           .push({
             name: 'home',
-            params: { id: null },
+            query: { id: null },
           })
           .catch(() => {});
 

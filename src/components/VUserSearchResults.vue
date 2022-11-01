@@ -1,11 +1,11 @@
 <template>
   <div class="search-container">
+    <VLoadingSpinner v-if="loadingUserRecipes || loadingSearchResults" />
     <VUserRecipePreview
-      v-if="!$route.query.userRecipeQuery"
+      v-else-if="!$route.query.userRecipeQuery"
       :recipes="userRecipes"
       :resultsActive="true"
     />
-    <VLoadingSpinner v-else-if="loadingSearchResults" />
     <div v-else-if="!Object.keys(searchResultsDisplay).length" class="error">
       <div>
         <svg>
@@ -103,6 +103,7 @@ export default {
       searchResultsCurrentPage: 'userRecipeSearchResultsCurrentPage',
       searchResultsPerPage: 'searchResultsPerPage',
       loadingSearchResults: 'loadingSearchResults',
+      loadingUserRecipes: 'loadingUserRecipes',
     }),
     numPages() {
       return Math.ceil(this.searchResults.length / this.searchResultsPerPage);

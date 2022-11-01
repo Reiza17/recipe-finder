@@ -15,43 +15,43 @@ const routes = [
     path: '/home',
     name: 'home',
     component: VHome,
-    children: [
-      // {
-      //   path: '/upload',
-      //   name: 'upload',
-      //   component: VUploadRecipe,
-      //   meta: { requiresAuth: true },
-      // },
-      // {
-      //   path: '/login',
-      //   name: 'login',
-      //   component: VLogin,
-      // },
-      // {
-      //   path: '/register',
-      //   name: 'register',
-      //   component: VRegister,
-      // },
-      {
-        path: ':id?/:userRecipeId?',
-        name: 'recipe',
-        // REVIEW What exactly should I put here?
-        // component:
-      },
-    ],
+    // children: [
+    //   // {
+    //   //   path: '/upload',
+    //   //   name: 'upload',
+    //   //   component: VUploadRecipe,
+    //   //   meta: { requiresAuth: true },
+    //   // },
+    //   // {
+    //   //   path: '/login',
+    //   //   name: 'login',
+    //   //   component: VLogin,
+    //   // },
+    //   // {
+    //   //   path: '/register',
+    //   //   name: 'register',
+    //   //   component: VRegister,
+    //   // },
+    //   {
+    //     path: ':id?/:userRecipeId?',
+    //     name: 'recipe',
+    //     // REVIEW What exactly should I put here?
+    //     // component:
+    //   },
+    // ],
   },
   {
     path: '/personal',
     name: 'personal',
     component: VPersonal,
-    children: [
-      {
-        path: ':userRecipeId?/:id?',
-        name: 'userRecipe',
-        // REVIEW What exactly should I put here?
-        // component:
-      },
-    ],
+    // children: [
+    //   {
+    //     path: ':userRecipeId?/:id?',
+    //     name: 'userRecipe',
+    //     // REVIEW What exactly should I put here?
+    //     // component:
+    //   },
+    // ],
   },
 ];
 
@@ -85,30 +85,30 @@ const router = new VueRouter({
 //   }
 // });
 
-function hasQueryParams(route) {
-  return !!Object.keys(route.query).length;
-}
+// function hasQueryParams(route) {
+//   return !!Object.keys(route.query).length;
+// }
 
-function hasRecipeParams(route) {
-  return !!Object.keys(route.params).length;
-}
+// function hasRecipeParams(route) {
+//   return !!Object.keys(route.params).length;
+// }
 
-router.beforeEach((to, from, next) => {
-  // console.log(from.params.id);
-  // console.log(hasRecipeParams(to));
-  // console.log(hasRecipeParams(from));
-  if (hasRecipeParams(from) && !hasRecipeParams(to)) {
-    next({
-      ...to,
-      params: {
-        id: from.params.id,
-        userRecipeId: from.params.userRecipeId,
-      },
-    });
-  } else {
-    next();
-  }
-});
+// router.beforeEach((to, from, next) => {
+//   // console.log(from.params.id);
+//   // console.log(hasRecipeParams(to));
+//   // console.log(hasRecipeParams(from));
+//   if (hasRecipeParams(from) && !hasRecipeParams(to)) {
+//     next({
+//       ...to,
+//       params: {
+//         id: from.params.id,
+//         userRecipeId: from.params.userRecipeId,
+//       },
+//     });
+//   } else {
+//     next();
+//   }
+// });
 
 router.beforeEach((to, from, next) => {
   // const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
@@ -121,21 +121,84 @@ router.beforeEach((to, from, next) => {
   // ) {
   //   next('/');
   // } else {
-  // NOTE If user reloads the page, it will retain the previous search results in the search panel. To remove this functionality, simply replace the code block below with the params codeblock above;
-  if (hasQueryParams(from) && !hasQueryParams(to)) {
+
+  if (from.path === to.path) {
+    next(false);
+  }
+
+  if (from.query.id && !to.query.id) {
     next({
-      ...to,
-      // params: { id: from.params.id },
+      path: to.path,
+      query: { ...to.query, id: from.query.id },
+    });
+  } else {
+    next();
+  }
+
+  if (from.query.userRecipeId && !to.query.userRecipeId) {
+    next({
+      path: to.path,
+      query: { ...to.query, userRecipeId: from.query.userRecipeId },
+    });
+  } else {
+    next();
+  }
+
+  if (from.query.query && !to.query.query) {
+    next({
+      path: to.path,
+      query: { ...to.query, query: from.query.query },
+    });
+  } else {
+    next();
+  }
+
+  if (from.query.page && !to.query.page) {
+    next({
+      path: to.path,
+      query: { ...to.query, page: from.query.page },
+    });
+  } else {
+    next();
+  }
+
+  if (from.query.userRecipeQuery && !to.query.userRecipeQuery) {
+    next({
+      path: to.path,
+      query: { ...to.query, userRecipeQuery: from.query.userRecipeQuery },
+    });
+  } else {
+    next();
+  }
+
+  if (from.query.userRecipeQueryPage && !to.query.userRecipeQueryPage) {
+    next({
+      path: to.path,
       query: {
-        query: from.query.query,
-        page: from.query.page,
-        userRecipeQuery: from.query.userRecipeQuery,
+        ...to.query,
         userRecipeQueryPage: from.query.userRecipeQueryPage,
       },
     });
   } else {
     next();
   }
+
+  // if (hasQueryParams(from) && !hasQueryParams(to)) {
+  //   next({
+  //     ...to,
+  //     // params: { id: from.params.id },
+  //     query: {
+  //       id: from.query.id,
+  //       userRecipeId: from.query.userRecipeId,
+  //       query: from.query.query,
+  //       page: from.query.page,
+  //       userRecipeQuery: from.query.userRecipeQuery,
+  //       userRecipeQueryPage: from.query.userRecipeQueryPage,
+  //     },
+  //   });
+  // } else {
+  //   next();
+  // }
   // }
 });
 

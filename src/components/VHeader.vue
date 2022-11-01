@@ -34,20 +34,14 @@
         <li class="nav__item">
           <router-link
             :to="{
-              name: 'recipe',
-              params: {
-                id: $route.params.id,
-                userRecipeId: $route.params.userRecipeId,
-              },
-              query: {
-                query: $route.query.query,
-                userRecipeQuery: $route.query.userRecipeQuery,
-                page: $route.query.page,
-                userRecipeQueryPage: $route.query.userRecipeQueryPage,
-              },
+              name: 'home',
+              // params: {
+              //   id: $route.params.id,
+              //   userRecipeId: $route.params.userRecipeId,
+              // },
             }"
             class="nav__btn"
-            :disabled="$route.name === 'recipe' || $route.name === 'recipe'"
+            :disabled="$route.name === 'home'"
           >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-upload-cloud`"></use>
@@ -58,20 +52,14 @@
         <li class="nav__item">
           <router-link
             :to="{
-              name: 'userRecipe',
-              params: {
-                id: $route.params.id,
-                userRecipeId: $route.params.userRecipeId,
-              },
-              query: {
-                query: $route.query.query,
-                userRecipeQuery: $route.query.userRecipeQuery,
-                page: $route.query.page,
-                userRecipeQueryPage: $route.query.userRecipeQueryPage,
-              },
+              name: 'personal',
+              // params: {
+              //   id: $route.params.id,
+              //   userRecipeId: $route.params.userRecipeId,
+              // },
             }"
             class="nav__btn"
-            :disabled="$route.name === 'userRecipe'"
+            :disabled="$route.name === 'personal'"
           >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-user`"></use>
@@ -303,5 +291,9 @@ export default {
       background-color: $color-grey-light-2;
     }
   }
+}
+
+.router-link-active {
+  background-color: $color-grey-light-2;
 }
 </style>

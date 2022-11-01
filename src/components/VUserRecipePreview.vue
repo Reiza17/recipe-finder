@@ -3,15 +3,15 @@
     <li
       class="preview"
       :class="{
-        'preview__link--active': result.id === $route.params.userRecipeId,
+        'preview__link--active': result.id === $route.query.userRecipeId,
       }"
       v-for="result in recipes"
       :key="result.id"
     >
       <router-link
         :to="{
-          name: 'userRecipe',
-          params: { userRecipeId: result.id, id: $route.params.id },
+          name: 'personal',
+          query: { userRecipeId: result.id },
         }"
         class="preview__link"
       >
@@ -22,8 +22,7 @@
           <h4
             class="preview__title"
             :class="{
-              'preview__title--active':
-                result.id === $route.params.userRecipeId,
+              'preview__title--active': result.id === $route.query.userRecipeId,
             }"
           >
             {{ result.title }}
@@ -45,7 +44,7 @@
               class="preview__bookmarked btn--round"
               :class="{
                 'preview__bookmarked--active':
-                  result.id === $route.params.userRecipeId,
+                  result.id === $route.query.userRecipeId,
               }"
             >
               <svg>

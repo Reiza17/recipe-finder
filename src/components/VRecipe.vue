@@ -5,12 +5,10 @@
     </div>
     <div
       v-else-if="
-        (!$route.params.id && !$route.query.query) ||
-        (!$route.params.id &&
+        (!$route.query.id && !$route.query.query) ||
+        (!$route.query.id &&
           $route.query.query &&
-          !Object.keys(searchResultsDisplay).length) ||
-        // TODO temporary fix for being unable to display a recipe upon reload
-        ($route.params.id && !Object.keys(recipe).length)
+          !Object.keys(searchResultsDisplay).length)
       "
       class="message"
     >
@@ -21,7 +19,7 @@
       </div>
       <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
-    <div v-else-if="!$route.params.id && $route.query.query" class="message">
+    <div v-else-if="!$route.query.id && $route.query.query" class="message">
       <div>
         <svg>
           <use :href="`${icons}#icon-smile`"></use>
@@ -201,7 +199,7 @@ export default {
     };
   },
   watch: {
-    '$route.params.id'(newValue) {
+    '$route.query.id'(newValue) {
       if (newValue)
         this.$store.dispatch('home/renderRecipe', {
           id: newValue,

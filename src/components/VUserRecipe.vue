@@ -5,12 +5,10 @@
     </div>
     <div
       v-else-if="
-        (!$route.params.userRecipeId && !$route.query.userRecipeQuery) ||
-        (!$route.params.userRecipeId &&
+        (!$route.query.userRecipeId && !$route.query.userRecipeQuery) ||
+        (!$route.query.userRecipeId &&
           $route.query.userRecipeQuery &&
-          !Object.keys(userRecipes).length) ||
-        // TODO temporary fix for being unable to display a recipe upon reload
-        ($route.params.userRecipeId && !Object.keys(recipe).length)
+          !Object.keys(userRecipes).length)
       "
       class="message"
     >
@@ -22,7 +20,7 @@
       <p>Start by searching for a recipe or an ingredient. Have fun!</p>
     </div>
     <div
-      v-else-if="!$route.params.userRecipeId && $route.query.userRecipeQuery"
+      v-else-if="!$route.query.userRecipeId && $route.query.userRecipeQuery"
       class="message"
     >
       <div>
@@ -204,7 +202,7 @@ export default {
     };
   },
   watch: {
-    '$route.params.userRecipeId'(newValue) {
+    '$route.query.userRecipeId'(newValue) {
       this.$store.dispatch('home/renderRecipe', {
         id: newValue,
       });
@@ -230,9 +228,6 @@ export default {
     // TODO delete the unused
     ...mapMutations({
       updateServings: 'UPDATE_SERVINGS',
-      toggleRecipeSpinner: 'TOGGLE_RECIPE_SPINNER',
-      toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
-      toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
       toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL',
     }),

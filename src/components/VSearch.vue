@@ -1,10 +1,13 @@
 <template>
   <form
-    v-if="$route.name === 'home' || $route.name === 'recipe'"
+    v-if="$route.name === 'home'"
     class="search"
     @submit.prevent="submitSearch"
   >
-    <i class="fa-solid fa-magnifying-glass fa-2xl"></i>
+    <!-- <i class="fa-solid fa-magnifying-glass fa-2xl"></i> -->
+    <svg class="fa-magnifying-glass">
+      <use :href="`${icons}#icon-search`"></use>
+    </svg>
     <input
       type="search"
       class="form-control"
@@ -36,11 +39,13 @@
     </div> -->
   </form>
   <form
-    v-else-if="$route.name === 'personal' || $route.name === 'userRecipe'"
+    v-else-if="$route.name === 'personal'"
     class="search"
     @submit.prevent="submitUserRecipeSearch"
   >
-    <i class="fa-solid fa-magnifying-glass fa-2xl"></i>
+    <svg class="fa-magnifying-glass">
+      <use :href="`${icons}#icon-search`"></use>
+    </svg>
     <input
       type="search"
       class="form-control"
@@ -96,8 +101,10 @@ export default {
 
 .search .fa-magnifying-glass {
   position: absolute;
-  top: 22px;
+  top: 11px;
   left: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .search input {
