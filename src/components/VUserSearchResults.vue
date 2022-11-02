@@ -1,22 +1,50 @@
 <template>
   <div class="search-container">
+    <button @click="toggleUploadRecipeModal" class="btn btn-success btn-lg">
+      <svg>
+        <use :href="`${icons}#icon-add-circle-fill`"></use>
+      </svg>
+      <span>Add a recipe</span>
+    </button>
     <VLoadingSpinner v-if="loadingUserRecipes || loadingSearchResults" />
     <VUserRecipePreview
       v-else-if="!$route.query.userRecipeQuery"
       :recipes="userRecipes"
       :resultsActive="true"
     />
-    <div v-else-if="!Object.keys(searchResultsDisplay).length" class="error">
-      <div>
-        <svg>
-          <use :href="`${icons}#icon-alert-triangle`"></use>
-        </svg>
+    <div v-else-if="!Object.keys(searchResultsDisplay).length">
+      <div class="error">
+        <div>
+          <svg>
+            <use :href="`${icons}#icon-alert-triangle`"></use>
+          </svg>
+        </div>
+        <div>
+          <p>No recipes for your search terms were found.</p>
+        </div>
       </div>
-      <div>
-        <p>No recipes for your search terms were found.</p>
-        <p>Try different keywords or more general keywords.</p>
-      </div>
+
+      <VUserRecipePreview :recipes="userRecipes" :resultsActive="true" />
     </div>
+    <!-- <div v-else>
+      <div class="header">
+        <button @click="toggleUploadRecipeModal" class="btn btn-primary">
+          Add a recipe
+        </button>
+        <button
+          v-if="searchResultsDisplay !== userRecipes"
+          @click="resetSearchResults"
+          class="btn btn-primary"
+        >
+          Return to all recipes
+        </button>
+      </div>
+      <VUserRecipePreview
+        :recipes="searchResultsDisplay"
+        :resultsActive="true"
+      />
+    </div> -->
+
     <VUserRecipePreview
       v-else
       :recipes="searchResultsDisplay"
@@ -106,7 +134,9 @@ export default {
       loadingUserRecipes: 'loadingUserRecipes',
     }),
     numPages() {
-      return Math.ceil(this.searchResults.length / this.searchResultsPerPage);
+      return Math.ceil(
+        this.searchResultsDisplay.length / this.searchResultsPerPage
+      );
     },
     // isActive(resultId) {
     //   const id = window.location.hash.slice(1);
@@ -116,7 +146,10 @@ export default {
   },
 
   methods: {
-    ...mapMutations({ updatePagination: 'UPDATE_PAGINATION' }),
+    ...mapMutations({
+      updatePagination: 'UPDATE_PAGINATION',
+      toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+    }),
   },
 
   // methods: {
@@ -141,11 +174,43 @@ export default {
     padding-top: 5px;
   }
 
+  // .header {
+  //   display: flex;
+  //   margin-bottom: 2rem;
+  //   justify-content: space-between;
+  // }
+
+  .btn {
+    display: flex;
+    width: 94%;
+    margin: 2rem auto;
+    align-items: center;
+    justify-content: center;
+    column-gap: 7px;
+
+    svg {
+      height: 2.25rem;
+      width: 2.25rem;
+      fill: currentColor;
+      // margin-right: 5px;
+      overflow: visible;
+      align-self: center;
+    }
+
+    span {
+      font-weight: 500;
+      align-self: center;
+      font-size: 14px;
+    }
+  }
+
   .error {
     max-width: 40rem;
     margin: 0 auto;
-    padding: 4rem 3rem;
+    margin-bottom: 1rem;
+    padding: 3rem 2rem 1rem 2rem;
     display: flex;
+    border-bottom: 1px solid grey;
 
     svg {
       height: 3rem;

@@ -44,13 +44,25 @@
             :disabled="$route.name === 'home'"
           >
             <svg class="nav__icon">
-              <use :href="`${icons}#icon-upload-cloud`"></use>
+              <use :href="`${icons}#icon-global`"></use>
             </svg>
             <span class="nav_label">Database</span>
           </router-link>
         </li>
+
         <li class="nav__item">
+          <button
+            v-if="!this.loggedIn"
+            class="nav__btn"
+            @click="toggleRegisterModal"
+          >
+            <svg class="nav__icon">
+              <use :href="`${icons}#icon-user`"></use>
+            </svg>
+            <span class="nav_label">My Recipes</span>
+          </button>
           <router-link
+            v-else
             :to="{
               name: 'personal',
               // params: {
@@ -185,11 +197,6 @@ export default {
       toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),
-
-    openUploadRecipeModal() {
-      if (!this.loggedIn) this.toggleRegisterModal();
-      else this.toggleUploadRecipeModal();
-    },
   },
 };
 </script>
@@ -267,10 +274,11 @@ export default {
     border: none;
     cursor: pointer;
     padding: 0 1.5rem;
-    transition: all 0.3s;
+    transition: all 0.25s;
+    // transition: border-bottom 0.25s;
     // added below just for non-bootstrap version
     text-decoration: none;
-
+    border-bottom: 2px solid transparent;
     display: flex;
     align-items: center;
 
@@ -288,12 +296,17 @@ export default {
     }
 
     &:hover {
-      background-color: $color-grey-light-2;
+      background-color: rgb(247, 247, 247);
+      // border-bottom: 2px solid rgb(38, 81, 143);
     }
+  }
+  &__icon {
+    margin-top: 0.1rem;
   }
 }
 
 .router-link-active {
-  background-color: $color-grey-light-2;
+  // background-color: $color-grey-light-2;
+  border-bottom: 2px solid rgb(38, 81, 143);
 }
 </style>

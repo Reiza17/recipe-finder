@@ -412,7 +412,9 @@ export default {
           results: filteredResults,
           page: +page,
         });
-        commit('TOGGLE_SEARCH_SPINNER', false);
+        setTimeout(() => {
+          commit('TOGGLE_SEARCH_SPINNER', false);
+        }, 300);
       } catch (err) {
         console.error(`Error searching for recipes: ${err}`);
         commit('TOGGLE_SEARCH_SPINNER', false);

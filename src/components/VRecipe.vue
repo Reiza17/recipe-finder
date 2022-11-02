@@ -17,7 +17,7 @@
           <use :href="`${icons}#icon-smile`"></use>
         </svg>
       </div>
-      <p>Start by searching for a recipe or an ingredient. Have fun!</p>
+      <p>Start by searching for a recipe or an ingredient.</p>
     </div>
     <div v-else-if="!$route.query.id && $route.query.query" class="message">
       <div>

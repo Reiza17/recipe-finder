@@ -73,7 +73,8 @@ export default {
     border: none;
     cursor: pointer;
     padding: 0 1.5rem;
-    transition: all 0.3s;
+    // transition: all 0.3s;
+    border-bottom: 2px solid transparent;
 
     display: flex;
     align-items: center;
@@ -91,8 +92,13 @@ export default {
     }
 
     &:hover {
-      background-color: $color-grey-light-2;
+      background-color: rgb(247, 247, 247);
+      // border-bottom: 2px solid rgb(38, 81, 143);
     }
+  }
+
+  &__icon {
+    margin-top: 0.1rem;
   }
 }
 

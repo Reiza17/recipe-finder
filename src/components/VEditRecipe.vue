@@ -428,7 +428,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      recipe: 'recipe',
+      recipe: 'userRecipe',
       uploadingRecipe: 'uploadingRecipe',
       successfulUpload: 'toastMessage',
     }),

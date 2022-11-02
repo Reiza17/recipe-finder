@@ -3,12 +3,22 @@
     <div v-if="renderRecipeError" class="message">
       <p>{{ renderRecipeError }}</p>
     </div>
+    <div v-else-if="!Object.keys(userRecipes).length" class="message">
+      <div>
+        <svg>
+          <use :href="`${icons}#icon-smile`"></use>
+        </svg>
+      </div>
+      <p>Start by adding a recipe.</p>
+    </div>
     <div
       v-else-if="
-        (!$route.query.userRecipeId && !$route.query.userRecipeQuery) ||
         (!$route.query.userRecipeId &&
-          $route.query.userRecipeQuery &&
-          !Object.keys(userRecipes).length)
+          !$route.query.userRecipeQuery &&
+          Object.keys(userRecipes).length) ||
+        ($route.query.userRecipeQuery &&
+          !$route.query.userRecipeId &&
+          Object.keys(searchResultsDisplay).length)
       "
       class="message"
     >
@@ -17,19 +27,15 @@
           <use :href="`${icons}#icon-smile`"></use>
         </svg>
       </div>
-      <p>Start by searching for a recipe or an ingredient. Have fun!</p>
+      <p>Click on or add a recipe.</p>
     </div>
     <div
-      v-else-if="!$route.query.userRecipeId && $route.query.userRecipeQuery"
-      class="message"
-    >
-      <div>
-        <svg>
-          <use :href="`${icons}#icon-smile`"></use>
-        </svg>
-      </div>
-      <p>Click on a recipe!</p>
-    </div>
+      v-else-if="
+        $route.query.userRecipeQuery &&
+        !$route.query.userRecipeId &&
+        !Object.keys(searchResultsDisplay).length
+      "
+    ></div>
 
     <VLoadingSpinner v-else-if="loadingRecipe" />
 
@@ -215,6 +221,7 @@ export default {
       loadingRecipe: 'loadingRecipe',
       renderRecipeError: 'renderRecipeError',
       userRecipes: 'userRecipes',
+      searchResultsDisplay: 'userRecipeSearchResultsDisplay',
     }),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
