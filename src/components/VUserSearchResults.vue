@@ -6,12 +6,15 @@
       </svg>
       <span>Add a recipe</span>
     </button>
+
     <VLoadingSpinner v-if="loadingUserRecipes || loadingSearchResults" />
+
     <VUserRecipePreview
       v-else-if="!$route.query.userRecipeQuery"
       :recipes="userRecipes"
       :resultsActive="true"
     />
+
     <div v-else-if="!Object.keys(searchResultsDisplay).length">
       <div class="error">
         <div>
@@ -26,24 +29,24 @@
 
       <VUserRecipePreview :recipes="userRecipes" :resultsActive="true" />
     </div>
-    <!-- <div v-else>
-      <div class="header">
-        <button @click="toggleUploadRecipeModal" class="btn btn-primary">
-          Add a recipe
-        </button>
-        <button
-          v-if="searchResultsDisplay !== userRecipes"
-          @click="resetSearchResults"
-          class="btn btn-primary"
-        >
-          Return to all recipes
-        </button>
-      </div>
+
+    <div
+      v-else-if="
+        searchResultsDisplay.length > 0 &&
+        searchResultsDisplay.length < userRecipes.length
+      "
+    >
+      <button @click="resetSearchResults" class="btn btn-primary btn-lg">
+        <svg>
+          <use :href="`${icons}#icon-go-back`"></use>
+        </svg>
+        <span>Back to all recipes</span>
+      </button>
       <VUserRecipePreview
         :recipes="searchResultsDisplay"
         :resultsActive="true"
       />
-    </div> -->
+    </div>
 
     <VUserRecipePreview
       v-else
@@ -149,7 +152,12 @@ export default {
     ...mapMutations({
       updatePagination: 'UPDATE_PAGINATION',
       toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+      createSearchResults: 'CREATE_USER_RECIPE_SEARCH_RESULTS',
     }),
+
+    resetSearchResults() {
+      this.createSearchResults({ results: this.userRecipes, page: 1 });
+    },
   },
 
   // methods: {
@@ -182,7 +190,7 @@ export default {
 
   .btn {
     display: flex;
-    width: 94%;
+    width: 96%;
     margin: 2rem auto;
     align-items: center;
     justify-content: center;

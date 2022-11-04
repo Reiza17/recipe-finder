@@ -3,15 +3,10 @@
   <div id="home">
     <html>
       <body class="min-vh-100">
-        <!-- <VHeader /> -->
-
         <div class="container-fluid">
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VSearchResults class="col-sm-3 search-results" />
             <VRecipe class="col-sm-9 recipe" />
-            <!-- <VUserRecipes v-if="userRecipesView" /> -->
-            <VUploadRecipe v-if="uploadRecipeModal" />
-            <VEditRecipe v-if="editRecipeModal" />
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
             <VToast v-if="toastMessage" />
@@ -23,12 +18,8 @@
 </template>
 
 <script>
-// import VHeader from '@/components/VHeader.vue';
 import VSearchResults from '@/components/VSearchResults.vue';
 import VRecipe from '@/components/VRecipe.vue';
-// import VUserRecipes from '@/components/VUserRecipes.vue';
-import VUploadRecipe from '@/components/VUploadRecipe.vue';
-import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
 import VRegister from '@/components/VRegister.vue';
 import VToast from '@/components/VToast.vue';
@@ -38,26 +29,15 @@ const { mapGetters } = createNamespacedHelpers('home');
 export default {
   name: 'VHome',
   components: {
-    // VHeader,
     VSearchResults,
     VRecipe,
-    VUploadRecipe,
-    VEditRecipe,
     VLogin,
     VRegister,
     VToast,
-    // VUserRecipes,
   },
 
   computed: {
-    ...mapGetters([
-      'userRecipesView',
-      'uploadRecipeModal',
-      'editRecipeModal',
-      'loginModal',
-      'registerModal',
-      'toastMessage',
-    ]),
+    ...mapGetters(['loginModal', 'registerModal', 'toastMessage']),
   },
   // methods: {
   //   ...mapMutations({

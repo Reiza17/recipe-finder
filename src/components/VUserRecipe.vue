@@ -39,6 +39,8 @@
 
     <VLoadingSpinner v-else-if="loadingRecipe" />
 
+    <router-view v-else-if="editRecipeModal" />
+
     <div v-else>
       <figure class="recipe__fig">
         <img :src="recipe.image_url" :alt="recipe.title" class="recipe__img" />
@@ -71,9 +73,10 @@
               <use :href="`${icons}#icon-delete`"></use>
             </svg>
           </button>
+
           <button
             v-if="recipe.user_generated"
-            @click="toggleEditRecipeModal"
+            @click="editUserRecipe"
             class="btn--round"
             title="Edit this recipe"
           >
@@ -191,6 +194,7 @@
 
 <script>
 import VLoadingSpinner from './VLoadingSpinner.vue';
+// import VEditRecipe from '@/components/VEditRecipe.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 import fracty from 'fracty';
@@ -222,6 +226,7 @@ export default {
       renderRecipeError: 'renderRecipeError',
       userRecipes: 'userRecipes',
       searchResultsDisplay: 'userRecipeSearchResultsDisplay',
+      editRecipeModal: 'editRecipeModal',
     }),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
@@ -246,12 +251,13 @@ export default {
       if (!this.loggedIn) this.toggleRegisterModal();
       else this.$store.dispatch('home/toggleBookmark', this.recipe);
     },
+    editUserRecipe() {
+      this.$router.push({ name: 'edit' }).catch(() => {});
+      this.toggleEditRecipeModal(true);
+    },
     deleteUserRecipe() {
       this.$store.dispatch('home/deleteUserRecipe', this.recipe);
     },
-    // editUserRecipe() {
-    //   this.$store.dispatch('home/toggleEditRecipeModal', this.recipe);
-    // },
 
     // TODO move this to either App.vue, VHome.vue, upon login, or upon user state change.
     // Concerns: if I put this in App, it would render the recipe even if I begin in another tab, thereby using resources and slowing things down. Or maybe that doesn't matter?

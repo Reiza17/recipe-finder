@@ -2,7 +2,10 @@
 import Vue from 'vue';
 import VHome from '@/views/VHome.vue';
 import VPersonal from '@/views/VPersonal.vue';
+import VEditRecipe from '@/components/VEditRecipe.vue';
 import VueRouter from 'vue-router';
+import store from '@/store';
+
 // import VRegister from '@/views/VRegister.vue';
 // import VLogin from '@/views/VLogin.vue';
 // import VUploadRecipe from '@/components/VUploadRecipe.vue';
@@ -44,14 +47,17 @@ const routes = [
     path: '/personal',
     name: 'personal',
     component: VPersonal,
-    // children: [
-    //   {
-    //     path: ':userRecipeId?/:id?',
-    //     name: 'userRecipe',
-    //     // REVIEW What exactly should I put here?
-    //     // component:
-    //   },
-    // ],
+    children: [
+      {
+        path: '/personal/edit',
+        name: 'edit',
+        component: VEditRecipe,
+        // path: ':userRecipeId?/:id?',
+        // name: 'userRecipe',
+        // REVIEW What exactly should I put here?
+        // component:
+      },
+    ],
   },
 ];
 
@@ -136,10 +142,21 @@ router.beforeEach((to, from, next) => {
   }
 
   if (from.query.userRecipeId && !to.query.userRecipeId) {
-    next({
-      path: to.path,
-      query: { ...to.query, userRecipeId: from.query.userRecipeId },
-    });
+    const userRecipes = store.getters['home/userRecipes'];
+
+    const existingUserRecipe = userRecipes.filter(
+      recipe => recipe.id === from.query.userRecipeId
+    );
+
+    // NOTE this allows deleting a recipe to also remove the recipe's id from the query params
+    if (Object.keys(existingUserRecipe).length) {
+      next({
+        path: to.path,
+        query: { ...to.query, userRecipeId: from.query.userRecipeId },
+      });
+    } else {
+      next();
+    }
   } else {
     next();
   }

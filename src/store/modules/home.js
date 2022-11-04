@@ -241,9 +241,9 @@ export default {
       Object.keys(recipe).forEach(key => delete recipe[key]);
     },
 
-    TOGGLE_EDIT_USER_RECIPE_MODAL(state) {
+    TOGGLE_EDIT_USER_RECIPE_MODAL(state, boolean) {
       // console.log(recipe.id);
-      state.editRecipeModal = !state.editRecipeModal;
+      state.editRecipeModal = boolean;
     },
 
     SET_USER_RECIPES(state, recipes) {
@@ -298,6 +298,10 @@ export default {
           dispatch('renderRecipe', {
             id: router.app._route.query.userRecipeId,
           });
+
+        // NOTE Will show the edit view after reloading
+        if (router.app._route.path === '/personal/edit')
+          commit('TOGGLE_EDIT_USER_RECIPE_MODAL', true);
       } catch (err) {
         console.log(err);
       }
@@ -437,7 +441,8 @@ export default {
           });
         // REVIEW can I load faster? as in, if it's already been loaded before, I just render it quickly. One suggested way is to store already loaded recipes into an array. And if the id of it matches any in that array, skip the API call. That's a somewhat hacky method, but others do it and it works.
         // BUG if I click between two recipes too fast, then it will render the wrong one
-        else {
+        // NOTE the if statement below is necessary, because after you delete a recipe the page will automatically reload and this action would do an API call b/c the recipe is no longer a userRecipe
+        else if (router.app._route.name === 'home') {
           const res = await axios.get(`${API_URL}${id}`);
           console.log(res);
           commit('CREATE_RECIPE_OBJECT', {
@@ -503,7 +508,7 @@ export default {
       }
     },
 
-    async uploadUserRecipe({ commit, rootState, dispatch }, { recipe, id }) {
+    async uploadUserRecipe({ commit, rootState, state }, { recipe, id }) {
       commit('TOGGLE_UPLOAD_SPINNER', true);
 
       try {
@@ -532,17 +537,16 @@ export default {
 
         router
           .push({
-            name: 'recipe',
-            query: { id: id },
+            name: 'personal',
+            query: { userRecipeId: id },
           })
           .catch(() => {});
 
-        if (router.app._route.query.query)
-          dispatch('searchRecipes', {
-            query: router.app._route.query.query,
-            page: router.app._route.query.page,
-            reloadingPage: true,
-          });
+        commit('CREATE_USER_RECIPE_SEARCH_RESULTS', {
+          results: state.userRecipes,
+          page: 1,
+        });
+
         commit('TOGGLE_UPLOAD_RECIPE_MODAL');
         commit('SET_TOAST_MESSAGE', 'The recipe has been uploaded');
       } catch (err) {
@@ -579,9 +583,9 @@ export default {
         commit('EDIT_USER_RECIPE', recipe);
 
         dispatch('renderRecipe', {
-          id: router.app._route.query.id,
+          id: router.app._route.query.userRecipeId,
         });
-        commit('TOGGLE_EDIT_USER_RECIPE_MODAL');
+        commit('TOGGLE_EDIT_USER_RECIPE_MODAL', false);
         commit('SET_TOAST_MESSAGE', 'The recipe has been edited');
       } catch (err) {
         console.log(err);
@@ -593,7 +597,7 @@ export default {
       }
     },
 
-    async deleteUserRecipe({ commit, rootState, dispatch }, recipe) {
+    async deleteUserRecipe({ commit, rootState, state }, recipe) {
       try {
         const docRef = doc(db, 'users', rootState.auth.user.uid);
         await updateDoc(docRef, {
@@ -601,15 +605,17 @@ export default {
         });
         commit('DELETE_USER_RECIPE', recipe);
 
-        // NOTE push to 'home' instead of 'recipe', as the latter expects a defined param
         router
           .push({
-            name: 'home',
-            query: { id: null },
+            name: 'personal',
+            query: { userRecipeId: undefined },
           })
           .catch(() => {});
 
-        dispatch('searchRecipes', { query: router.app._route.query.query });
+        commit('CREATE_USER_RECIPE_SEARCH_RESULTS', {
+          results: state.userRecipes,
+          page: 1,
+        });
         commit('SET_TOAST_MESSAGE', 'The recipe has been deleted');
       } catch (err) {
         console.error(`Failed to remove user recipe from server: ${err}`);
