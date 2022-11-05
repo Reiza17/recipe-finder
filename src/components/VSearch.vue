@@ -39,7 +39,11 @@
     </div> -->
   </form>
   <form
-    v-else-if="$route.name === 'personal' || $route.name === 'edit'"
+    v-else-if="
+      $route.name === 'personal' ||
+      $route.name === 'edit' ||
+      $route.name === 'upload'
+    "
     class="search"
     @submit.prevent="submitUserRecipeSearch"
   >

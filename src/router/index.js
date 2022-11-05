@@ -2,6 +2,7 @@
 import Vue from 'vue';
 import VHome from '@/views/VHome.vue';
 import VPersonal from '@/views/VPersonal.vue';
+import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import VEditRecipe from '@/components/VEditRecipe.vue';
 import VueRouter from 'vue-router';
 import store from '@/store';
@@ -48,6 +49,15 @@ const routes = [
     name: 'personal',
     component: VPersonal,
     children: [
+      {
+        path: '/personal/upload',
+        name: 'upload',
+        component: VUploadRecipe,
+        // path: ':userRecipeId?/:id?',
+        // name: 'userRecipe',
+        // REVIEW What exactly should I put here?
+        // component:
+      },
       {
         path: '/personal/edit',
         name: 'edit',

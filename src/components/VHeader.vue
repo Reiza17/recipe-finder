@@ -151,7 +151,7 @@
           </button>
         </li>
         <li class="nav__item" v-else>
-          <!-- <button class="nav__btn" @click="toggleUploadRecipeModal">
+          <!-- <button class="nav__btn" @click="toggleUploadRecipeView">
             <svg class="nav__icon">
               <use href="@/assets/images/icons.svg#icon-edit"></use>
             </svg>
@@ -192,7 +192,7 @@ export default {
   },
   methods: {
     ...mapMutations({
-      // toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+      // toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
       toggleUserRecipesView: 'TOGGLE_USER_RECIPES_VIEW',
       toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',

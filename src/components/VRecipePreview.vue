@@ -28,16 +28,14 @@
             {{ result.title }}
           </h4>
           <p class="preview__publisher">{{ result.publisher }}</p>
-          <div v-if="result.user_generated">
+          <!-- NOTE uncomment to enable personal recipe tag -->
+          <!-- <div v-if="result.user_generated">
             <div v-if="resultsActive" class="preview__user-generated">
-              <!-- <svg>
-                <use :href="`${icons}#icon-user`"></use>
-              </svg> -->
               <h4>
                 <span class="badge bg-primary text-uppercase">Personal</span>
               </h4>
             </div>
-          </div>
+          </div> -->
           <div v-if="isBookmarked(result.id)">
             <div
               v-if="resultsActive"

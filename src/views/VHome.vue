@@ -42,7 +42,7 @@ export default {
   // methods: {
   //   ...mapMutations({
   //     setStoredBookmarks: 'SET_STORED_BOOKMARKS',
-  //     toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+  //     toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
   //   }),
   // },
 

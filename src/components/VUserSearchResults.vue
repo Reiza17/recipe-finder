@@ -1,6 +1,6 @@
 <template>
   <div class="search-container">
-    <button @click="toggleUploadRecipeModal" class="btn btn-success btn-lg">
+    <button @click="uploadUserRecipe" class="btn btn-success btn-lg">
       <svg>
         <use :href="`${icons}#icon-add-circle-fill`"></use>
       </svg>
@@ -151,12 +151,18 @@ export default {
   methods: {
     ...mapMutations({
       updatePagination: 'UPDATE_PAGINATION',
-      toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+      toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
       createSearchResults: 'CREATE_USER_RECIPE_SEARCH_RESULTS',
     }),
 
     resetSearchResults() {
       this.createSearchResults({ results: this.userRecipes, page: 1 });
+    },
+    uploadUserRecipe() {
+      this.toggleUploadRecipeView(true);
+      this.$router
+        .replace({ name: 'upload', query: { userRecipeId: 'new' } })
+        .catch(() => {});
     },
   },
 
@@ -190,7 +196,7 @@ export default {
 
   .btn {
     display: flex;
-    width: 96%;
+    width: 98%;
     margin: 2rem auto;
     align-items: center;
     justify-content: center;

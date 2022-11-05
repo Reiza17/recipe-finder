@@ -39,7 +39,7 @@
 
     <VLoadingSpinner v-else-if="loadingRecipe" />
 
-    <router-view v-else-if="editRecipeModal" />
+    <router-view v-else-if="editRecipeView || uploadRecipeView" />
 
     <div v-else>
       <figure class="recipe__fig">
@@ -47,20 +47,7 @@
       </figure>
 
       <div class="d-flex flex-row justify-content-between mb-2">
-        <h1 class="recipe__title d-flex flex-row">
-          <span>{{ recipe.title }}</span>
-          <div
-            v-if="recipe.user_generated"
-            title="This recipe was created by you"
-          >
-            <!-- <svg>
-              <use :href="`${icons}#icon-user`"></use>
-            </svg> -->
-            <h4>
-              <span class="badge bg-primary text-uppercase">Personal</span>
-            </h4>
-          </div>
-        </h1>
+        <span class="recipe__title">{{ recipe.title }}</span>
 
         <div class="d-flex flex-row align-items-end">
           <button
@@ -226,7 +213,8 @@ export default {
       renderRecipeError: 'renderRecipeError',
       userRecipes: 'userRecipes',
       searchResultsDisplay: 'userRecipeSearchResultsDisplay',
-      editRecipeModal: 'editRecipeModal',
+      editRecipeView: 'editRecipeView',
+      uploadRecipeView: 'uploadRecipeView',
     }),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
@@ -241,7 +229,7 @@ export default {
     ...mapMutations({
       updateServings: 'UPDATE_SERVINGS',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
-      toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL',
+      toggleEditRecipeView: 'TOGGLE_EDIT_USER_RECIPE_VIEW',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
@@ -253,7 +241,7 @@ export default {
     },
     editUserRecipe() {
       this.$router.push({ name: 'edit' }).catch(() => {});
-      this.toggleEditRecipeModal(true);
+      this.toggleEditRecipeView(true);
     },
     deleteUserRecipe() {
       this.$store.dispatch('home/deleteUserRecipe', this.recipe);

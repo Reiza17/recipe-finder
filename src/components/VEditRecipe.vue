@@ -13,7 +13,7 @@
       "
       class="overlay"
     ></div> -->
-  <!-- <div @click="toggleEditRecipeModal" class="overlay"></div>
+  <!-- <div @click="toggleEditRecipeView" class="overlay"></div>
     <div class="add-recipe-window d-flex">
       -->
   <form @submit.prevent="submitForm" class="upload">
@@ -225,7 +225,7 @@
         </div> -->
 
     <div class="ingredients">
-      <div class="ingredients-heading">
+      <div class="ingredients-heading mb-3">
         <h3 class="upload__heading">Ingredients</h3>
         <button
           class="btn btn-success add-ingredient"
@@ -348,7 +348,7 @@
           </button> -->
     </div>
 
-    <div class="d-flex justify-content-center gap-5">
+    <div class="d-flex justify-content-center gap-5 mb-5">
       <button
         type="submit"
         :disabled="$v.$invalid"
@@ -401,6 +401,7 @@ export default {
       // isSubmitted: false,
       // uiState: 'submit not clicked',
       formSubmitted: false,
+      formCancelled: false,
       // NOTE For alternative way to display errors
       // formErrorsExist: false,
       // formEmpty: true,
@@ -435,7 +436,7 @@ export default {
     }),
   },
   methods: {
-    ...mapMutations({ toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL' }),
+    ...mapMutations({ toggleEditRecipeView: 'TOGGLE_EDIT_USER_RECIPE_VIEW' }),
 
     addIngredient() {
       this.formData.ingredients.push({
@@ -460,14 +461,16 @@ export default {
             '⚠ You have unsaved changes. Do you really want to leave?'
           )
         ) {
+          this.formCancelled = true;
           this.$router.push({ name: 'personal' }).catch(() => {});
-          this.toggleEditRecipeModal(false);
+          this.toggleEditRecipeView(false);
         } else {
           return;
         }
       } else {
+        this.formCancelled = true;
         this.$router.push({ name: 'personal' }).catch(() => {});
-        this.toggleEditRecipeModal(false);
+        this.toggleEditRecipeView(false);
       }
     },
 
@@ -516,10 +519,16 @@ export default {
   },
 
   beforeRouteLeave(to, from, next) {
-    if (!this.formSubmitted && this.confirmStayInDirtyForm()) {
-      next(false);
+    if (!this.formCancelled) {
+      if (!this.formSubmitted && this.confirmStayInDirtyForm()) {
+        next(false);
+      } else {
+        // NOTE need to set formCancelled to true, or it'll run the else block below twice
+        this.formCancelled = true;
+        this.toggleEditRecipeView(false);
+        next();
+      }
     } else {
-      this.toggleEditRecipeModal(false);
       next();
     }
   },
@@ -631,7 +640,7 @@ export default {
     column-gap: 10px;
     row-gap: 30px;
     display: flex;
-    margin-bottom: 30px;
+    margin-bottom: 34px;
     flex-wrap: wrap;
   }
 
@@ -818,7 +827,7 @@ export default {
     font-size: 2.25rem;
     font-weight: 700;
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     grid-column: 1/-1;
   }
 

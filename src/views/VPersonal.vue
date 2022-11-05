@@ -8,8 +8,8 @@
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VUserSearchResults class="col-sm-3 search-results" />
             <keep-alive><VUserRecipe class="col-sm-9 recipe" /></keep-alive>
-            <VUploadRecipe v-if="uploadRecipeModal" />
-            <!-- <VEditRecipe v-if="editRecipeModal" /> -->
+            <!-- <VUploadRecipe v-if="uploadRecipeView" /> -->
+            <!-- <VEditRecipe v-if="editRecipeView" /> -->
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
             <VToast v-if="toastMessage" />
@@ -24,7 +24,7 @@
 // import VHeader from '@/components/VHeader.vue';
 import VUserSearchResults from '@/components/VUserSearchResults.vue';
 import VUserRecipe from '@/components/VUserRecipe.vue';
-import VUploadRecipe from '@/components/VUploadRecipe.vue';
+// import VUploadRecipe from '@/components/VUploadRecipe.vue';
 // import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
 import VRegister from '@/components/VRegister.vue';
@@ -38,7 +38,7 @@ export default {
     // VHeader,
     VUserSearchResults,
     VUserRecipe,
-    VUploadRecipe,
+    // VUploadRecipe,
     // VEditRecipe,
     VLogin,
     VRegister,
@@ -48,8 +48,8 @@ export default {
   computed: {
     ...mapGetters([
       'userRecipesView',
-      'uploadRecipeModal',
-      'editRecipeModal',
+      'uploadRecipeView',
+      'editRecipeView',
       'loginModal',
       'registerModal',
       'toastMessage',
@@ -58,7 +58,7 @@ export default {
   // methods: {
   //   ...mapMutations({
   //     setStoredBookmarks: 'SET_STORED_BOOKMARKS',
-  //     toggleUploadRecipeModal: 'TOGGLE_UPLOAD_RECIPE_MODAL',
+  //     toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
   //   }),
   // },
 

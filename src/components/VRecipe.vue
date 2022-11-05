@@ -38,21 +38,20 @@
       <div class="d-flex flex-row justify-content-between mb-2">
         <h1 class="recipe__title d-flex flex-row">
           <span>{{ recipe.title }}</span>
-          <div
+          <!-- NOTE uncomment to enable personal recipe tag -->
+          <!-- <div
             v-if="recipe.user_generated"
             title="This recipe was created by you"
           >
-            <!-- <svg>
-              <use :href="`${icons}#icon-user`"></use>
-            </svg> -->
             <h4>
               <span class="badge bg-primary text-uppercase">Personal</span>
             </h4>
-          </div>
+          </div> -->
         </h1>
 
         <div class="d-flex flex-row align-items-end">
-          <button
+          <!-- NOTE uncomment to enable personal recipe buttons -->
+          <!-- <button
             v-if="recipe.user_generated"
             @click="deleteUserRecipe"
             class="btn--round"
@@ -64,14 +63,14 @@
           </button>
           <button
             v-if="recipe.user_generated"
-            @click="toggleEditRecipeModal"
+            @click="toggleEditRecipeView"
             class="btn--round"
             title="Edit this recipe"
           >
             <svg>
               <use :href="`${icons}#icon-edit`"></use>
             </svg>
-          </button>
+          </button> -->
           <button
             v-if="!recipe.user_generated"
             @click="bookmarkRecipe"
@@ -230,7 +229,7 @@ export default {
       toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
       toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
-      toggleEditRecipeModal: 'TOGGLE_EDIT_USER_RECIPE_MODAL',
+      toggleEditRecipeView: 'TOGGLE_EDIT_USER_RECIPE_VIEW',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
@@ -244,7 +243,7 @@ export default {
       this.$store.dispatch('home/deleteUserRecipe', this.recipe);
     },
     // editUserRecipe() {
-    //   this.$store.dispatch('home/toggleEditRecipeModal', this.recipe);
+    //   this.$store.dispatch('home/toggleEditRecipeView', this.recipe);
     // },
 
     // TODO move this to either App.vue, VHome.vue, upon login, or upon user state change.

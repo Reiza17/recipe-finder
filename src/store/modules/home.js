@@ -39,9 +39,9 @@ export default {
     loadingUserRecipes: false,
     loginModal: false,
     registerModal: false,
-    editRecipeModal: false,
+    editRecipeView: false,
     renderRecipeError: null,
-    uploadRecipeModal: false,
+    uploadRecipeView: false,
     uploadingRecipe: false,
     toastMessage: '',
     toastTimeout: null,
@@ -81,9 +81,9 @@ export default {
     loadingUserRecipes: state => state.loadingUserRecipes,
     loginModal: state => state.loginModal,
     registerModal: state => state.registerModal,
-    editRecipeModal: state => state.editRecipeModal,
+    editRecipeView: state => state.editRecipeView,
     renderRecipeError: state => state.renderRecipeError,
-    uploadRecipeModal: state => state.uploadRecipeModal,
+    uploadRecipeView: state => state.uploadRecipeView,
     uploadingRecipe: state => state.uploadingRecipe,
     toastMessage: state => state.toastMessage,
     // User recipes view variables
@@ -188,8 +188,14 @@ export default {
       state.userRecipesView = !state.userRecipesView;
     },
 
-    TOGGLE_UPLOAD_RECIPE_MODAL(state) {
-      state.uploadRecipeModal = !state.uploadRecipeModal;
+    TOGGLE_UPLOAD_USER_RECIPE_VIEW(state, boolean) {
+      // console.log(recipe.id);
+      state.uploadRecipeView = boolean;
+    },
+
+    TOGGLE_EDIT_USER_RECIPE_VIEW(state, boolean) {
+      // console.log(recipe.id);
+      state.editRecipeView = boolean;
     },
 
     TOGGLE_UPLOAD_SPINNER(state, boolean) {
@@ -239,11 +245,6 @@ export default {
 
       // NOTE delete the recipe object so that Recipe view changes (there's a v-if that's based on object length)
       Object.keys(recipe).forEach(key => delete recipe[key]);
-    },
-
-    TOGGLE_EDIT_USER_RECIPE_MODAL(state, boolean) {
-      // console.log(recipe.id);
-      state.editRecipeModal = boolean;
     },
 
     SET_USER_RECIPES(state, recipes) {
@@ -299,9 +300,12 @@ export default {
             id: router.app._route.query.userRecipeId,
           });
 
+        if (router.app._route.path === '/personal/upload')
+          commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', true);
+
         // NOTE Will show the edit view after reloading
         if (router.app._route.path === '/personal/edit')
-          commit('TOGGLE_EDIT_USER_RECIPE_MODAL', true);
+          commit('TOGGLE_EDIT_USER_RECIPE_VIEW', true);
       } catch (err) {
         console.log(err);
       }
@@ -547,7 +551,7 @@ export default {
           page: 1,
         });
 
-        commit('TOGGLE_UPLOAD_RECIPE_MODAL');
+        commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', false);
         commit('SET_TOAST_MESSAGE', 'The recipe has been uploaded');
       } catch (err) {
         console.log(err);
@@ -585,7 +589,7 @@ export default {
         dispatch('renderRecipe', {
           id: router.app._route.query.userRecipeId,
         });
-        commit('TOGGLE_EDIT_USER_RECIPE_MODAL', false);
+        commit('TOGGLE_EDIT_USER_RECIPE_VIEW', false);
         commit('SET_TOAST_MESSAGE', 'The recipe has been edited');
       } catch (err) {
         console.log(err);
