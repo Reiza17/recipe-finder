@@ -50,7 +50,7 @@ export default {
     // const storage = localStorage.getItem('bookmarks');
     // if (storage) this.setStoredBookmarks(JSON.parse(storage));
     console.log('VHome created');
-    this.$store.dispatch('home/init');
+    this.$store.dispatch('home/initHomeView');
   },
   destroyed() {
     console.log('VHome destroyed');

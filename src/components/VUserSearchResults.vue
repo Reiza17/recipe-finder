@@ -161,7 +161,7 @@ export default {
     uploadUserRecipe() {
       this.toggleUploadRecipeView(true);
       this.$router
-        .replace({ name: 'upload', query: { userRecipeId: 'new' } })
+        .replace({ name: 'upload', query: { userRecipeId: 'draft' } })
         .catch(() => {});
     },
   },

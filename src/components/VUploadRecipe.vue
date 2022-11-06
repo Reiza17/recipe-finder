@@ -388,49 +388,49 @@ export default {
       // formErrorsExist: false,
       // formEmpty: true,
 
-      // formData: {
-      //   id: uniqid(),
-      //   user_generated: true,
-      //   title: null,
-      //   publisher: null,
-      //   source_url: null,
-      //   image_url: null,
-      //   servings: null,
-      //   cooking_time: null,
-      //   ingredients: [
-      //     // { quantity: null, unit: null, description: null, id: uniqid() },
-      //     { quantity: null, unit: null, description: null, id: uniqid() },
-      //   ],
-      // },
-
-      // NOTE pre-filled out form below for testing/demo purposes
       formData: {
         id: uniqid(),
         user_generated: true,
-        title: 'TEST RECIPE',
-        publisher: 'TEST17',
-        source_url:
-          'https://www.closetcooking.com/chicken-fajita-grilled-cheese/',
-        image_url:
-          'https://images.unsplash.com/photo-1583224994076-ae951d019af7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-        servings: 2,
-        cooking_time: 25,
+        title: null,
+        publisher: null,
+        source_url: null,
+        image_url: null,
+        servings: null,
+        cooking_time: null,
         ingredients: [
           // { quantity: null, unit: null, description: null, id: uniqid() },
-          { quantity: 1, unit: 'cup', description: 'sugar', id: uniqid() },
-          { quantity: 0.5, unit: 'kg', description: 'rice', id: uniqid() },
-          {
-            quantity: 1,
-            unit: 'tsp',
-            description: 'coriander seeds',
-            id: uniqid(),
-          },
-          { quantity: 50, unit: 'oz', description: 'butter', id: uniqid() },
-          // { quantity: 2, unit: 'free-range', description: 'eggs', id: uniqid() },
-          // { quantity: 2, unit: 'pieces', description: 'bread', id: uniqid() },
-          // { quantity: 1, unit: 'cup', description: 'grated romano cheese', id: uniqid() },
+          { quantity: null, unit: null, description: null, id: uniqid() },
         ],
       },
+
+      // NOTE pre-filled out form below for testing/demo purposes
+      // formData: {
+      //   id: uniqid(),
+      //   user_generated: true,
+      //   title: 'TEST RECIPE',
+      //   publisher: 'TEST17',
+      //   source_url:
+      //     'https://www.closetcooking.com/chicken-fajita-grilled-cheese/',
+      //   image_url:
+      //     'https://images.unsplash.com/photo-1583224994076-ae951d019af7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+      //   servings: 2,
+      //   cooking_time: 25,
+      //   ingredients: [
+      //     // { quantity: null, unit: null, description: null, id: uniqid() },
+      //     { quantity: 1, unit: 'cup', description: 'sugar', id: uniqid() },
+      //     { quantity: 0.5, unit: 'kg', description: 'rice', id: uniqid() },
+      //     {
+      //       quantity: 1,
+      //       unit: 'tsp',
+      //       description: 'coriander seeds',
+      //       id: uniqid(),
+      //     },
+      //     { quantity: 50, unit: 'oz', description: 'butter', id: uniqid() },
+      //     // { quantity: 2, unit: 'free-range', description: 'eggs', id: uniqid() },
+      //     // { quantity: 2, unit: 'pieces', description: 'bread', id: uniqid() },
+      //     // { quantity: 1, unit: 'cup', description: 'grated romano cheese', id: uniqid() },
+      //   ],
+      // },
     };
   },
   validations: {

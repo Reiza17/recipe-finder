@@ -479,6 +479,7 @@ export default {
       try {
         // const isFormCorrect = await this.$v.$validate();
         // is not loading
+        // REVIEW why did I do this?
         this.formSubmitted = true;
         this.$v.$touch();
         if (this.$v.$invalid) {

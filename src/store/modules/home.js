@@ -254,22 +254,16 @@ export default {
   },
 
   actions: {
-    async init({ commit, dispatch, rootState }) {
+    async initHomeView({ commit, dispatch, rootState }) {
       try {
-        commit('TOGGLE_RECIPE_SPINNER', true);
         commit('TOGGLE_BOOKMARKS_SPINNER', true);
-        commit('TOGGLE_USER_RECIPES_SPINNER', true);
-
-        // NOTE no need to toggle above spinners to false, as that's done at the end of the actions themselves
 
         // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
         await dispatch('auth/fetchUser', null, { root: true });
         if (rootState.auth.user) {
           dispatch('fetchBookmarks');
-          await dispatch('fetchUserRecipes');
         }
         commit('TOGGLE_BOOKMARKS_SPINNER', false);
-        commit('TOGGLE_USER_RECIPES_SPINNER', false);
 
         console.log(router);
         if (router.app._route.query.query)
@@ -278,6 +272,31 @@ export default {
             page: router.app._route.query.page,
             reloadingPage: true,
           });
+
+        // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
+        // if (loggingIn) return;
+
+        // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
+        if (router.app._route.query.id)
+          dispatch('renderRecipe', {
+            id: router.app._route.query.id,
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async initUserView({ commit, dispatch, rootState }) {
+      try {
+        commit('TOGGLE_USER_RECIPES_SPINNER', true);
+        commit('TOGGLE_RECIPE_SPINNER', true);
+
+        // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
+        await dispatch('auth/fetchUser', null, { root: true });
+        if (rootState.auth.user) {
+          await dispatch('fetchUserRecipes');
+        }
+        commit('TOGGLE_USER_RECIPES_SPINNER', false);
 
         if (router.app._route.query.userRecipeQuery)
           dispatch('searchUserRecipes', {
@@ -290,10 +309,6 @@ export default {
         // if (loggingIn) return;
 
         // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
-        if (router.app._route.query.id)
-          dispatch('renderRecipe', {
-            id: router.app._route.query.id,
-          });
 
         if (router.app._route.query.userRecipeId)
           dispatch('renderRecipe', {
@@ -310,6 +325,63 @@ export default {
         console.log(err);
       }
     },
+
+    // async init({ commit, dispatch, rootState }) {
+    //   try {
+    //     // commit('TOGGLE_RECIPE_SPINNER', true);
+    //     commit('TOGGLE_BOOKMARKS_SPINNER', true);
+    //     commit('TOGGLE_USER_RECIPES_SPINNER', true);
+
+    //     // NOTE no need to toggle above spinners to false, as that's done at the end of the actions themselves
+
+    //     // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
+    //     await dispatch('auth/fetchUser', null, { root: true });
+    //     if (rootState.auth.user) {
+    //       dispatch('fetchBookmarks');
+    //       await dispatch('fetchUserRecipes');
+    //     }
+    //     commit('TOGGLE_BOOKMARKS_SPINNER', false);
+    //     commit('TOGGLE_USER_RECIPES_SPINNER', false);
+
+    //     console.log(router);
+    //     if (router.app._route.query.query)
+    //       dispatch('searchRecipes', {
+    //         query: router.app._route.query.query,
+    //         page: router.app._route.query.page,
+    //         reloadingPage: true,
+    //       });
+
+    //     if (router.app._route.query.userRecipeQuery)
+    //       dispatch('searchUserRecipes', {
+    //         query: router.app._route.query.userRecipeQuery,
+    //         page: router.app._route.query.userRecipeQueryPage,
+    //         reloadingPage: true,
+    //       });
+
+    //     // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
+    //     // if (loggingIn) return;
+
+    //     // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
+    //     if (router.app._route.query.id)
+    //       dispatch('renderRecipe', {
+    //         id: router.app._route.query.id,
+    //       });
+
+    //     if (router.app._route.query.userRecipeId)
+    //       dispatch('renderRecipe', {
+    //         id: router.app._route.query.userRecipeId,
+    //       });
+
+    //     if (router.app._route.path === '/personal/upload')
+    //       commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', true);
+
+    //     // NOTE Will show the edit view after reloading
+    //     if (router.app._route.path === '/personal/edit')
+    //       commit('TOGGLE_EDIT_USER_RECIPE_VIEW', true);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // },
 
     async searchRecipes(
       { commit, state },
@@ -432,7 +504,7 @@ export default {
     async renderRecipe({ commit, state }, { id }) {
       try {
         // console.log(id);
-        commit('SHOW_RENDER_RECIPE_ERROR_MESSAGE', null);
+        // commit('SHOW_RENDER_RECIPE_ERROR_MESSAGE', null);
         commit('TOGGLE_RECIPE_SPINNER', true);
 
         const [userRecipe] = state.userRecipes.filter(

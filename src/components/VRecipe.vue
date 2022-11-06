@@ -1,8 +1,15 @@
 <template>
   <div class="recipe">
-    <div v-if="renderRecipeError" class="message">
-      <p>{{ renderRecipeError }}</p>
+    <VLoadingSpinner v-if="loadingRecipe" />
+    <div v-else-if="!$route.query.id && $route.query.query" class="message">
+      <div>
+        <svg>
+          <use :href="`${icons}#icon-smile`"></use>
+        </svg>
+      </div>
+      <p>Click on a recipe!</p>
     </div>
+
     <div
       v-else-if="
         (!$route.query.id && !$route.query.query) ||
@@ -19,16 +26,10 @@
       </div>
       <p>Start by searching for a recipe or an ingredient.</p>
     </div>
-    <div v-else-if="!$route.query.id && $route.query.query" class="message">
-      <div>
-        <svg>
-          <use :href="`${icons}#icon-smile`"></use>
-        </svg>
-      </div>
-      <p>Click on a recipe!</p>
-    </div>
 
-    <VLoadingSpinner v-else-if="loadingRecipe" />
+    <div v-else-if="renderRecipeError" class="message">
+      <p>{{ renderRecipeError }}</p>
+    </div>
 
     <div v-else>
       <figure class="recipe__fig">

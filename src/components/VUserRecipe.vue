@@ -1,8 +1,9 @@
 <template>
   <div class="recipe">
-    <div v-if="renderRecipeError" class="message">
-      <p>{{ renderRecipeError }}</p>
-    </div>
+    <router-view v-if="editRecipeView || uploadRecipeView" />
+
+    <VLoadingSpinner v-else-if="loadingRecipe" />
+
     <div v-else-if="!Object.keys(userRecipes).length" class="message">
       <div>
         <svg>
@@ -11,6 +12,7 @@
       </div>
       <p>Start by adding a recipe.</p>
     </div>
+
     <div
       v-else-if="
         (!$route.query.userRecipeId &&
@@ -29,6 +31,7 @@
       </div>
       <p>Click on or add a recipe.</p>
     </div>
+
     <div
       v-else-if="
         $route.query.userRecipeQuery &&
@@ -37,9 +40,9 @@
       "
     ></div>
 
-    <VLoadingSpinner v-else-if="loadingRecipe" />
-
-    <router-view v-else-if="editRecipeView || uploadRecipeView" />
+    <div v-else-if="renderRecipeError" class="message">
+      <p>{{ renderRecipeError }}</p>
+    </div>
 
     <div v-else>
       <figure class="recipe__fig">
@@ -200,9 +203,11 @@ export default {
   },
   watch: {
     '$route.query.userRecipeId'(newValue) {
-      this.$store.dispatch('home/renderRecipe', {
-        id: newValue,
-      });
+      // TODO  This if-statement prevents rendering a recipe if user is simply uploading one. It's a temporary fix for not being able to remove the userRecipeId query param.
+      if (newValue && newValue !== 'draft')
+        this.$store.dispatch('home/renderRecipe', {
+          id: newValue,
+        });
     },
   },
   computed: {
