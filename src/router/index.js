@@ -158,57 +158,60 @@ router.beforeEach((to, from, next) => {
       recipe => recipe.id === from.query.userRecipeId
     );
 
+    console.log(userRecipes);
+    console.log(existingUserRecipe);
+
     // NOTE this allows deleting a recipe to also remove the recipe's id from the query params
     if (Object.keys(existingUserRecipe).length) {
       next({
         path: to.path,
         query: { ...to.query, userRecipeId: from.query.userRecipeId },
       });
-    } else {
-      next();
     }
-  } else {
-    next();
   }
 
   if (from.query.query && !to.query.query) {
     next({
       path: to.path,
-      query: { ...to.query, query: from.query.query },
+      query: { ...to.query, query: from.query.query, page: from.query.page },
     });
   } else {
     next();
   }
 
-  if (from.query.page && !to.query.page) {
-    next({
-      path: to.path,
-      query: { ...to.query, page: from.query.page },
-    });
-  } else {
-    next();
-  }
+  // if (from.query.page && !to.query.page) {
+  //   next({
+  //     path: to.path,
+  //     query: { ...to.query, page: from.query.page },
+  //   });
+  // } else {
+  //   next();
+  // }
 
   if (from.query.userRecipeQuery && !to.query.userRecipeQuery) {
     next({
       path: to.path,
-      query: { ...to.query, userRecipeQuery: from.query.userRecipeQuery },
-    });
-  } else {
-    next();
-  }
-
-  if (from.query.userRecipeQueryPage && !to.query.userRecipeQueryPage) {
-    next({
-      path: to.path,
       query: {
         ...to.query,
+        userRecipeQuery: from.query.userRecipeQuery,
         userRecipeQueryPage: from.query.userRecipeQueryPage,
       },
     });
   } else {
     next();
   }
+
+  // if (from.query.userRecipeQueryPage && !to.query.userRecipeQueryPage) {
+  //   next({
+  //     path: to.path,
+  //     query: {
+  //       ...to.query,
+  //       userRecipeQueryPage: from.query.userRecipeQueryPage,
+  //     },
+  //   });
+  // } else {
+  //   next();
+  // }
 
   // if (hasQueryParams(from) && !hasQueryParams(to)) {
   //   next({

@@ -39,11 +39,7 @@
     </div> -->
   </form>
   <form
-    v-else-if="
-      $route.name === 'personal' ||
-      $route.name === 'edit' ||
-      $route.name === 'upload'
-    "
+    v-else-if="$route.path.startsWith('/personal')"
     class="search"
     @submit.prevent="submitUserRecipeSearch"
   >

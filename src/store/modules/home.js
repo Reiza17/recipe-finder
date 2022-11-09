@@ -112,11 +112,14 @@ export default {
 
     UPDATE_PAGINATION(state, amount) {
       state.search.page += amount;
-      router.push({
-        query: {
-          page: state.search.page,
-        },
-      });
+      router
+        .push({
+          query: {
+            query: router.app._route.query.query,
+            page: state.search.page,
+          },
+        })
+        .catch(() => {});
     },
 
     // REVIEW should I split this into two actions instead?
@@ -262,6 +265,9 @@ export default {
         await dispatch('auth/fetchUser', null, { root: true });
         if (rootState.auth.user) {
           dispatch('fetchBookmarks');
+          // NOTE allows persistent selection of user recipe once user tabs over
+          if (router.app._route.query.userRecipeId)
+            dispatch('fetchUserRecipes');
         }
         commit('TOGGLE_BOOKMARKS_SPINNER', false);
 
