@@ -7,9 +7,7 @@
         <div class="container-fluid">
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VUserSearchResults class="col-sm-3 search-results" />
-            <keep-alive><VUserRecipe class="col-sm-9 recipe" /></keep-alive>
-            <!-- <VUploadRecipe v-if="uploadRecipeView" /> -->
-            <!-- <VEditRecipe v-if="editRecipeView" /> -->
+            <router-view></router-view>
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
             <VToast v-if="toastMessage" />
@@ -23,7 +21,7 @@
 <script>
 // import VHeader from '@/components/VHeader.vue';
 import VUserSearchResults from '@/components/VUserSearchResults.vue';
-import VUserRecipe from '@/components/VUserRecipe.vue';
+// import VUserRecipe from '@/components/VUserRecipe.vue';
 // import VUploadRecipe from '@/components/VUploadRecipe.vue';
 // import VEditRecipe from '@/components/VEditRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
@@ -37,7 +35,7 @@ export default {
   components: {
     // VHeader,
     VUserSearchResults,
-    VUserRecipe,
+    // VUserRecipe,
     // VUploadRecipe,
     // VEditRecipe,
     VLogin,
@@ -48,8 +46,6 @@ export default {
   computed: {
     ...mapGetters([
       'userRecipesView',
-      'uploadRecipeView',
-      'editRecipeView',
       'loginModal',
       'registerModal',
       'toastMessage',

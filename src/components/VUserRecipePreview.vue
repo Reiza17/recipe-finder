@@ -10,7 +10,7 @@
     >
       <router-link
         :to="{
-          name: 'personal',
+          name: 'user-recipes',
           query: { userRecipeId: result.id },
         }"
         class="preview__link"

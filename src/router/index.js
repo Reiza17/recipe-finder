@@ -2,6 +2,7 @@
 import Vue from 'vue';
 import VHome from '@/views/VHome.vue';
 import VPersonal from '@/views/VPersonal.vue';
+import VUserRecipe from '@/components/VUserRecipe.vue';
 import VUploadRecipe from '@/components/VUploadRecipe.vue';
 import VEditRecipe from '@/components/VEditRecipe.vue';
 import VueRouter from 'vue-router';
@@ -49,6 +50,15 @@ const routes = [
     name: 'personal',
     component: VPersonal,
     children: [
+      {
+        path: '/personal/user-recipes',
+        name: 'user-recipes',
+        component: VUserRecipe,
+        // path: ':userRecipeId?/:id?',
+        // name: 'userRecipe',
+        // REVIEW What exactly should I put here?
+        // component:
+      },
       {
         path: '/personal/upload',
         name: 'upload',
@@ -158,8 +168,8 @@ router.beforeEach((to, from, next) => {
       recipe => recipe.id === from.query.userRecipeId
     );
 
-    console.log(userRecipes);
-    console.log(existingUserRecipe);
+    // console.log(userRecipes);
+    // console.log(existingUserRecipe);
 
     // NOTE this allows deleting a recipe to also remove the recipe's id from the query params
     if (Object.keys(existingUserRecipe).length) {
@@ -189,14 +199,17 @@ router.beforeEach((to, from, next) => {
   // }
 
   if (from.query.userRecipeQuery && !to.query.userRecipeQuery) {
-    next({
-      path: to.path,
-      query: {
-        ...to.query,
-        userRecipeQuery: from.query.userRecipeQuery,
-        userRecipeQueryPage: from.query.userRecipeQueryPage,
-      },
-    });
+    if (to.query.userRecipeQuery === '') next();
+    else {
+      next({
+        path: to.path,
+        query: {
+          ...to.query,
+          userRecipeQuery: from.query.userRecipeQuery,
+          userRecipeQueryPage: from.query.userRecipeQueryPage,
+        },
+      });
+    }
   } else {
     next();
   }

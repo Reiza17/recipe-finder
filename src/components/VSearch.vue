@@ -67,6 +67,12 @@ export default {
       userRecipeQuery: this.$route.query.userRecipeQuery,
     };
   },
+  watch: {
+    // NOTE used for resetting the search input to '' after pressing 'Back to all recipes' in search results container
+    '$route.query.userRecipeQuery'(newValue) {
+      this.userRecipeQuery = newValue;
+    },
+  },
   methods: {
     submitSearch() {
       this.$store.dispatch('home/searchRecipes', { query: this.query });

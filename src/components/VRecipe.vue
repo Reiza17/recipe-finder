@@ -230,7 +230,6 @@ export default {
       toggleBookmarksSpinner: 'TOGGLE_BOOKMARKS_SPINNER',
       toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
-      toggleEditRecipeView: 'TOGGLE_EDIT_USER_RECIPE_VIEW',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';

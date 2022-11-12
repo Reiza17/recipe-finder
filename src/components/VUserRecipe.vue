@@ -1,8 +1,6 @@
 <template>
   <div class="recipe">
-    <router-view v-if="editRecipeView || uploadRecipeView" />
-
-    <VLoadingSpinner v-else-if="loadingRecipe" />
+    <VLoadingSpinner v-if="loadingRecipe" />
 
     <div v-else-if="!Object.keys(userRecipes).length" class="message">
       <div>
@@ -203,7 +201,7 @@ export default {
   },
   watch: {
     '$route.query.userRecipeId'(newValue) {
-      // TODO  This if-statement prevents rendering a recipe if user is simply uploading one. It's a temporary fix for not being able to remove the userRecipeId query param.
+      // TODO  This if-statement prevents rendering a recipe if user is simply uploading one. It's a band-aid fix for not being able to remove the userRecipeId query param.
       if (newValue && newValue !== 'draft')
         this.$store.dispatch('home/renderRecipe', {
           id: newValue,
@@ -218,8 +216,6 @@ export default {
       renderRecipeError: 'renderRecipeError',
       userRecipes: 'userRecipes',
       searchResultsDisplay: 'userRecipeSearchResultsDisplay',
-      editRecipeView: 'editRecipeView',
-      uploadRecipeView: 'uploadRecipeView',
     }),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
@@ -234,7 +230,6 @@ export default {
     ...mapMutations({
       updateServings: 'UPDATE_SERVINGS',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
-      toggleEditRecipeView: 'TOGGLE_EDIT_USER_RECIPE_VIEW',
     }),
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
@@ -246,7 +241,6 @@ export default {
     },
     editUserRecipe() {
       this.$router.push({ name: 'edit' }).catch(() => {});
-      this.toggleEditRecipeView(true);
     },
     deleteUserRecipe() {
       this.$store.dispatch('home/deleteUserRecipe', this.recipe);
@@ -278,6 +272,11 @@ export default {
     //     this.$store.dispatch('home/uploadBookmarks');
     //   }
     // });
+    // NOTE if you reload from edit or upload view, the action below allows for the correct recipe to render after its preview is clicked (because recipe view is not created after you reload)
+    if (this.$route.query.userRecipeId)
+      this.$store.dispatch('home/renderRecipe', {
+        id: this.$route.query.userRecipeId,
+      });
   },
 };
 </script>

@@ -151,15 +151,21 @@ export default {
   methods: {
     ...mapMutations({
       updatePagination: 'UPDATE_PAGINATION',
-      toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
       createSearchResults: 'CREATE_USER_RECIPE_SEARCH_RESULTS',
     }),
 
     resetSearchResults() {
       this.createSearchResults({ results: this.userRecipes, page: 1 });
+      this.$router
+        .replace({
+          query: {
+            userRecipeQuery: '',
+          },
+        })
+        .catch(() => {});
     },
+
     uploadUserRecipe() {
-      this.toggleUploadRecipeView(true);
       this.$router
         .replace({ name: 'upload', query: { userRecipeId: 'draft' } })
         .catch(() => {});

@@ -39,9 +39,7 @@ export default {
     loadingUserRecipes: false,
     loginModal: false,
     registerModal: false,
-    editRecipeView: false,
     renderRecipeError: null,
-    uploadRecipeView: false,
     uploadingRecipe: false,
     toastMessage: '',
     toastTimeout: null,
@@ -81,9 +79,7 @@ export default {
     loadingUserRecipes: state => state.loadingUserRecipes,
     loginModal: state => state.loginModal,
     registerModal: state => state.registerModal,
-    editRecipeView: state => state.editRecipeView,
     renderRecipeError: state => state.renderRecipeError,
-    uploadRecipeView: state => state.uploadRecipeView,
     uploadingRecipe: state => state.uploadingRecipe,
     toastMessage: state => state.toastMessage,
     // User recipes view variables
@@ -191,16 +187,6 @@ export default {
       state.userRecipesView = !state.userRecipesView;
     },
 
-    TOGGLE_UPLOAD_USER_RECIPE_VIEW(state, boolean) {
-      // console.log(recipe.id);
-      state.uploadRecipeView = boolean;
-    },
-
-    TOGGLE_EDIT_USER_RECIPE_VIEW(state, boolean) {
-      // console.log(recipe.id);
-      state.editRecipeView = boolean;
-    },
-
     TOGGLE_UPLOAD_SPINNER(state, boolean) {
       state.uploadingRecipe = boolean;
     },
@@ -292,7 +278,7 @@ export default {
       }
     },
 
-    async initUserView({ commit, dispatch, rootState }) {
+    async initUserView({ commit, dispatch, rootState, state }) {
       try {
         commit('TOGGLE_USER_RECIPES_SPINNER', true);
         commit('TOGGLE_RECIPE_SPINNER', true);
@@ -304,6 +290,7 @@ export default {
         }
         commit('TOGGLE_USER_RECIPES_SPINNER', false);
 
+        console.log(state.userRecipe);
         if (router.app._route.query.userRecipeQuery)
           dispatch('searchUserRecipes', {
             query: router.app._route.query.userRecipeQuery,
@@ -321,12 +308,14 @@ export default {
             id: router.app._route.query.userRecipeId,
           });
 
-        if (router.app._route.path === '/personal/upload')
-          commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', true);
+        console.log(state.userRecipe);
 
-        // NOTE Will show the edit view after reloading
-        if (router.app._route.path === '/personal/edit')
-          commit('TOGGLE_EDIT_USER_RECIPE_VIEW', true);
+        // if (router.app._route.path === '/personal/upload')
+        //   commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', true);
+
+        // // NOTE Will show the edit view after reloading
+        // if (router.app._route.path === '/personal/edit')
+        //   commit('TOGGLE_EDIT_USER_RECIPE_VIEW', true);
       } catch (err) {
         console.log(err);
       }
@@ -461,7 +450,7 @@ export default {
         if (!reloadingPage)
           router
             .push({
-              name: 'personal',
+              name: 'user-recipes',
               query: {
                 userRecipeQuery: query,
                 userRecipeQueryPage: page,
@@ -619,17 +608,20 @@ export default {
 
         router
           .push({
-            name: 'personal',
+            name: 'user-recipes',
             query: { userRecipeId: id },
           })
           .catch(() => {});
+
+        // dispatch('renderRecipe', {
+        //   id: router.app._route.query.userRecipeId,
+        // });
 
         commit('CREATE_USER_RECIPE_SEARCH_RESULTS', {
           results: state.userRecipes,
           page: 1,
         });
 
-        commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', false);
         commit('SET_TOAST_MESSAGE', 'The recipe has been uploaded');
       } catch (err) {
         console.log(err);
@@ -667,7 +659,13 @@ export default {
         dispatch('renderRecipe', {
           id: router.app._route.query.userRecipeId,
         });
-        commit('TOGGLE_EDIT_USER_RECIPE_VIEW', false);
+
+        router
+          .push({
+            name: 'user-recipes',
+          })
+          .catch(() => {});
+
         commit('SET_TOAST_MESSAGE', 'The recipe has been edited');
       } catch (err) {
         console.log(err);
@@ -689,7 +687,7 @@ export default {
 
         router
           .push({
-            name: 'personal',
+            name: 'user-recipes',
             query: { userRecipeId: undefined },
           })
           .catch(() => {});

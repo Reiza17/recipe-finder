@@ -369,7 +369,7 @@
 
 <script>
 import { createNamespacedHelpers } from 'vuex';
-const { mapMutations, mapGetters } = createNamespacedHelpers('home');
+const { mapGetters } = createNamespacedHelpers('home');
 import { required, url, minLength } from 'vuelidate/lib/validators';
 import uniqid from 'uniqid';
 import { startCase, lowerCase } from 'lodash';
@@ -460,10 +460,6 @@ export default {
     }),
   },
   methods: {
-    ...mapMutations({
-      toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
-    }),
-
     addIngredient() {
       this.formData.ingredients.push({
         quantity: '',
@@ -488,15 +484,13 @@ export default {
           )
         ) {
           this.formCancelled = true;
-          this.$router.push({ name: 'personal' }).catch(() => {});
-          this.toggleUploadRecipeView(false);
+          this.$router.push({ name: 'user-recipes' }).catch(() => {});
         } else {
           return;
         }
       } else {
         this.formCancelled = true;
-        this.$router.push({ name: 'personal' }).catch(() => {});
-        this.toggleUploadRecipeView(false);
+        this.$router.push({ name: 'user-recipes' }).catch(() => {});
       }
     },
 
@@ -554,7 +548,6 @@ export default {
       } else {
         // NOTE need to set formCancelled to true, or it'll run the else block below twice
         this.formCancelled = true;
-        this.toggleUploadRecipeView(false);
         next();
       }
     } else {
@@ -634,6 +627,7 @@ export default {
   // display: flex;
   // flex-direction: column;
   margin-top: 2rem;
+  max-width: 928px;
 
   @media only screen and (max-width: 648px) {
     // min-width: 260px;

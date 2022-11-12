@@ -64,14 +64,14 @@
           <router-link
             v-else
             :to="{
-              name: 'personal',
+              name: 'user-recipes',
               // params: {
               //   id: $route.params.id,
               //   userRecipeId: $route.params.userRecipeId,
               // },
             }"
             class="nav__btn"
-            :disabled="$route.name === 'personal'"
+            :disabled="$route.name === 'user-recipes'"
           >
             <svg class="nav__icon">
               <use :href="`${icons}#icon-user`"></use>
