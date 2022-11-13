@@ -16,7 +16,7 @@
               <use :href="`${icons}#icon-smile`"></use>
             </svg>
           </div>
-          <p>No bookmarks yet. Find a nice recipe and bookmark it :)</p>
+          <p>Bookmark a recipe you like!</p>
         </div>
 
         <VRecipePreview v-else :recipes="recipeBookmarks" />

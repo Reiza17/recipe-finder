@@ -1,6 +1,6 @@
 import axios from 'axios';
 import router from '@/router';
-import { API_URL, RES_PER_PAGE, KEY } from '@/common/config.js';
+import { API_URL, RESULTS_PER_PAGE, KEY } from '@/common/config.js';
 import {
   // collection,
   // getDocs,
@@ -26,12 +26,12 @@ export default {
     search: {
       results: [],
       page: 1,
-      resultsPerPage: RES_PER_PAGE,
+      resultsPerPage: RESULTS_PER_PAGE,
     },
     userRecipeSearch: {
       results: [],
       page: 1,
-      resultsPerPage: RES_PER_PAGE,
+      resultsPerPage: RESULTS_PER_PAGE,
     },
     loadingSearchResults: false,
     loadingRecipe: false,
@@ -243,141 +243,6 @@ export default {
   },
 
   actions: {
-    async initHomeView({ commit, dispatch, rootState }) {
-      try {
-        commit('TOGGLE_BOOKMARKS_SPINNER', true);
-
-        // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
-        await dispatch('auth/fetchUser', null, { root: true });
-        if (rootState.auth.user) {
-          dispatch('fetchBookmarks');
-          // NOTE allows persistent selection of user recipe once user tabs over
-          if (router.app._route.query.userRecipeId)
-            dispatch('fetchUserRecipes');
-        }
-        commit('TOGGLE_BOOKMARKS_SPINNER', false);
-
-        console.log(router);
-        if (router.app._route.query.query)
-          dispatch('searchRecipes', {
-            query: router.app._route.query.query,
-            page: router.app._route.query.page,
-            reloadingPage: true,
-          });
-
-        // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
-        // if (loggingIn) return;
-
-        // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
-        if (router.app._route.query.id)
-          dispatch('renderRecipe', {
-            id: router.app._route.query.id,
-          });
-      } catch (err) {
-        console.log(err);
-      }
-    },
-
-    async initUserView({ commit, dispatch, rootState, state }) {
-      try {
-        commit('TOGGLE_USER_RECIPES_SPINNER', true);
-        commit('TOGGLE_RECIPE_SPINNER', true);
-
-        // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
-        await dispatch('auth/fetchUser', null, { root: true });
-        if (rootState.auth.user) {
-          await dispatch('fetchUserRecipes');
-        }
-        commit('TOGGLE_USER_RECIPES_SPINNER', false);
-
-        console.log(state.userRecipe);
-        if (router.app._route.query.userRecipeQuery)
-          dispatch('searchUserRecipes', {
-            query: router.app._route.query.userRecipeQuery,
-            page: router.app._route.query.userRecipeQueryPage,
-            reloadingPage: true,
-          });
-
-        // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
-        // if (loggingIn) return;
-
-        // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
-
-        if (router.app._route.query.userRecipeId)
-          dispatch('renderRecipe', {
-            id: router.app._route.query.userRecipeId,
-          });
-
-        console.log(state.userRecipe);
-
-        // if (router.app._route.path === '/personal/upload')
-        //   commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', true);
-
-        // // NOTE Will show the edit view after reloading
-        // if (router.app._route.path === '/personal/edit')
-        //   commit('TOGGLE_EDIT_USER_RECIPE_VIEW', true);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-
-    // async init({ commit, dispatch, rootState }) {
-    //   try {
-    //     // commit('TOGGLE_RECIPE_SPINNER', true);
-    //     commit('TOGGLE_BOOKMARKS_SPINNER', true);
-    //     commit('TOGGLE_USER_RECIPES_SPINNER', true);
-
-    //     // NOTE no need to toggle above spinners to false, as that's done at the end of the actions themselves
-
-    //     // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
-    //     await dispatch('auth/fetchUser', null, { root: true });
-    //     if (rootState.auth.user) {
-    //       dispatch('fetchBookmarks');
-    //       await dispatch('fetchUserRecipes');
-    //     }
-    //     commit('TOGGLE_BOOKMARKS_SPINNER', false);
-    //     commit('TOGGLE_USER_RECIPES_SPINNER', false);
-
-    //     console.log(router);
-    //     if (router.app._route.query.query)
-    //       dispatch('searchRecipes', {
-    //         query: router.app._route.query.query,
-    //         page: router.app._route.query.page,
-    //         reloadingPage: true,
-    //       });
-
-    //     if (router.app._route.query.userRecipeQuery)
-    //       dispatch('searchUserRecipes', {
-    //         query: router.app._route.query.userRecipeQuery,
-    //         page: router.app._route.query.userRecipeQueryPage,
-    //         reloadingPage: true,
-    //       });
-
-    //     // NOTE Prevents a second reload from triggering while logging in. The login action in auth.js does a router.push to send the params (thereby reloading the recipe b/c the url will change), then dispatches this init action. Once I remove the router-links from the login/register/upload recipe modules, I probably won't need this guard anymore (as well as the loggingIn parameter above, and a slew of other related things in this and other components.
-    //     // if (loggingIn) return;
-
-    //     // TODO test to see if the actions for one tab are executed when the other tab inits upon reload. If so, then split the actions or use a guard clause
-    //     if (router.app._route.query.id)
-    //       dispatch('renderRecipe', {
-    //         id: router.app._route.query.id,
-    //       });
-
-    //     if (router.app._route.query.userRecipeId)
-    //       dispatch('renderRecipe', {
-    //         id: router.app._route.query.userRecipeId,
-    //       });
-
-    //     if (router.app._route.path === '/personal/upload')
-    //       commit('TOGGLE_UPLOAD_USER_RECIPE_VIEW', true);
-
-    //     // NOTE Will show the edit view after reloading
-    //     if (router.app._route.path === '/personal/edit')
-    //       commit('TOGGLE_EDIT_USER_RECIPE_VIEW', true);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // },
-
     async searchRecipes(
       { commit, state },
       { query, page = 1, reloadingPage = false }
@@ -515,7 +380,7 @@ export default {
         // NOTE the if statement below is necessary, because after you delete a recipe the page will automatically reload and this action would do an API call b/c the recipe is no longer a userRecipe
         else if (router.app._route.name === 'home') {
           const res = await axios.get(`${API_URL}${id}`);
-          console.log(res);
+          // console.log(res);
           commit('CREATE_RECIPE_OBJECT', {
             data: res.data.data.recipe,
             userGenerated: false,
@@ -590,7 +455,7 @@ export default {
           uploadedRecipes: arrayUnion(userRecipe),
         });
 
-        // REVIEW this timeout is not useful, because there's no way to cancel pending writes to firestore, meaning even after timeout throws an error, the user's network will keep trying to upload the data to firestore (and if successful, the user recipes will not be updated on the client-side). Stack overflow solution: Use (firestore) security rules to ensure that only valid transitions are allowed. A typical approach here could be to add a (client-side) timestamp to each write operation, and reject (firestore) writes where the timestamp is too old.
+        // REVIEW the timeout below is not useful, because there's no way to cancel pending writes to firestore, meaning even after timeout throws an error, the user's network will keep trying to upload the data to firestore (and if successful, the user recipes will not be updated on the client-side). Stack overflow solution: Use (firestore) security rules to ensure that only valid transitions are allowed. A typical approach here could be to add a (client-side) timestamp to each write operation, and reject (firestore) writes where the timestamp is too old.
         // const uploadRec = async function () {
         //   await updateDoc(docRef, {
         //     uploadedRecipes: arrayUnion(userRecipe),
@@ -631,7 +496,7 @@ export default {
           'There was a problem uploading the recipe. Please try again'
         );
 
-        // TODO prob need to add something that saves the draft (client-side, maybe as a cookie?), so that they don't lose everything, which would suck
+        // TODO prob need to add something that saves the draft (client-side, maybe as a cookie?), so that they don't lose everything by accident
         // throw err;
       }
     },
@@ -727,7 +592,7 @@ export default {
           updateDoc(docRef, {
             bookmarks: arrayUnion(recipe),
           });
-          commit('SET_TOAST_MESSAGE', "You've saved this recipe");
+          commit('SET_TOAST_MESSAGE', "You've saved this recipe!");
         } else {
           // NOTE the mutation below actually changes the recipe (setting its 'bookmarked' property to 'false'), meaning it becomes different from the object in the backend. Having this discrepancy means the backend cannot remove the object, as they need to exactly match. Therefore, need to dispatch action to backend FIRST before committing the mutation.
           updateDoc(docRef, {

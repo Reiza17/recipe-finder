@@ -537,22 +537,12 @@ export default {
   },
   created() {
     window.addEventListener('beforeunload', this.checkIfStayInDirtyForm);
-    // NOTE this allows cancelling the edit to restore the original recipe
-    // if (this.$route.query.userRecipeId)
-    //   this.$store.dispatch('renderRecipe', {
-    //     id: this.$route.query.userRecipeId,
-    //   });
     this.formData = _.cloneDeep(this.recipe);
   },
 
   // NOTE without this, formData will be empty after reloading this page
   beforeUpdate() {
     window.addEventListener('beforeunload', this.checkIfStayInDirtyForm);
-    // NOTE this allows cancelling the edit to restore the original recipe
-    // if (this.$route.query.userRecipeId)
-    //   this.$store.dispatch('renderRecipe', {
-    //     id: this.$route.query.userRecipeId,
-    //   });
     if (!Object.keys(this.formData).length)
       this.formData = _.cloneDeep(this.recipe);
   },

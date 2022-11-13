@@ -13,18 +13,19 @@
         <p>Try different keywords or more general keywords.</p>
       </div>
     </div>
+
     <VRecipePreview
       v-else
       :recipes="searchResultsDisplay"
       :resultsActive="true"
     />
 
-    <div v-if="!loadingSearchResults && $route.query.query" class="pagination">
-      <!-- Page 1, and there are other pages -->
+    <div v-if="!loadingSearchResults && $route.query.query" class="page-nav">
+      <!-- If 1st page and there are multiple pages -->
       <button
         v-if="searchResultsCurrentPage === 1 && numPages > 1"
         @click="updatePagination(1)"
-        class="btn--inline pagination__btn--next"
+        class="btn--inline float-end"
       >
         <span>Page {{ searchResultsCurrentPage + 1 }}</span>
         <svg class="search__icon">
@@ -32,11 +33,11 @@
         </svg>
       </button>
 
-      <!-- // Last page -->
+      <!-- If last page and there are multiple pages-->
       <button
         v-else-if="searchResultsCurrentPage === numPages && numPages > 1"
         @click="updatePagination(-1)"
-        class="btn--inline pagination__btn--prev"
+        class="btn--inline"
       >
         <svg class="search__icon">
           <use :href="`${icons}#icon-arrow-left`"></use>
@@ -44,22 +45,19 @@
         <span>Page {{ searchResultsCurrentPage - 1 }}</span>
       </button>
 
-      <!-- // Other pages -->
-      <div v-else-if="searchResultsCurrentPage < numPages">
-        <button
-          @click="updatePagination(-1)"
-          class="btn--inline pagination__btn--prev"
-        >
+      <!-- If between 1st & last page of multiple pages -->
+      <div
+        class="d-flex justify-content-between"
+        v-else-if="searchResultsCurrentPage < numPages"
+      >
+        <button @click="updatePagination(-1)" class="btn--inline">
           <svg class="search__icon">
             <use :href="`${icons}#icon-arrow-left`"></use>
           </svg>
           <span>Page {{ searchResultsCurrentPage - 1 }}</span>
         </button>
 
-        <button
-          @click="updatePagination(1)"
-          class="btn--inline pagination__btn--next"
-        >
+        <button @click="updatePagination(1)" class="btn--inline">
           <span>Page {{ searchResultsCurrentPage + 1 }}</span>
           <svg class="search__icon">
             <use :href="`${icons}#icon-arrow-right`"></use>
@@ -153,32 +151,23 @@ export default {
   }
 }
 
-.pagination {
+.page-nav {
   margin-top: auto;
-  // padding: 0 3.5rem;
+  padding: 0 3.2rem;
 
   &::after {
     content: '';
     display: table;
     clear: both;
   }
-
-  &__btn {
-    &--prev {
-      float: left;
-    }
-    &--next {
-      float: right;
-    }
-  }
 }
 
 .btn--inline {
-  color: $color-primary;
+  color: black;
   font-size: 1.3rem;
   font-weight: 600;
   border: none;
-  background-color: $color-grey-light-1;
+  background-color: $color-grey-light-2;
   padding: 0.8rem 1.2rem;
   border-radius: 10rem;
   cursor: pointer;
@@ -199,8 +188,7 @@ export default {
   }
 
   &:hover {
-    color: $color-grad-2;
-    background-color: $color-grey-light-2;
+    background-color: $color-grey-light-3;
   }
 
   &:focus {

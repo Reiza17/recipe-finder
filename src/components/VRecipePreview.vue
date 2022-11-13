@@ -133,6 +133,7 @@ export default {
 // }
 
 .preview {
+  list-style: none;
   &__link {
     &:link,
     &:visited {

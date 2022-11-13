@@ -38,19 +38,52 @@ export default {
 
   computed: {
     ...mapGetters(['loginModal', 'registerModal', 'toastMessage']),
+    loggedIn() {
+      return this.$store.getters['auth/loggedIn'];
+    },
   },
-  // methods: {
-  //   ...mapMutations({
-  //     setStoredBookmarks: 'SET_STORED_BOOKMARKS',
-  //     toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
-  //   }),
-  // },
+
+  methods: {
+    // ...mapMutations({
+    //   setStoredBookmarks: 'SET_STORED_BOOKMARKS',
+    //   toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
+    // }),
+
+    async init() {
+      try {
+        this.$store.commit('home/TOGGLE_BOOKMARKS_SPINNER', true);
+
+        // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
+        await this.$store.dispatch('auth/fetchUser', null, { root: true });
+        if (this.loggedIn) {
+          this.$store.dispatch('home/fetchBookmarks');
+          // NOTE allows persistent selection of user recipe once user tabs over
+          if (this.$route.query.userRecipeId)
+            this.$store.dispatch('home/fetchUserRecipes');
+        }
+
+        if (this.$route.query.query)
+          this.$store.dispatch('home/searchRecipes', {
+            query: this.$route.query.query,
+            page: this.$route.query.page,
+            reloadingPage: true,
+          });
+
+        if (this.$route.query.id)
+          this.$store.dispatch('home/renderRecipe', {
+            id: this.$route.query.id,
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+  },
 
   created() {
     // const storage = localStorage.getItem('bookmarks');
     // if (storage) this.setStoredBookmarks(JSON.parse(storage));
     console.log('VHome created');
-    this.$store.dispatch('home/initHomeView');
+    this.init();
   },
   destroyed() {
     console.log('VHome destroyed');

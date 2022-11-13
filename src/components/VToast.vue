@@ -2,17 +2,17 @@
   <!-- <div class="toast-container top-0 start-50 translate-middle-x"> -->
   <div
     ref="el"
-    class="toast align-items-center text-bg-success border-0 bottom-0 start-50 translate-middle-x"
+    class="toast justify-content-center text-bg-success border-0 bottom-0 start-50 translate-middle-x"
     role="alert"
     aria-live="assertive"
     aria-atomic="true"
     data-bs-autohide="false"
   >
-    <div class="d-flex">
+    <div class="d-flex align-items-center gap-4">
       <div class="toast-body">{{ toastMessage }}</div>
       <button
         type="button"
-        class="btn-close btn-close-white m-auto"
+        class="btn-close btn-close-white"
         data-bs-dismiss="toast"
         aria-label="Close"
       ></button>
@@ -53,11 +53,11 @@ export default {
 
 <style lang="scss" scoped>
 .toast {
+  display: flex;
   max-width: 250px;
   position: absolute;
 }
 .toast-body {
   font-size: 14px;
-  padding-left: 15px;
 }
 </style>

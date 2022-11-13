@@ -192,8 +192,6 @@ export default {
   },
   methods: {
     ...mapMutations({
-      // toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
-      toggleUserRecipesView: 'TOGGLE_USER_RECIPES_VIEW',
       toggleLoginModal: 'TOGGLE_LOGIN_MODAL',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),
