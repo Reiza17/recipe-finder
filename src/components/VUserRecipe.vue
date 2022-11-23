@@ -51,8 +51,8 @@
         class="recipe__img"
       />
 
-      <div class="d-flex flex-row justify-content-between mb-2">
-        <span class="recipe__title">{{ recipe.title }}</span>
+      <div class="recipe__title d-flex flex-row justify-content-between mb-2">
+        <span>{{ recipe.title }}</span>
       </div>
 
       <div

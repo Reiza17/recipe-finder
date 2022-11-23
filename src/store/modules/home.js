@@ -30,6 +30,7 @@ export default {
     },
     userRecipeSearch: {
       results: [],
+      cachedResults: [],
       page: 1,
       resultsPerPage: RESULTS_PER_PAGE,
     },
@@ -119,20 +120,18 @@ export default {
     },
 
     // REVIEW should I split this into two actions instead?
-    CREATE_RECIPE_OBJECT(state, { data, userGenerated = false }) {
-      if (!userGenerated) {
-        state.recipe = { ...data, bookmarked: false };
-        if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
-          state.recipe.bookmarked = true;
-        else state.recipe.bookmarked = false;
-      } else {
-        state.userRecipe = { ...data, bookmarked: false };
-        if (
-          state.bookmarks.some(bookmark => bookmark.id === state.userRecipe.id)
-        )
-          state.userRecipe.bookmarked = true;
-        else state.userRecipe.bookmarked = false;
-      }
+    CREATE_RECIPE_OBJECT(state, { data }) {
+      state.recipe = { ...data, bookmarked: false };
+      if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
+        state.recipe.bookmarked = true;
+      else state.recipe.bookmarked = false;
+    },
+
+    CREATE_USER_RECIPE_OBJECT(state, { data }) {
+      state.userRecipe = { ...data, bookmarked: false };
+      if (state.bookmarks.some(bookmark => bookmark.id === state.userRecipe.id))
+        state.userRecipe.bookmarked = true;
+      else state.userRecipe.bookmarked = false;
     },
 
     SHOW_RENDER_RECIPE_ERROR_MESSAGE(state, message) {
@@ -270,6 +269,10 @@ export default {
         // );
 
         const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
+        // const res = await axios.get(
+        //   `${API_URL}?type=public&q=${query}&app_id=${ID}&app_key=${KEY}`
+        // );
+        console.log(res);
         const allSearchResults = res.data.data.recipes;
 
         // TODO Rename variable to something better?
@@ -371,9 +374,8 @@ export default {
           recipe => recipe.id === id
         );
         if (userRecipe)
-          commit('CREATE_RECIPE_OBJECT', {
+          commit('CREATE_USER_RECIPE_OBJECT', {
             data: userRecipe,
-            userGenerated: true,
           });
         // REVIEW can I load faster? as in, if it's already been loaded before, I just render it quickly. One suggested way is to store already loaded recipes into an array. And if the id of it matches any in that array, skip the API call. That's a somewhat hacky method, but others do it and it works.
         // BUG if I click between two recipes too fast, then it will render the wrong one
@@ -383,7 +385,6 @@ export default {
           // console.log(res);
           commit('CREATE_RECIPE_OBJECT', {
             data: res.data.data.recipe,
-            userGenerated: false,
           });
         }
         commit('TOGGLE_RECIPE_SPINNER', false);

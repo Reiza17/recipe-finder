@@ -200,7 +200,7 @@ export default {
   .btn {
     display: flex;
     width: 98%;
-    margin: 2rem auto;
+    margin: 1rem auto 2rem auto;
     align-items: center;
     justify-content: center;
     column-gap: 7px;

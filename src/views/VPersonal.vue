@@ -2,7 +2,7 @@
   <!-- <div id="app"> -->
   <div id="personal">
     <html>
-      <body class="min-vh-100">
+      <body class="min-vh-80">
         <!-- <VHeader /> -->
         <div class="container-fluid">
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
@@ -89,12 +89,12 @@ export default {
   created() {
     // const storage = localStorage.getItem('bookmarks');
     // if (storage) this.setStoredBookmarks(JSON.parse(storage));
-    console.log('VPersonal created');
+    // console.log('VPersonal created');
     this.init();
   },
-  destroyed() {
-    console.log('VPersonal destroyed');
-  },
+  // destroyed() {
+  //   console.log('VPersonal destroyed');
+  // },
 };
 </script>
 
@@ -125,11 +125,16 @@ html {
 .search-results {
   min-width: 260px;
   // max-width: 365px;
+  min-height: 80vh;
+  padding-right: 1.2rem;
   margin-bottom: 2rem;
+  margin-right: 0.8rem;
+  border-right: 1px solid rgb(231, 231, 231);
 
   @media only screen and (max-width: 648px) {
     // min-width: 260px;
     width: 100%;
+    border-right: none;
   }
 }
 
