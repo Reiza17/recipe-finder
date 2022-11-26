@@ -1,6 +1,6 @@
 import axios from 'axios';
 import router from '@/router';
-import { API_URL, RESULTS_PER_PAGE, KEY } from '@/common/config.js';
+import { API_URL, RESULTS_PER_PAGE, ID, KEY } from '@/common/config.js';
 import {
   // collection,
   // getDocs,
@@ -143,12 +143,12 @@ export default {
     },
 
     UPDATE_SERVINGS(state, amount) {
-      if (state.recipe.servings + amount <= 0) return;
+      if (state.recipe.yield + amount <= 0) return;
 
-      const oldServings = state.recipe.servings;
-      state.recipe.servings += amount;
+      const prevServings = state.recipe.yield;
+      state.recipe.yield += amount;
       state.recipe.ingredients.forEach(ing => {
-        ing.quantity = (ing.quantity * state.recipe.servings) / oldServings;
+        ing.quantity = (ing.quantity * state.recipe.yield) / prevServings;
       });
     },
 
@@ -268,12 +268,18 @@ export default {
         //   recipe.title.toLowerCase().split(' ').includes(query.toLowerCase())
         // );
 
-        const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
-        // const res = await axios.get(
-        //   `${API_URL}?type=public&q=${query}&app_id=${ID}&app_key=${KEY}`
-        // );
+        // const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
+        const res = await axios.get(
+          `${API_URL}?type=public&q=${query}&app_id=${ID}&app_key=${KEY}`
+        );
         console.log(res);
-        const allSearchResults = res.data.data.recipes;
+        console.log(res.data.hits);
+        const nextPageRes = res.data._links.next.href;
+
+        const res2 = await axios.get(nextPageRes);
+        console.log(res2);
+
+        const allSearchResults = res.data.hits;
 
         // TODO Rename variable to something better?
         const bookmarkedSearchResults = allSearchResults.filter(apiRecipe =>
@@ -381,12 +387,26 @@ export default {
         // BUG if I click between two recipes too fast, then it will render the wrong one
         // NOTE the if statement below is necessary, because after you delete a recipe the page will automatically reload and this action would do an API call b/c the recipe is no longer a userRecipe
         else if (router.app._route.name === 'home') {
-          const res = await axios.get(`${API_URL}${id}`);
-          // console.log(res);
-          commit('CREATE_RECIPE_OBJECT', {
-            data: res.data.data.recipe,
-          });
+          const existingRecipe = state.search.results.filter(result =>
+            result.recipe.uri.includes(id)
+          )[0].recipe;
+          // console.log(id);
+          // console.log(existingRecipe);
+
+          if (existingRecipe) {
+            commit('CREATE_RECIPE_OBJECT', {
+              data: existingRecipe,
+            });
+          } else {
+            // TODO fix this API call
+            const res = await axios.get(`${API_URL}${id}`);
+            // console.log(res);
+            commit('CREATE_RECIPE_OBJECT', {
+              data: res.data.data.recipe,
+            });
+          }
         }
+        console.log(state.recipe);
         commit('TOGGLE_RECIPE_SPINNER', false);
       } catch (err) {
         console.log(err);

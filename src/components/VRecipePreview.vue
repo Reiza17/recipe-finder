@@ -2,32 +2,32 @@
   <ul :class="{ results: resultsActive }">
     <li
       class="preview"
-      :class="{ 'preview__link--active': result.id === $route.query.id }"
+      :class="{ 'preview__link--active': getId(result) === $route.query.id }"
       v-for="result in recipes"
-      :key="result.id"
+      :key="getId(result)"
     >
       <router-link
         :to="{
           name: 'home',
           query: {
-            id: result.id,
+            id: getId(result),
           },
         }"
         class="preview__link"
       >
         <figure class="preview__fig">
-          <img :src="result.image_url" :alt="result.title" />
+          <img :src="result.recipe.image" :alt="result.recipe.label" />
         </figure>
         <div class="preview__data">
           <h4
             class="preview__title"
             :class="{
-              'preview__title--active': result.id === $route.query.id,
+              'preview__title--active': getId(result) === $route.query.id,
             }"
           >
-            {{ result.title }}
+            {{ result.recipe.label }}
           </h4>
-          <p class="preview__publisher">{{ result.publisher }}</p>
+          <p class="preview__publisher">{{ result.recipe.source }}</p>
           <!-- NOTE uncomment to enable personal recipe tag -->
           <!-- <div v-if="result.user_generated">
             <div v-if="resultsActive" class="preview__user-generated">
@@ -36,12 +36,13 @@
               </h4>
             </div>
           </div> -->
-          <div v-if="isBookmarked(result.id)">
+          <div v-if="isBookmarked(result.recipe.uri)">
             <div
               v-if="resultsActive"
               class="preview__bookmarked btn--round"
               :class="{
-                'preview__bookmarked--active': result.id === $route.query.id,
+                'preview__bookmarked--active':
+                  getId(result) === $route.query.id,
               }"
             >
               <svg>
@@ -112,7 +113,18 @@ export default {
   },
   methods: {
     isBookmarked(id) {
-      return this.recipeBookmarks.some(recipe => recipe.id === id);
+      // console.log(id);
+      // console.log(this.recipeBookmarks);
+      // console.log(this.recipeBookmarks[0].uri);
+      // return this.recipeBookmarks.some(recipe => recipe.id === id);
+      return this.recipeBookmarks.some(recipe => recipe.uri === id);
+    },
+    getId(result) {
+      const uri = result.recipe.uri;
+      // console.log(uri);
+      const id = uri.split('#recipe_')[1];
+      // console.log(id);
+      return id;
     },
   },
 };

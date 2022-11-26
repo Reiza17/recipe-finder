@@ -33,15 +33,15 @@
 
     <div v-else>
       <img
-        :src="imageLoading ? placeholder : recipe.image_url"
+        :src="imageLoading ? placeholder : recipe.image"
         @load="imageLoading = false"
         @error="recipe.image_url = image_error"
-        :alt="recipe.title"
+        :alt="recipe.label"
         class="recipe__img"
       />
 
       <div class="recipe__title d-flex flex-row justify-content-between mb-2">
-        <span>{{ recipe.title }}</span>
+        <span>{{ recipe.label }}</span>
         <!-- NOTE uncomment to enable personal recipe tag -->
         <!-- <div
             v-if="recipe.user_generated"
@@ -57,12 +57,12 @@
         class="recipe__details justify-content-between flex-wrap-reverse gap-4"
       >
         <div class="d-flex flex-row align-items-center">
-          <div class="recipe__info">
+          <div v-if="recipe.totalTime" class="recipe__info">
             <svg class="recipe__info-icon">
               <use :href="`${icons}#icon-clock`"></use>
             </svg>
             <span class="recipe__info-data recipe__info-data--minutes">{{
-              recipe.cooking_time
+              recipe.totalTime
             }}</span>
             <span class="recipe__info-text">minutes</span>
           </div>
@@ -72,7 +72,7 @@
               <use :href="`${icons}#icon-users`"></use>
             </svg>
             <span class="recipe__info-data recipe__info-data--people">{{
-              recipe.servings
+              recipe.yield
             }}</span>
             <span class="recipe__info-text">servings</span>
 
@@ -149,12 +149,18 @@
             <svg class="recipe__icon">
               <use :href="`${icons}#icon-check`"></use>
             </svg>
-            <div class="recipe__quantity">
+            <!-- <div class="recipe__quantity">
               {{ ingQuantity(ing) }}
             </div>
             <div class="recipe__description">
-              <span class="recipe__unit">{{ ing.unit }}</span>
-              {{ ing.description }}
+              <span v-if="ing.measure !== '<unit>'" class="recipe__unit">{{
+                ing.measure
+              }}</span>
+              {{ ing.food }}
+            </div> -->
+            <!-- !isNaN(ing.text.split(' ')[0]) -->
+            <div class="recipe__description">
+              {{ ingDescription(ing) }}
             </div>
           </li>
         </ul>
@@ -164,14 +170,10 @@
         <h2 class="heading--2">How to cook it</h2>
         <p class="recipe__directions-text">
           This recipe was carefully designed and tested by
-          <span class="recipe__publisher">{{ recipe.publisher }}</span
+          <span class="recipe__publisher">{{ recipe.source }}</span
           >. Please check out directions at their website.
         </p>
-        <a
-          class="btn btn-outline-success"
-          :href="recipe.source_url"
-          target="_blank"
-        >
+        <a class="btn btn-outline-success" :href="recipe.url" target="_blank">
           <span>Directions </span>
           <svg class="search__icon">
             <use :href="`${icons}#icon-arrow-right`"></use>
@@ -239,9 +241,68 @@ export default {
       toggleUserRecipesSpinner: 'TOGGLE_USER_RECIPES_SPINNER',
       toggleRegisterModal: 'TOGGLE_REGISTER_MODAL',
     }),
+    parseFraction(fraction) {
+      if (fraction.includes('/')) {
+        const [numerator, denominator] = fraction.split('/').map(Number);
+        return numerator / denominator;
+      } else {
+        const [numerator, denominator] = fraction.split('⁄').map(Number);
+        return numerator / denominator;
+      }
+    },
     ingQuantity(ingredient) {
       return ingredient.quantity ? fracty(ingredient.quantity).toString() : '';
     },
+    ingDescription(ingredient) {
+      const parenthesesDeleted = ingredient.text.replace(/(\(.*?\))/, '');
+
+      const splitWords = parenthesesDeleted.split(' ');
+
+      for (const word of splitWords) {
+        const normalizedWord = word.normalize('NFKD');
+        if (normalizedWord.includes('⁄')) {
+          splitWords.splice(
+            splitWords.indexOf(word),
+            1,
+            this.parseFraction(normalizedWord)
+          );
+        }
+
+        if (normalizedWord.includes('/')) {
+          if (isNaN(word.split('/')[0]) || isNaN(word.split('/')[1])) {
+            splitWords.splice(splitWords[1], 1, ingredient.measure);
+            return `${this.ingQuantity(ingredient)} ${splitWords.join(' ')}`;
+          } else {
+            splitWords.splice(splitWords[0], 1, this.parseFraction(word));
+          }
+        }
+      }
+
+      if (!isNaN(splitWords[0]) && !isNaN(splitWords[1])) {
+        splitWords[0] = +splitWords[0] + +splitWords[1];
+        splitWords.splice(splitWords.indexOf(splitWords[1]), 1);
+      }
+
+      if (ingredient.quantity === 0 && isNaN(splitWords[0])) {
+        console.log('pure text');
+        return ingredient.text;
+      } else if (ingredient.quantity && isNaN(splitWords[0])) {
+        if (!isNaN(splitWords[0].split('')[0]))
+          return `${this.ingQuantity(ingredient)} ${
+            ingredient.measure
+          } ${splitWords.slice(1).join(' ')}`;
+
+        return `${this.ingQuantity(ingredient)} ${
+          splitWords.join(' ').charAt(0).toLowerCase() +
+          splitWords.join(' ').slice(1)
+        }`;
+      } else {
+        return `${this.ingQuantity(ingredient)} ${splitWords
+          .slice(1)
+          .join(' ')}`;
+      }
+    },
+
     bookmarkRecipe() {
       // if (!this.loggedIn) this.$router.push({ name: 'register' });
       if (!this.loggedIn) this.toggleRegisterModal();
@@ -535,10 +596,10 @@ export default {
     margin-top: 0.1rem;
   }
 
-  &__quantity {
-    margin-right: 0.5rem;
-    flex: 0 0 auto;
-  }
+  // &__quantity {
+  //   margin-right: 0.5rem;
+  //   flex: 0 0 auto;
+  // }
 
   ///////////
   // DIRECTIONS
