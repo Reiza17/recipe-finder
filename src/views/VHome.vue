@@ -69,10 +69,13 @@ export default {
             reloadingPage: true,
           });
 
-        if (this.$route.query.id)
-          this.$store.dispatch('home/renderRecipe', {
-            id: this.$route.query.id,
-          });
+        // NOTE commented out because this code is relocated to VRecipe component itself, to allow cloning of the recipe in VRecipe
+        // REVIEW also consider relocating the query if-statement above to VSearchResults
+        // if (this.$route.query.id)
+        //   this.$store.dispatch('home/renderRecipe', {
+        //     id: this.$route.query.id,
+        //   });
+        // console.log('home init done');
       } catch (err) {
         console.log(err);
       }

@@ -142,15 +142,16 @@ export default {
       state.loadingRecipe = boolean;
     },
 
-    UPDATE_SERVINGS(state, amount) {
-      if (state.recipe.yield + amount <= 0) return;
+    // NOTE relocated to VRecipe component itself
+    // UPDATE_SERVINGS(state, amount) {
+    //   if (state.recipe.yield + amount <= 0) return;
 
-      const prevServings = state.recipe.yield;
-      state.recipe.yield += amount;
-      state.recipe.ingredients.forEach(ing => {
-        ing.quantity = (ing.quantity * state.recipe.yield) / prevServings;
-      });
-    },
+    //   const prevServings = state.recipe.yield;
+    //   state.recipe.yield += amount;
+    //   state.recipe.ingredients.forEach(ing => {
+    //     ing.quantity *= state.recipe.yield / prevServings;
+    //   });
+    // },
 
     TOGGLE_BOOKMARKS_SPINNER(state, boolean) {
       state.loadingBookmarks = boolean;
@@ -272,8 +273,8 @@ export default {
         const res = await axios.get(
           `${API_URL}?type=public&q=${query}&app_id=${ID}&app_key=${KEY}`
         );
-        console.log(res);
-        console.log(res.data.hits);
+        // console.log(res);
+        // console.log(res.data.hits);
         const nextPageRes = res.data._links.next.href;
 
         const res2 = await axios.get(nextPageRes);
@@ -387,26 +388,27 @@ export default {
         // BUG if I click between two recipes too fast, then it will render the wrong one
         // NOTE the if statement below is necessary, because after you delete a recipe the page will automatically reload and this action would do an API call b/c the recipe is no longer a userRecipe
         else if (router.app._route.name === 'home') {
-          const existingRecipe = state.search.results.filter(result =>
-            result.recipe.uri.includes(id)
-          )[0].recipe;
-          // console.log(id);
-          // console.log(existingRecipe);
-
-          if (existingRecipe) {
-            commit('CREATE_RECIPE_OBJECT', {
-              data: existingRecipe,
-            });
+          if (Object.keys(state.search.results).length) {
+            const existingRecipe = state.search.results.filter(result =>
+              result.recipe.uri.includes(id)
+            )[0].recipe;
+            if (existingRecipe) {
+              commit('CREATE_RECIPE_OBJECT', {
+                data: existingRecipe,
+              });
+            }
+            console.log(existingRecipe);
           } else {
-            // TODO fix this API call
-            const res = await axios.get(`${API_URL}${id}`);
+            const res = await axios.get(
+              `${API_URL}/${id}?type=public&app_id=${ID}&app_key=${KEY}`
+            );
             // console.log(res);
             commit('CREATE_RECIPE_OBJECT', {
-              data: res.data.data.recipe,
+              data: res.data.recipe,
             });
           }
         }
-        console.log(state.recipe);
+        // console.log(state.recipe);
         commit('TOGGLE_RECIPE_SPINNER', false);
       } catch (err) {
         console.log(err);

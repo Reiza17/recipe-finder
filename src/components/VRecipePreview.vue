@@ -6,6 +6,7 @@
       v-for="result in recipes"
       :key="getId(result)"
     >
+      <!-- v-if in router-link is needed to prevent TypeError: undefined -->
       <router-link
         :to="{
           name: 'home',
@@ -14,6 +15,7 @@
           },
         }"
         class="preview__link"
+        v-if="result.recipe"
       >
         <figure class="preview__fig">
           <img :src="result.recipe.image" :alt="result.recipe.label" />
@@ -120,11 +122,8 @@ export default {
       return this.recipeBookmarks.some(recipe => recipe.uri === id);
     },
     getId(result) {
-      const uri = result.recipe.uri;
-      // console.log(uri);
-      const id = uri.split('#recipe_')[1];
-      // console.log(id);
-      return id;
+      // NOTE optional chaining needed to prevent TypeError: undefined. Note also that Vue 2 doesn't support optional chaining in html template (only Vue 3 does). Hence I need to use a method, like here.
+      return result.recipe?.uri.split('#recipe_')[1];
     },
   },
 };

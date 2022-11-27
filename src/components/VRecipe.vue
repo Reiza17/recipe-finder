@@ -74,7 +74,9 @@
             <span class="recipe__info-data recipe__info-data--people">{{
               recipe.yield
             }}</span>
-            <span class="recipe__info-text">servings</span>
+            <span class="recipe__info-text">
+              {{ recipe.yield > 1 ? 'servings' : 'serving' }}
+            </span>
 
             <div class="recipe__info-buttons">
               <button
@@ -189,6 +191,7 @@ import VLoadingSpinner from './VLoadingSpinner.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 import fracty from 'fracty';
+import _ from 'lodash';
 
 export default {
   name: 'VRecipe',
@@ -203,14 +206,20 @@ export default {
       fracty,
       // REVIEW Instead of below, could get the value from init. Or, I could also use something like v-if="this.$router.currentRoute.value.path === '/login'". However, this would require that my url changes when I do a search (currently it doesn't).
       // existingRecipe: this.$route.params.id,
+      // recipeServingsCopy: null,
+      // recipeIngredientsCopy: {},
+      recipe: {},
     };
   },
   watch: {
     '$route.query.id'(newValue) {
+      // TODO test if I even need this if statement
       if (newValue)
         this.$store.dispatch('home/renderRecipe', {
           id: newValue,
         });
+
+      this.recipe = _.cloneDeep(this.stateRecipe);
     },
     'recipe.image_url': function () {
       this.imageLoading = true;
@@ -218,12 +227,17 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'recipe',
+      // 'recipe',
       'recipeBookmarked',
       'loadingRecipe',
       'renderRecipeError',
       'searchResultsDisplay',
+      'recipeServings',
+      'recipeIngredients',
     ]),
+    stateRecipe() {
+      return this.$store.getters['home/recipe'];
+    },
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
     },
@@ -303,6 +317,24 @@ export default {
       }
     },
 
+    // updateServings(amount) {
+    //   const prevServings = this.recipeServingsCopy;
+    //   this.recipeServingsCopy += amount;
+    //   this.recipeIngredients.forEach(ing => {
+    //     ing.quantity = (ing.quantity * this.recipeServingsCopy) / prevServings;
+    //   });
+    // },
+
+    updateServings(amount) {
+      if (this.recipe.yield + amount <= 0) return;
+
+      const prevServings = this.recipe.yield;
+      this.recipe.yield += amount;
+      this.recipe.ingredients.forEach(ing => {
+        ing.quantity *= this.recipe.yield / prevServings;
+      });
+    },
+
     bookmarkRecipe() {
       // if (!this.loggedIn) this.$router.push({ name: 'register' });
       if (!this.loggedIn) this.toggleRegisterModal();
@@ -321,6 +353,17 @@ export default {
         'Recipe link copied to clipboard!'
       );
     },
+    async init() {
+      if (this.$route.query.id) {
+        await this.$store.dispatch('home/renderRecipe', {
+          id: this.$route.query.id,
+        });
+        this.recipe = _.cloneDeep(this.stateRecipe);
+      }
+    },
+  },
+  created() {
+    this.init();
   },
 };
 </script>
