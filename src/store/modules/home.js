@@ -119,17 +119,34 @@ export default {
         .catch(() => {});
     },
 
+    // return recipe?.uri.split('#recipe_')[1];
+
     // REVIEW should I split this into two actions instead?
     CREATE_RECIPE_OBJECT(state, { data }) {
       state.recipe = { ...data, bookmarked: false };
-      if (state.bookmarks.some(bookmark => bookmark.id === state.recipe.id))
+      console.log(state.recipe);
+      console.log(state.bookmarks);
+      if (
+        state.bookmarks.some(
+          bookmark =>
+            bookmark.uri.split('#recipe_')[1] ===
+            state.recipe.uri.split('#recipe_')[1]
+        )
+      )
         state.recipe.bookmarked = true;
-      else state.recipe.bookmarked = false;
+      // else state.recipe.bookmarked = false;
+      console.log(state.recipe);
     },
 
     CREATE_USER_RECIPE_OBJECT(state, { data }) {
       state.userRecipe = { ...data, bookmarked: false };
-      if (state.bookmarks.some(bookmark => bookmark.id === state.userRecipe.id))
+      if (
+        state.bookmarks.some(
+          bookmark =>
+            bookmark.uri.split('#recipe_')[1] ===
+            state.userRecipe.uri.split('#recipe_')[1]
+        )
+      )
         state.userRecipe.bookmarked = true;
       else state.userRecipe.bookmarked = false;
     },
@@ -165,11 +182,15 @@ export default {
     ADD_BOOKMARK(state, recipe) {
       state.recipe.bookmarked = true;
       state.bookmarks.unshift(recipe);
+      // console.log(state.recipe);
+      console.log(state.bookmarks);
     },
 
-    DELETE_BOOKMARK(state, recipe) {
+    DELETE_BOOKMARK(state) {
       const recipeIndex = state.bookmarks.findIndex(
-        bookmark => bookmark.id === recipe.id
+        bookmark =>
+          bookmark.uri.split('#recipe_')[1] ===
+          state.recipe.uri.split('#recipe_')[1]
       );
       state.bookmarks.splice(recipeIndex, 1);
       state.recipe.bookmarked = false;
@@ -280,12 +301,15 @@ export default {
         const res2 = await axios.get(nextPageRes);
         console.log(res2);
 
-        const allSearchResults = res.data.hits;
+        const allSearchResults = res.data.hits.map(hit => hit.recipe);
+        // console.log(allSearchResults);
 
         // TODO Rename variable to something better?
         const bookmarkedSearchResults = allSearchResults.filter(apiRecipe =>
           state.bookmarks.some(
-            bookmarkedRecipe => bookmarkedRecipe.id === apiRecipe.id
+            bookmarkedRecipe =>
+              bookmarkedRecipe.uri.split('#recipe_')[1] ===
+              apiRecipe.uri.split('#recipe_')[1]
           )
         );
 
@@ -293,7 +317,9 @@ export default {
         const nonBookmarkedSearchResults = allSearchResults.filter(
           apiRecipe =>
             !state.bookmarks.some(
-              bookmarkedRecipe => bookmarkedRecipe.id === apiRecipe.id
+              bookmarkedRecipe =>
+                bookmarkedRecipe.uri.split('#recipe_')[1] ===
+                apiRecipe.uri.split('#recipe_')[1]
             )
         );
 
@@ -389,20 +415,20 @@ export default {
         // NOTE the if statement below is necessary, because after you delete a recipe the page will automatically reload and this action would do an API call b/c the recipe is no longer a userRecipe
         else if (router.app._route.name === 'home') {
           if (Object.keys(state.search.results).length) {
-            const existingRecipe = state.search.results.filter(result =>
-              result.recipe.uri.includes(id)
-            )[0].recipe;
+            const existingRecipe = state.search.results.filter(recipe =>
+              recipe.uri.includes(id)
+            )[0];
             if (existingRecipe) {
               commit('CREATE_RECIPE_OBJECT', {
                 data: existingRecipe,
               });
             }
-            console.log(existingRecipe);
+            // console.log(existingRecipe);
           } else {
             const res = await axios.get(
               `${API_URL}/${id}?type=public&app_id=${ID}&app_key=${KEY}`
             );
-            // console.log(res);
+            console.log(res);
             commit('CREATE_RECIPE_OBJECT', {
               data: res.data.recipe,
             });
@@ -605,23 +631,43 @@ export default {
     },
 
     // REVIEW Instead of pushing an entire recipe object, it might be better to push just its id.
-    async toggleBookmark({ state, commit, rootState }, recipe) {
+    async toggleBookmark({ state, commit, rootState }) {
       try {
         const docRef = doc(db, 'users', rootState.auth.user.uid);
 
-        if (!state.bookmarks.some(bookmark => bookmark.id === recipe.id)) {
-          commit('ADD_BOOKMARK', recipe);
+        if (
+          !state.bookmarks.some(
+            bookmark =>
+              bookmark.uri.split('#recipe_')[1] ===
+              state.recipe.uri.split('#recipe_')[1]
+          )
+        ) {
+          const bookmark = Object.fromEntries(
+            Object.entries(state.recipe).filter(([key]) =>
+              ['uri', 'image', 'label', 'source'].includes(key)
+            )
+          );
+          commit('ADD_BOOKMARK', bookmark);
           // NOTE no need to await this, since no further thing depends on it here. Not awaiting allows the toggling of bookmarks to be much faster
+          console.log(bookmark);
           updateDoc(docRef, {
-            bookmarks: arrayUnion(recipe),
+            bookmarks: arrayUnion(bookmark),
           });
           commit('SET_TOAST_MESSAGE', "You've saved this recipe!");
         } else {
           // NOTE the mutation below actually changes the recipe (setting its 'bookmarked' property to 'false'), meaning it becomes different from the object in the backend. Having this discrepancy means the backend cannot remove the object, as they need to exactly match. Therefore, need to dispatch action to backend FIRST before committing the mutation.
+          const bookmark = state.bookmarks.filter(
+            bookmark =>
+              bookmark.uri.split('#recipe_')[1] ===
+              state.recipe.uri.split('#recipe_')[1]
+          )[0];
+          console.log(bookmark);
           updateDoc(docRef, {
-            bookmarks: arrayRemove(recipe),
+            bookmarks: arrayRemove(bookmark),
           });
-          commit('DELETE_BOOKMARK', recipe);
+
+          commit('DELETE_BOOKMARK');
+
           commit('SET_TOAST_MESSAGE', "You've unsaved this recipe");
         }
       } catch (err) {

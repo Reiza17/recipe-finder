@@ -6,7 +6,42 @@
         <div class="container-fluid">
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VSearchResults class="col-sm-3 search-results" />
-            <VRecipe class="col-sm-9 recipe" />
+
+            <!-- <div> -->
+            <VLoadingSpinner v-if="loadingRecipe" />
+            <div
+              v-else-if="!$route.query.id && $route.query.query"
+              class="message"
+            >
+              <div>
+                <svg>
+                  <use :href="`${icons}#icon-smile`"></use>
+                </svg>
+              </div>
+              <p>Click on a recipe!</p>
+            </div>
+
+            <div
+              v-else-if="
+                (!$route.query.id && !$route.query.query) ||
+                (!$route.query.id &&
+                  $route.query.query &&
+                  !Object.keys(searchResultsDisplay).length)
+              "
+              class="message"
+            >
+              <div>
+                <svg>
+                  <use :href="`${icons}#icon-smile`"></use>
+                </svg>
+              </div>
+              <p>Start by searching for a recipe or an ingredient.</p>
+            </div>
+            <!-- </div> -->
+            <VRecipe
+              v-if="Object.keys(recipe).length"
+              class="col-sm-9 recipe"
+            />
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
             <VToast v-if="toastMessage" />
@@ -19,6 +54,7 @@
 
 <script>
 import VSearchResults from '@/components/VSearchResults.vue';
+import VLoadingSpinner from '@/components/VLoadingSpinner.vue';
 import VRecipe from '@/components/VRecipe.vue';
 import VLogin from '@/components/VLogin.vue';
 import VRegister from '@/components/VRegister.vue';
@@ -30,14 +66,27 @@ export default {
   name: 'VHome',
   components: {
     VSearchResults,
+    VLoadingSpinner,
     VRecipe,
     VLogin,
     VRegister,
     VToast,
   },
 
+  data() {
+    return {
+      icons: require('@/assets/images/icons.svg'),
+    };
+  },
+
   computed: {
-    ...mapGetters(['loginModal', 'registerModal', 'toastMessage']),
+    ...mapGetters([
+      'recipe',
+      'loadingRecipe',
+      'loginModal',
+      'registerModal',
+      'toastMessage',
+    ]),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
     },
@@ -49,6 +98,9 @@ export default {
     //   toggleUploadRecipeView: 'TOGGLE_UPLOAD_USER_RECIPE_VIEW',
     // }),
 
+    // TODO complete this, and add v-if to above (e.g. v-if !loading spinner), then clone the recipe in created(), etc., like before. Alternatively, try v-if userFetched or something in VRecipes. Final, probably best method: revert to original way of rendering recipe in VHome, then use getters, create variables that get data from these getters, and manipulate (toggleServings or whatever) only on this data. This should work, as it'd mean the original data is not actually touched (aside from when bookmarking it)
+    // if (this.$route.query.id) TOGGLE RECIPE SPINNER
+
     async init() {
       try {
         this.$store.commit('home/TOGGLE_BOOKMARKS_SPINNER', true);
@@ -56,7 +108,7 @@ export default {
         // NOTE await is necessary for these, otherwise the user recipes and bookmarks won't display
         await this.$store.dispatch('auth/fetchUser', null, { root: true });
         if (this.loggedIn) {
-          this.$store.dispatch('home/fetchBookmarks');
+          await this.$store.dispatch('home/fetchBookmarks');
           // NOTE allows persistent selection of user recipe once user tabs over
           if (this.$route.query.userRecipeId)
             this.$store.dispatch('home/fetchUserRecipes');
@@ -71,11 +123,11 @@ export default {
 
         // NOTE commented out because this code is relocated to VRecipe component itself, to allow cloning of the recipe in VRecipe
         // REVIEW also consider relocating the query if-statement above to VSearchResults
-        // if (this.$route.query.id)
-        //   this.$store.dispatch('home/renderRecipe', {
-        //     id: this.$route.query.id,
-        //   });
-        // console.log('home init done');
+        if (this.$route.query.id)
+          this.$store.dispatch('home/renderRecipe', {
+            id: this.$route.query.id,
+          });
+        console.log('home init done');
       } catch (err) {
         console.log(err);
       }
@@ -116,6 +168,28 @@ html {
 // .container-fluid {
 //   margin: auto;
 // }
+
+.message {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 5rem 4rem;
+
+  display: flex;
+
+  svg {
+    height: 3rem;
+    width: 3rem;
+    // fill: $color-primary;
+    transform: translateY(-0.3rem);
+  }
+
+  p {
+    margin-left: 1.5rem;
+    font-size: 1.8rem;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+}
 
 // TODO add new classes and change names to them here
 .search-results {

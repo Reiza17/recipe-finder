@@ -2,49 +2,49 @@
   <ul :class="{ results: resultsActive }">
     <li
       class="preview"
-      :class="{ 'preview__link--active': getId(result) === $route.query.id }"
-      v-for="result in recipes"
-      :key="getId(result)"
+      :class="{ 'preview__link--active': getId(recipe) === $route.query.id }"
+      v-for="recipe in recipes"
+      :key="getId(recipe)"
     >
       <!-- v-if in router-link is needed to prevent TypeError: undefined -->
       <router-link
         :to="{
           name: 'home',
           query: {
-            id: getId(result),
+            id: getId(recipe),
           },
         }"
         class="preview__link"
-        v-if="result.recipe"
+        v-if="recipe"
       >
         <figure class="preview__fig">
-          <img :src="result.recipe.image" :alt="result.recipe.label" />
+          <img :src="recipe.image" :alt="recipe.label" />
         </figure>
         <div class="preview__data">
           <h4
             class="preview__title"
             :class="{
-              'preview__title--active': getId(result) === $route.query.id,
+              'preview__title--active': getId(recipe) === $route.query.id,
             }"
           >
-            {{ result.recipe.label }}
+            {{ recipe.label }}
           </h4>
-          <p class="preview__publisher">{{ result.recipe.source }}</p>
+          <p class="preview__publisher">{{ recipe.source }}</p>
           <!-- NOTE uncomment to enable personal recipe tag -->
-          <!-- <div v-if="result.user_generated">
+          <!-- <div v-if="recipe.user_generated">
             <div v-if="resultsActive" class="preview__user-generated">
               <h4>
                 <span class="badge bg-primary text-uppercase">Personal</span>
               </h4>
             </div>
           </div> -->
-          <div v-if="isBookmarked(result.recipe.uri)">
+          <div v-if="isBookmarked(recipe.uri)">
             <div
               v-if="resultsActive"
               class="preview__bookmarked btn--round"
               :class="{
                 'preview__bookmarked--active':
-                  getId(result) === $route.query.id,
+                  getId(recipe) === $route.query.id,
               }"
             >
               <svg>
@@ -55,21 +55,21 @@
         </div>
       </router-link>
 
-      <!-- <a class="preview__link" :href="`#${result.id}`">
+      <!-- <a class="preview__link" :href="`#${recipe.id}`">
         <figure class="preview__fig">
-          <img :src="result.image_url" :alt="result.title" />
+          <img :src="recipe.image_url" :alt="recipe.title" />
         </figure>
         <div class="preview__data">
-          <h4 class="preview__title">{{ result.title }}</h4>
-          <p class="preview__publisher">{{ result.publisher }}</p>
-          <div v-if="result.user_generated">
+          <h4 class="preview__title">{{ recipe.title }}</h4>
+          <p class="preview__publisher">{{ recipe.publisher }}</p>
+          <div v-if="recipe.user_generated">
             <div v-if="resultsActive" class="preview__user-generated">
               <svg>
                 <use :href="`${icons}#icon-user`"></use>
               </svg>
             </div>
           </div>
-          <div v-if="isBookmarked(result.id)">
+          <div v-if="isBookmarked(recipe.id)">
             <div v-if="resultsActive" class="preview__bookmarked btn--round">
               <svg>
                 <use :href="`${icons}#icon-favorite-fill`"></use>
@@ -121,9 +121,9 @@ export default {
       // return this.recipeBookmarks.some(recipe => recipe.id === id);
       return this.recipeBookmarks.some(recipe => recipe.uri === id);
     },
-    getId(result) {
+    getId(recipe) {
       // NOTE optional chaining needed to prevent TypeError: undefined. Note also that Vue 2 doesn't support optional chaining in html template (only Vue 3 does). Hence I need to use a method, like here.
-      return result.recipe?.uri.split('#recipe_')[1];
+      return recipe?.uri.split('#recipe_')[1];
     },
   },
 };

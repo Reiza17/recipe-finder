@@ -1,6 +1,6 @@
 <template>
   <div class="recipe">
-    <VLoadingSpinner v-if="loadingRecipe" />
+    <!-- <VLoadingSpinner v-if="loadingRecipe" />
     <div v-else-if="!$route.query.id && $route.query.query" class="message">
       <div>
         <svg>
@@ -27,7 +27,11 @@
       <p>Start by searching for a recipe or an ingredient.</p>
     </div>
 
-    <div v-else-if="renderRecipeError" class="message">
+    div v-else-if="renderRecipeError" class="message">
+      <p>{{ renderRecipeError }}</p>
+    </div> -->
+
+    <div v-if="renderRecipeError" class="message">
       <p>{{ renderRecipeError }}</p>
     </div>
 
@@ -187,7 +191,7 @@
 </template>
 
 <script>
-import VLoadingSpinner from './VLoadingSpinner.vue';
+// import VLoadingSpinner from './VLoadingSpinner.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 import fracty from 'fracty';
@@ -195,7 +199,7 @@ import _ from 'lodash';
 
 export default {
   name: 'VRecipe',
-  components: { VLoadingSpinner },
+  // components: { VLoadingSpinner },
   data() {
     return {
       // icons: '@/assets/images/icons.svg',
@@ -214,6 +218,7 @@ export default {
   watch: {
     '$route.query.id'(newValue) {
       // TODO test if I even need this if statement
+      // console.log(newValue);
       if (newValue)
         this.$store.dispatch('home/renderRecipe', {
           id: newValue,
@@ -229,7 +234,7 @@ export default {
     ...mapGetters([
       // 'recipe',
       'recipeBookmarked',
-      'loadingRecipe',
+      // 'loadingRecipe',
       'renderRecipeError',
       'searchResultsDisplay',
       'recipeServings',
@@ -338,7 +343,7 @@ export default {
     bookmarkRecipe() {
       // if (!this.loggedIn) this.$router.push({ name: 'register' });
       if (!this.loggedIn) this.toggleRegisterModal();
-      else this.$store.dispatch('home/toggleBookmark', this.recipe);
+      else this.$store.dispatch('home/toggleBookmark');
     },
     // deleteUserRecipe() {
     //   this.$store.dispatch('home/deleteUserRecipe', this.recipe);
@@ -353,17 +358,19 @@ export default {
         'Recipe link copied to clipboard!'
       );
     },
-    async init() {
-      if (this.$route.query.id) {
-        await this.$store.dispatch('home/renderRecipe', {
-          id: this.$route.query.id,
-        });
-        this.recipe = _.cloneDeep(this.stateRecipe);
-      }
-    },
+    // async init() {
+    //   if (this.$route.query.id) {
+    //     await this.$store.dispatch('home/renderRecipe', {
+    //       id: this.$route.query.id,
+    //     });
+    //     this.recipe = _.cloneDeep(this.stateRecipe);
+    //   }
+    // },
   },
   created() {
-    this.init();
+    // this.init();
+    this.recipe = _.cloneDeep(this.stateRecipe);
+    console.log(this.recipe);
   },
 };
 </script>
