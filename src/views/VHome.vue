@@ -7,41 +7,38 @@
           <div class="row justify-content-sm-center d-flex flex-wrap-reverse">
             <VSearchResults class="col-sm-3 search-results" />
 
-            <!-- <div> -->
-            <VLoadingSpinner v-if="loadingRecipe" />
-            <div
-              v-else-if="!$route.query.id && $route.query.query"
-              class="message"
-            >
-              <div>
-                <svg>
-                  <use :href="`${icons}#icon-smile`"></use>
-                </svg>
+            <div class="col-sm-9 recipe">
+              <VLoadingSpinner v-if="loadingRecipe" />
+              <div
+                v-if="!$route.query.id && $route.query.query"
+                class="message"
+              >
+                <div>
+                  <svg>
+                    <use :href="`${icons}#icon-smile`"></use>
+                  </svg>
+                </div>
+                <p>Click on a recipe!</p>
               </div>
-              <p>Click on a recipe!</p>
-            </div>
 
-            <div
-              v-else-if="
-                (!$route.query.id && !$route.query.query) ||
-                (!$route.query.id &&
-                  $route.query.query &&
-                  !Object.keys(searchResultsDisplay).length)
-              "
-              class="message"
-            >
-              <div>
-                <svg>
-                  <use :href="`${icons}#icon-smile`"></use>
-                </svg>
+              <div
+                v-else-if="
+                  (!$route.query.id && !$route.query.query) ||
+                  (!$route.query.id &&
+                    $route.query.query &&
+                    !Object.keys(searchResultsDisplay).length)
+                "
+                class="message"
+              >
+                <div>
+                  <svg>
+                    <use :href="`${icons}#icon-smile`"></use>
+                  </svg>
+                </div>
+                <p>Start by searching for a recipe or an ingredient.</p>
               </div>
-              <p>Start by searching for a recipe or an ingredient.</p>
+              <VRecipe v-if="Object.keys(recipe).length" />
             </div>
-            <!-- </div> -->
-            <VRecipe
-              v-if="Object.keys(recipe).length"
-              class="col-sm-9 recipe"
-            />
             <VLogin v-if="loginModal" />
             <VRegister v-if="registerModal" />
             <VToast v-if="toastMessage" />
@@ -79,6 +76,20 @@ export default {
     };
   },
 
+  watch: {
+    '$route.query.id'(newValue) {
+      // TODO test if I even need this if statement
+      // console.log(newValue);
+      if (newValue && !Object.keys(this.recipe).length)
+        this.$store.dispatch('home/renderRecipe', {
+          id: newValue,
+        });
+    },
+    // 'recipe.image_url': function () {
+    //   this.imageLoading = true;
+    // },
+  },
+
   computed: {
     ...mapGetters([
       'recipe',
@@ -86,6 +97,7 @@ export default {
       'loginModal',
       'registerModal',
       'toastMessage',
+      'searchResultsDisplay',
     ]),
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];

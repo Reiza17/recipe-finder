@@ -22,11 +22,13 @@ export default {
     userRecipe: {},
     userRecipes: [],
     bookmarks: [],
+    bookmarkImages: true,
     previousURL: '',
     search: {
       results: [],
       page: 1,
       resultsPerPage: RESULTS_PER_PAGE,
+      nextResultsLink: '',
     },
     userRecipeSearch: {
       results: [],
@@ -41,6 +43,7 @@ export default {
     loginModal: false,
     registerModal: false,
     renderRecipeError: null,
+    searchRecipesError: null,
     uploadingRecipe: false,
     toastMessage: '',
     toastTimeout: null,
@@ -52,6 +55,7 @@ export default {
     recipe: state => state.recipe,
     recipeBookmarks: state => state.bookmarks,
     recipeBookmarked: state => state.recipe.bookmarked,
+    bookmarkImages: state => state.bookmarkImages,
     userRecipe: state => state.userRecipe,
     userRecipes: state => state.userRecipes,
     userRecipeSearchResults: state => state.userRecipeSearch.results,
@@ -66,6 +70,7 @@ export default {
       return state.userRecipeSearch.results.slice(start, end);
     },
     searchResults: state => state.search.results,
+    nextResultsLink: state => state.search.nextResultsLink,
     searchResultsCurrentPage: state => state.search.page,
     searchResultsPerPage: state => state.search.resultsPerPage,
     searchResultsDisplay: state => {
@@ -81,6 +86,7 @@ export default {
     loginModal: state => state.loginModal,
     registerModal: state => state.registerModal,
     renderRecipeError: state => state.renderRecipeError,
+    searchRecipesError: state => state.searchRecipesError,
     uploadingRecipe: state => state.uploadingRecipe,
     toastMessage: state => state.toastMessage,
     // User recipes view variables
@@ -96,6 +102,15 @@ export default {
     CREATE_SEARCH_RESULTS(state, { results, page = 1 }) {
       state.search.results = results;
       state.search.page = page;
+    },
+
+    // NOTE need to access link to get next set of search results from API
+    CREATE_NEXT_SEARCH_RESULTS_LINK(state, link) {
+      state.search.nextResultsLink = link;
+    },
+
+    ADD_SEARCH_RESULTS(state, results) {
+      state.search.results.push(...results);
     },
 
     CREATE_USER_RECIPE_SEARCH_RESULTS(state, { results, page = 1 }) {
@@ -124,8 +139,8 @@ export default {
     // REVIEW should I split this into two actions instead?
     CREATE_RECIPE_OBJECT(state, { data }) {
       state.recipe = { ...data, bookmarked: false };
-      console.log(state.recipe);
-      console.log(state.bookmarks);
+      // console.log(state.recipe);
+      // console.log(state.bookmarks);
       if (
         state.bookmarks.some(
           bookmark =>
@@ -135,7 +150,7 @@ export default {
       )
         state.recipe.bookmarked = true;
       // else state.recipe.bookmarked = false;
-      console.log(state.recipe);
+      // console.log(state.recipe);
     },
 
     CREATE_USER_RECIPE_OBJECT(state, { data }) {
@@ -153,6 +168,11 @@ export default {
 
     SHOW_RENDER_RECIPE_ERROR_MESSAGE(state, message) {
       state.renderRecipeError = message;
+    },
+
+    SHOW_SEARCH_RECIPES_ERROR_MESSAGE(state, message) {
+      state.searchRecipesError = message;
+      state.loadingSearchResults = false;
     },
 
     TOGGLE_RECIPE_SPINNER(state, boolean) {
@@ -194,6 +214,11 @@ export default {
       );
       state.bookmarks.splice(recipeIndex, 1);
       state.recipe.bookmarked = false;
+    },
+
+    REMOVE_BOOKMARK_IMAGES(state) {
+      state.bookmarkImages = false;
+      // console.log(state.bookmarkImages);
     },
 
     TOGGLE_LOGIN_MODAL(state) {
@@ -269,6 +294,8 @@ export default {
       { query, page = 1, reloadingPage = false }
     ) {
       try {
+        // NOTE resets error message so it doesn't show
+        commit('SHOW_SEARCH_RECIPES_ERROR_MESSAGE', '');
         commit('TOGGLE_SEARCH_SPINNER', true);
 
         // NOTE The guard clause prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
@@ -291,16 +318,35 @@ export default {
         // );
 
         // const res = await axios.get(`${API_URL}?search=${query}&key=${KEY}`);
+        console.log('API call');
         const res = await axios.get(
           `${API_URL}?type=public&q=${query}&app_id=${ID}&app_key=${KEY}`
         );
         // console.log(res);
+        // console.log(res.data.hits.length === 0);
+        if (res.data.hits.length === 0) {
+          commit('CREATE_SEARCH_RESULTS', {
+            results: '',
+            page: 1,
+          });
+
+          return commit(
+            'SHOW_SEARCH_RECIPES_ERROR_MESSAGE',
+            'No recipes for your search terms were found.\n\nTry different keywords or more general keywords.'
+          );
+        }
         // console.log(res.data.hits);
-        const nextPageRes = res.data._links.next.href;
 
-        const res2 = await axios.get(nextPageRes);
-        console.log(res2);
+        // NOTE creating this link here allows us to access the next set of results from the API in the future. Link will be accessed in VSearchResults component.
+        commit('CREATE_NEXT_SEARCH_RESULTS_LINK', res.data._links.next.href);
 
+        // const nextPageRes = res.data._links.next.href;
+        // const res2 = await axios.get(nextPageRes);
+        // console.log(res2);
+        // const res3 = await axios.get(res2.data._links.next.href);
+        // console.log(res3);
+
+        // NOTE mapping this will remove the next link, so need to store the next link somewhere else (it wouldn't be taken from the searchResults)
         const allSearchResults = res.data.hits.map(hit => hit.recipe);
         // console.log(allSearchResults);
 
@@ -334,8 +380,17 @@ export default {
         });
         commit('TOGGLE_SEARCH_SPINNER', false);
       } catch (err) {
-        console.error(`Error searching for recipes: ${err}`);
-        commit('TOGGLE_SEARCH_SPINNER', false);
+        // if (err.response.status === 429)
+        if (err === 'ERR_FAILED 429')
+          commit(
+            'SHOW_SEARCH_RECIPES_ERROR_MESSAGE',
+            'You have sent too many requests for recipes. Please try again later.'
+          );
+        else
+          commit(
+            'SHOW_SEARCH_RECIPES_ERROR_MESSAGE',
+            'Oops! Something went wrong. Please try again.'
+          );
       }
     },
 
@@ -399,7 +454,7 @@ export default {
 
     async renderRecipe({ commit, state }, { id }) {
       try {
-        // console.log(id);
+        console.log('rendering recipe');
         // commit('SHOW_RENDER_RECIPE_ERROR_MESSAGE', null);
         commit('TOGGLE_RECIPE_SPINNER', true);
 
@@ -422,13 +477,22 @@ export default {
               commit('CREATE_RECIPE_OBJECT', {
                 data: existingRecipe,
               });
+            } else {
+              const res = await axios.get(
+                `${API_URL}/${id}?type=public&app_id=${ID}&app_key=${KEY}`
+              );
+              console.log('API call');
+              commit('CREATE_RECIPE_OBJECT', {
+                data: res.data.recipe,
+              });
             }
             // console.log(existingRecipe);
           } else {
             const res = await axios.get(
               `${API_URL}/${id}?type=public&app_id=${ID}&app_key=${KEY}`
             );
-            console.log(res);
+            console.log('API call');
+            // console.log(res);
             commit('CREATE_RECIPE_OBJECT', {
               data: res.data.recipe,
             });
@@ -445,11 +509,11 @@ export default {
             'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
             "This recipe isn't available"
           );
-        else if (err.response.status === 429)
-          commit(
-            'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
-            'You have sent too many requests for recipes. Please try again in an hour.'
-          );
+        // else if (err.response.status === 429)
+        //   commit(
+        //     'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
+        //     'You have sent too many requests for recipes. Please try again later.'
+        //   );
         // REVIEW can add more messages for other types of errors
         else if (!err.status) {
           commit(

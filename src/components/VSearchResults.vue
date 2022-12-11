@@ -2,15 +2,14 @@
   <div class="search-container">
     <div v-if="!$route.query.query"></div>
     <VLoadingSpinner v-else-if="loadingSearchResults" />
-    <div v-else-if="!Object.keys(searchResultsDisplay).length" class="error">
+    <div v-else-if="searchRecipesError" class="error">
       <div>
         <svg>
           <use :href="`${icons}#icon-alert-triangle`"></use>
         </svg>
       </div>
       <div>
-        <p>No recipes for your search terms were found.</p>
-        <p>Try different keywords or more general keywords.</p>
+        <p>{{ searchRecipesError }}</p>
       </div>
     </div>
 
@@ -24,7 +23,7 @@
       <!-- If 1st page and there are multiple pages -->
       <button
         v-if="searchResultsCurrentPage === 1 && numPages > 1"
-        @click="updatePagination(1)"
+        @click="goToNextPage()"
         class="btn--inline float-end"
       >
         <span>Page {{ searchResultsCurrentPage + 1 }}</span>
@@ -33,10 +32,21 @@
         </svg>
       </button>
 
+      <!-- <button
+        v-else-if="searchResultsCurrentPage === numPages-1 && numPages > 1"
+        @click="goToNextPage(true)"
+        class="btn--inline"
+      >
+        <svg class="search__icon">
+          <use :href="`${icons}#icon-arrow-left`"></use>
+        </svg>
+        <span>Page {{ searchResultsCurrentPage - 1 }}</span>
+      </button> -->
+
       <!-- If last page and there are multiple pages-->
       <button
         v-else-if="searchResultsCurrentPage === numPages && numPages > 1"
-        @click="updatePagination(-1)"
+        @click="goToPreviousPage()"
         class="btn--inline"
       >
         <svg class="search__icon">
@@ -50,14 +60,14 @@
         class="d-flex justify-content-between"
         v-else-if="searchResultsCurrentPage < numPages"
       >
-        <button @click="updatePagination(-1)" class="btn--inline">
+        <button @click="goToPreviousPage()" class="btn--inline">
           <svg class="search__icon">
             <use :href="`${icons}#icon-arrow-left`"></use>
           </svg>
           <span>Page {{ searchResultsCurrentPage - 1 }}</span>
         </button>
 
-        <button @click="updatePagination(1)" class="btn--inline">
+        <button @click="goToNextPage()" class="btn--inline">
           <span>Page {{ searchResultsCurrentPage + 1 }}</span>
           <svg class="search__icon">
             <use :href="`${icons}#icon-arrow-right`"></use>
@@ -71,8 +81,10 @@
 <script>
 import VRecipePreview from '@/components/VRecipePreview.vue';
 import VLoadingSpinner from '@/components/VLoadingSpinner.vue';
+import { API_SEARCH_RESULTS_PAGE_LIMIT } from '@/common/config.js';
+import axios from 'axios';
 import { createNamespacedHelpers } from 'vuex';
-const { mapGetters, mapMutations } = createNamespacedHelpers('home');
+const { mapGetters } = createNamespacedHelpers('home');
 
 export default {
   name: 'VSearchResults',
@@ -93,6 +105,8 @@ export default {
       'searchResultsCurrentPage',
       'searchResultsPerPage',
       'loadingSearchResults',
+      'searchRecipesError',
+      'nextResultsLink',
     ]),
     numPages() {
       return Math.ceil(this.searchResults.length / this.searchResultsPerPage);
@@ -105,7 +119,32 @@ export default {
   },
 
   methods: {
-    ...mapMutations({ updatePagination: 'UPDATE_PAGINATION' }),
+    // ...mapMutations({ updatePagination: 'UPDATE_PAGINATION' }),
+    async goToNextPage() {
+      try {
+        if (
+          this.numPages < API_SEARCH_RESULTS_PAGE_LIMIT &&
+          this.searchResultsCurrentPage === this.numPages - 1 &&
+          this.numPages > 1
+        ) {
+          const res = await axios.get(this.nextResultsLink);
+          this.$store.commit(
+            'home/CREATE_NEXT_SEARCH_RESULTS_LINK',
+            res.data._links.next.href
+          );
+          const newResults = res.data.hits.map(hit => hit.recipe);
+          this.$store.commit('home/ADD_SEARCH_RESULTS', newResults);
+        }
+        this.$store.commit('home/UPDATE_PAGINATION', 1);
+      } catch (err) {
+        console.log(err);
+        // NOTE if api call fails (presumably b/c of hitting the daily limit), then the website will just navigate to the next page without doing an api call for additional results
+        this.$store.commit('home/UPDATE_PAGINATION', 1);
+      }
+    },
+    goToPreviousPage() {
+      this.$store.commit('home/UPDATE_PAGINATION', -1);
+    },
   },
 
   // methods: {
@@ -146,7 +185,9 @@ export default {
       margin-bottom: 1.5rem;
       font-size: 1.8rem;
       font-weight: 600;
-      line-height: 1.5;
+      white-space: pre-wrap;
+      // NOTE Necessary for ios safari
+      word-wrap: break-word;
     }
   }
 }

@@ -6,7 +6,12 @@
       </svg>
       <span class="nav_label">Bookmarks</span>
     </button>
-    <div class="bookmarks">
+    <div
+      class="bookmarks"
+      :class="{
+        'image-error': !bookmarkImages,
+      }"
+    >
       <ul class="bookmarks__list">
         <VLoadingSpinner v-if="loadingBookmarks" />
         <!-- Change condition to if fetch results in nothing -->
@@ -43,7 +48,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recipeBookmarks', 'loadingBookmarks']),
+    ...mapGetters(['recipeBookmarks', 'loadingBookmarks', 'bookmarkImages']),
   },
 };
 </script>
@@ -139,6 +144,10 @@ export default {
     visibility: visible;
     opacity: 1;
   }
+}
+
+.image-error {
+  width: 30rem !important;
 }
 
 .message,

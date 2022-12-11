@@ -2,7 +2,9 @@
   <ul :class="{ results: resultsActive }">
     <li
       class="preview"
-      :class="{ 'preview__link--active': getId(recipe) === $route.query.id }"
+      :class="{
+        'preview__link--active': getId(recipe) === $route.query.id,
+      }"
       v-for="recipe in recipes"
       :key="getId(recipe)"
     >
@@ -15,10 +17,17 @@
           },
         }"
         class="preview__link"
+        :class="{
+          'preview__link--image-error': !image,
+        }"
         v-if="recipe"
       >
-        <figure class="preview__fig">
-          <img :src="recipe.image" :alt="recipe.label" />
+        <figure class="preview__fig" v-if="image">
+          <img
+            :src="recipe.image"
+            :alt="recipe.label"
+            @error="handleImageError"
+          />
         </figure>
         <div class="preview__data">
           <h4
@@ -107,6 +116,7 @@ export default {
   data() {
     return {
       icons: require('@/assets/images/icons.svg'),
+      image: true,
     };
   },
 
@@ -125,6 +135,11 @@ export default {
       // NOTE optional chaining needed to prevent TypeError: undefined. Note also that Vue 2 doesn't support optional chaining in html template (only Vue 3 does). Hence I need to use a method, like here.
       return recipe?.uri.split('#recipe_')[1];
     },
+    handleImageError() {
+      this.image = false;
+      // console.log('image error handled');
+      this.$store.commit('home/REMOVE_BOOKMARK_IMAGES');
+    },
   },
 };
 </script>
@@ -134,7 +149,7 @@ export default {
 
 .results {
   list-style: none;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 // NOTE unnecessary because of v-if
@@ -165,6 +180,10 @@ export default {
     &--active {
       background-color: #efeff2;
       border-radius: 8px;
+    }
+
+    &--image-error {
+      padding: 1rem 1.5rem !important;
     }
   }
 

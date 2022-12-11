@@ -1,7 +1,7 @@
 <template>
   <div class="recipe">
-    <!-- <VLoadingSpinner v-if="loadingRecipe" />
-    <div v-else-if="!$route.query.id && $route.query.query" class="message">
+    <VLoadingSpinner v-if="loadingRecipe" />
+    <!-- <div v-else-if="!$route.query.id && $route.query.query" class="message">
       <div>
         <svg>
           <use :href="`${icons}#icon-smile`"></use>
@@ -25,17 +25,13 @@
         </svg>
       </div>
       <p>Start by searching for a recipe or an ingredient.</p>
-    </div>
-
-    div v-else-if="renderRecipeError" class="message">
-      <p>{{ renderRecipeError }}</p>
     </div> -->
 
-    <div v-if="renderRecipeError" class="message">
+    <div v-else-if="renderRecipeError" class="message">
       <p>{{ renderRecipeError }}</p>
     </div>
 
-    <div v-else>
+    <div v-else-if="Object.keys(recipe).length">
       <img
         :src="imageLoading ? placeholder : recipe.image"
         @load="imageLoading = false"
@@ -191,7 +187,7 @@
 </template>
 
 <script>
-// import VLoadingSpinner from './VLoadingSpinner.vue';
+import VLoadingSpinner from './VLoadingSpinner.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapGetters, mapMutations } = createNamespacedHelpers('home');
 import fracty from 'fracty';
@@ -199,7 +195,7 @@ import _ from 'lodash';
 
 export default {
   name: 'VRecipe',
-  // components: { VLoadingSpinner },
+  components: { VLoadingSpinner },
   data() {
     return {
       // icons: '@/assets/images/icons.svg',
@@ -218,13 +214,8 @@ export default {
   watch: {
     '$route.query.id'(newValue) {
       // TODO test if I even need this if statement
-      // console.log(newValue);
-      if (newValue)
-        this.$store.dispatch('home/renderRecipe', {
-          id: newValue,
-        });
-
-      this.recipe = _.cloneDeep(this.stateRecipe);
+      console.log(newValue);
+      if (newValue) this.renderAndCloneRecipe(newValue);
     },
     'recipe.image_url': function () {
       this.imageLoading = true;
@@ -234,7 +225,7 @@ export default {
     ...mapGetters([
       // 'recipe',
       'recipeBookmarked',
-      // 'loadingRecipe',
+      'loadingRecipe',
       'renderRecipeError',
       'searchResultsDisplay',
       'recipeServings',
@@ -303,7 +294,7 @@ export default {
       }
 
       if (ingredient.quantity === 0 && isNaN(splitWords[0])) {
-        console.log('pure text');
+        // console.log('pure text');
         return ingredient.text;
       } else if (ingredient.quantity && isNaN(splitWords[0])) {
         if (!isNaN(splitWords[0].split('')[0]))
@@ -357,6 +348,13 @@ export default {
         'home/SET_TOAST_MESSAGE',
         'Recipe link copied to clipboard!'
       );
+    },
+    async renderAndCloneRecipe(value) {
+      await this.$store.dispatch('home/renderRecipe', {
+        id: value,
+      });
+
+      this.recipe = _.cloneDeep(this.stateRecipe);
     },
     // async init() {
     //   if (this.$route.query.id) {
