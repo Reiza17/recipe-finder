@@ -27,10 +27,6 @@
       <p>Start by searching for a recipe or an ingredient.</p>
     </div> -->
 
-    <div v-else-if="renderRecipeError" class="message">
-      <p>{{ renderRecipeError }}</p>
-    </div>
-
     <div v-else-if="Object.keys(recipe).length">
       <img
         :src="imageLoading ? placeholder : recipe.image"
@@ -226,7 +222,6 @@ export default {
       // 'recipe',
       'recipeBookmarked',
       'loadingRecipe',
-      'renderRecipeError',
       'searchResultsDisplay',
       'recipeServings',
       'recipeIngredients',
@@ -268,7 +263,7 @@ export default {
 
       const splitWords = parenthesesDeleted.split(' ');
 
-      for (const word of splitWords) {
+      for (const [i, word] of splitWords.entries()) {
         const normalizedWord = word.normalize('NFKD');
         if (normalizedWord.includes('⁄')) {
           splitWords.splice(
@@ -280,10 +275,11 @@ export default {
 
         if (normalizedWord.includes('/')) {
           if (isNaN(word.split('/')[0]) || isNaN(word.split('/')[1])) {
+            console.log('triggered 2');
             splitWords.splice(splitWords[1], 1, ingredient.measure);
             return `${this.ingQuantity(ingredient)} ${splitWords.join(' ')}`;
           } else {
-            splitWords.splice(splitWords[0], 1, this.parseFraction(word));
+            splitWords.splice(i, 1, this.parseFraction(word));
           }
         }
       }
@@ -342,7 +338,7 @@ export default {
     copyRecipeLink() {
       // FIXME change the base URL below after deploying this app
       navigator.clipboard.writeText(
-        `http://localhost:8080/home?id=${this.recipe.id}`
+        `http://localhost:8080/home?id=${this.recipe.uri.split('#recipe_')[1]}`
       );
       this.$store.commit(
         'home/SET_TOAST_MESSAGE',
@@ -355,6 +351,7 @@ export default {
       });
 
       this.recipe = _.cloneDeep(this.stateRecipe);
+      console.log(this.recipe);
     },
     // async init() {
     //   if (this.$route.query.id) {
@@ -481,28 +478,6 @@ export default {
 //   visibility: hidden;
 //   opacity: 0;
 // }
-
-.message {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: 5rem 4rem;
-
-  display: flex;
-
-  svg {
-    height: 3rem;
-    width: 3rem;
-    // fill: $color-primary;
-    transform: translateY(-0.3rem);
-  }
-
-  p {
-    margin-left: 1.5rem;
-    font-size: 1.8rem;
-    line-height: 1.5;
-    font-weight: 600;
-  }
-}
 
 //////////////////
 /// From _recipe.scss

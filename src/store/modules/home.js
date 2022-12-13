@@ -294,8 +294,9 @@ export default {
       { query, page = 1, reloadingPage = false }
     ) {
       try {
-        // NOTE resets error message so it doesn't show
+        // NOTE resets error messages so they doesn't show
         commit('SHOW_SEARCH_RECIPES_ERROR_MESSAGE', '');
+        commit('SHOW_RENDER_RECIPE_ERROR_MESSAGE', false);
         commit('TOGGLE_SEARCH_SPINNER', true);
 
         // NOTE The guard clause prevents the router from replacing an existing query with the same query during page reloads, something which results in a redundancy error.
@@ -380,8 +381,8 @@ export default {
         });
         commit('TOGGLE_SEARCH_SPINNER', false);
       } catch (err) {
-        // if (err.response.status === 429)
-        if (err === 'ERR_FAILED 429')
+        console.log(err.errorCode, err.message);
+        if (err.errorCode === '403')
           commit(
             'SHOW_SEARCH_RECIPES_ERROR_MESSAGE',
             'You have sent too many requests for recipes. Please try again later.'
@@ -502,9 +503,9 @@ export default {
         commit('TOGGLE_RECIPE_SPINNER', false);
       } catch (err) {
         console.log(err);
-        console.error(`Error loading recipe: ${err}`);
+        // console.error(`Error loading recipe: ${err}`);
         // TODO improve and streamline the error handling process
-        if (err.response.status === 400)
+        if (err.response.status === 400 || err.response.status === 404)
           commit(
             'SHOW_RENDER_RECIPE_ERROR_MESSAGE',
             "This recipe isn't available"
@@ -515,6 +516,7 @@ export default {
         //     'You have sent too many requests for recipes. Please try again later.'
         //   );
         // REVIEW can add more messages for other types of errors
+        // TODO test below
         else if (!err.status) {
           commit(
             'SHOW_RENDER_RECIPE_ERROR_MESSAGE',

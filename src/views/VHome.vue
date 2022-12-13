@@ -10,7 +10,12 @@
             <div class="col-sm-9 recipe">
               <VLoadingSpinner v-if="loadingRecipe" />
               <div
-                v-if="!$route.query.id && $route.query.query"
+                v-if="
+                  (!$route.query.id && $route.query.query) ||
+                  ($route.query.id &&
+                    $route.query.query &&
+                    !Object.keys(recipe).length)
+                "
                 class="message"
               >
                 <div>
@@ -37,6 +42,10 @@
                 </div>
                 <p>Start by searching for a recipe or an ingredient.</p>
               </div>
+              <div v-else-if="renderRecipeError" class="message">
+                <p>{{ renderRecipeError }}</p>
+              </div>
+
               <VRecipe v-if="Object.keys(recipe).length" />
             </div>
             <VLogin v-if="loginModal" />
@@ -94,6 +103,7 @@ export default {
     ...mapGetters([
       'recipe',
       'loadingRecipe',
+      'renderRecipeError',
       'loginModal',
       'registerModal',
       'toastMessage',

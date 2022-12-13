@@ -25,11 +25,20 @@
         v-if="searchResultsCurrentPage === 1 && numPages > 1"
         @click="goToNextPage()"
         class="btn--inline float-end"
+        :disabled="loadingMoreResults"
       >
-        <span>Page {{ searchResultsCurrentPage + 1 }}</span>
-        <svg class="search__icon">
-          <use :href="`${icons}#icon-arrow-right`"></use>
-        </svg>
+        <span
+          class="spinner-border"
+          role="status"
+          aria-hidden="true"
+          v-if="loadingMoreResults"
+        ></span>
+        <div v-else>
+          <span>Page {{ searchResultsCurrentPage + 1 }}</span>
+          <svg class="search__icon">
+            <use :href="`${icons}#icon-arrow-right`"></use>
+          </svg>
+        </div>
       </button>
 
       <!-- <button
@@ -67,11 +76,23 @@
           <span>Page {{ searchResultsCurrentPage - 1 }}</span>
         </button>
 
-        <button @click="goToNextPage()" class="btn--inline">
-          <span>Page {{ searchResultsCurrentPage + 1 }}</span>
-          <svg class="search__icon">
-            <use :href="`${icons}#icon-arrow-right`"></use>
-          </svg>
+        <button
+          @click="goToNextPage()"
+          class="btn--inline"
+          :disabled="loadingMoreResults"
+        >
+          <span
+            class="spinner-border"
+            role="status"
+            aria-hidden="true"
+            v-if="loadingMoreResults"
+          ></span>
+          <div v-else>
+            <span>Page {{ searchResultsCurrentPage + 1 }}</span>
+            <svg class="search__icon">
+              <use :href="`${icons}#icon-arrow-right`"></use>
+            </svg>
+          </div>
         </button>
       </div>
     </div>
@@ -96,6 +117,7 @@ export default {
   data() {
     return {
       icons: require('@/assets/images/icons.svg'),
+      loadingMoreResults: false,
     };
   },
   computed: {
@@ -127,6 +149,7 @@ export default {
           this.searchResultsCurrentPage === this.numPages - 1 &&
           this.numPages > 1
         ) {
+          this.loadingMoreResults = true;
           const res = await axios.get(this.nextResultsLink);
           this.$store.commit(
             'home/CREATE_NEXT_SEARCH_RESULTS_LINK',
@@ -134,11 +157,13 @@ export default {
           );
           const newResults = res.data.hits.map(hit => hit.recipe);
           this.$store.commit('home/ADD_SEARCH_RESULTS', newResults);
+          this.loadingMoreResults = false;
         }
         this.$store.commit('home/UPDATE_PAGINATION', 1);
       } catch (err) {
         console.log(err);
         // NOTE if api call fails (presumably b/c of hitting the daily limit), then the website will just navigate to the next page without doing an api call for additional results
+        this.loadingMoreResults = false;
         this.$store.commit('home/UPDATE_PAGINATION', 1);
       }
     },
@@ -212,8 +237,9 @@ export default {
   padding: 0.8rem 1.2rem;
   border-radius: 10rem;
   cursor: pointer;
+  min-width: 81px;
 
-  display: flex;
+  // display: flex;
   align-items: center;
   transition: all 0.2s;
 
@@ -226,6 +252,11 @@ export default {
 
   span {
     margin: 0 0.4rem;
+  }
+
+  .spinner-border {
+    max-height: 1.6rem;
+    max-width: 1.6rem;
   }
 
   &:hover {

@@ -17,10 +17,9 @@
           },
         }"
         class="preview__link"
-        :class="{
-          'preview__link--image-error': !image,
-        }"
+        :class="[!image && !resultsActive ? 'preview__link--image-error' : '']"
         v-if="recipe"
+        :title="recipe.label"
       >
         <figure class="preview__fig" v-if="image">
           <img
