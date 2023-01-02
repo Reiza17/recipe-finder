@@ -4,7 +4,7 @@
       <svg class="nav__icon">
         <use :href="`${icons}#icon-favorite-fill`"></use>
       </svg>
-      <span class="nav_label">Bookmarks</span>
+      <span class="nav_label">Saved</span>
     </button>
     <div
       class="bookmarks"
@@ -72,7 +72,7 @@ export default {
     font-family: inherit;
     color: inherit;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     // text-transform: uppercase;
     background: none;
     border: none;

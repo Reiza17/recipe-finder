@@ -96,13 +96,16 @@ export default {
 
 .search {
   // display: flex;
-  max-width: 40rem;
+  max-width: 50rem;
   width: 100%;
   position: relative;
   border-radius: 10rem;
   box-shadow: 0 1px 8px rgb(67 41 163 / 10%);
   // box-sizing: border-box;
   // max-width: 450px;
+  @media all and (max-width: 644px) {
+    max-width: 80rem;
+  }
 }
 
 .search .fa-magnifying-glass {

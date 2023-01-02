@@ -1,10 +1,88 @@
 <template>
-  <header
-    class="navbar sticky-top p-3 flex-wrap-reverse justify-content-end gap-4"
-  >
-    <div class="d-flex flex-row align-items-center flex-grow-1 ms-5">
+  <header class="navbar sticky-top p-3 d-flex gap-4">
+    <nav class="nav ms-3 narrowscreen-icons">
+      <ul class="nav__list justify-content-between">
+        <a class="navbar-brand d-flex align-items-center me-4" href="/home">
+          <img
+            src="@/assets/images/logo.svg"
+            alt="Logo"
+            width="40"
+            height="40"
+            class="d-inline-block me-2"
+          />
+          <p class="logo-text-narrow me-3">Forklift</p>
+        </a>
+
+        <div class="d-flex">
+          <li class="nav__item">
+            <router-link
+              :to="{
+                name: 'home',
+              }"
+              class="nav__btn"
+              :disabled="$route.name === 'home'"
+            >
+              <!-- <svg class="nav__icon">
+              <use :href="`${icons}#icon-global`"></use>
+            </svg> -->
+              <span>Database</span>
+            </router-link>
+          </li>
+
+          <li class="nav__item text-nowrap">
+            <button
+              v-if="!this.loggedIn"
+              class="nav__btn"
+              @click="toggleRegisterModal"
+            >
+              <!-- <svg class="nav__icon">
+              <use :href="`${icons}#icon-user`"></use>
+            </svg> -->
+              <span>My Recipes</span>
+            </button>
+            <router-link
+              v-else
+              :to="{
+                name: 'user-recipes',
+              }"
+              class="nav__btn"
+              :disabled="$route.name === 'user-recipes'"
+            >
+              <!-- <svg class="nav__icon">
+              <use :href="`${icons}#icon-user`"></use>
+            </svg> -->
+              <span>My Recipes</span>
+            </router-link>
+          </li>
+
+          <!-- <li class="nav__item">
+          </li> -->
+          <!-- <VBookmarks /> -->
+
+          <!-- <li class="nav__item" v-if="!loggedIn">
+            <button @click="toggleLoginModal" class="nav__btn">
+              <span>Log In</span>
+            </button>
+          </li>
+          <li class="nav__item" v-if="!loggedIn">
+            <button @click="toggleRegisterModal" class="nav__btn">
+              <span>Sign Up</span>
+            </button>
+          </li>
+          <li class="nav__item" v-else>
+            <button class="nav__btn" @click="$store.dispatch('auth/logout')">
+              Logout
+            </button>
+          </li> -->
+        </div>
+      </ul>
+    </nav>
+
+    <div
+      class="d-flex flex-row align-items-center flex-grow-1 ms-5 widescreen-search"
+    >
       <a
-        class="navbar-brand d-flex flex-row align-items-center me-4"
+        class="navbar-brand d-flex flex-row align-items-center me-4 widescreen-icons"
         href="/home"
       >
         <img
@@ -20,7 +98,7 @@
       <VSearch />
     </div>
 
-    <nav class="nav ms-4">
+    <nav class="nav ms-4 widescreen-icons">
       <ul class="nav__list">
         <!-- <VUserRecipes v-if="loggedIn" /> -->
         <!-- <li class="nav__item">
@@ -213,6 +291,36 @@ export default {
   }
 }
 
+.narrowscreen-icons {
+  display: none;
+}
+
+@media all and (max-width: 644px) {
+  .widescreen-icons {
+    display: none !important;
+  }
+  .widescreen-search {
+    margin-left: 0 !important;
+  }
+
+  .narrowscreen-icons {
+    display: block;
+    width: 100%;
+    margin-right: 0 !important;
+    margin-left: 0.5rem !important;
+  }
+
+  .d-inline-block {
+    width: 28px;
+    height: 28px;
+  }
+
+  .logo-text-narrow {
+    font-size: 17px !important;
+    letter-spacing: 0.1rem !important;
+  }
+}
+
 .navbar {
   background-color: white;
   border-bottom: 1px solid rgb(231, 231, 231);
@@ -225,7 +333,8 @@ export default {
 //   height: 4.6rem;
 //   display: block;
 // }
-.logo-text {
+.logo-text,
+.logo-text-narrow {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: large;
   color: #eb1700;
@@ -266,7 +375,7 @@ export default {
     font-family: inherit;
     color: inherit;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     // text-transform: uppercase;
     background: none;
     border: none;
@@ -296,6 +405,10 @@ export default {
     &:hover {
       background-color: rgb(247, 247, 247);
       // border-bottom: 2px solid rgb(38, 81, 143);
+    }
+
+    @media all and (max-width: 644px) {
+      padding: 0 0.8rem;
     }
   }
   &__icon {
