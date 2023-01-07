@@ -17,6 +17,8 @@
       v-else
       :recipes="searchResultsDisplay"
       :resultsActive="true"
+      data-bs-target="#searchResultsDropdown"
+      data-bs-toggle="collapse"
     />
 
     <div v-if="!loadingSearchResults && $route.query.query" class="page-nav">

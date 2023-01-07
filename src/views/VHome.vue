@@ -224,9 +224,10 @@ html {
   border-right: 1px solid rgb(231, 231, 231);
 
   @media only screen and (max-width: 648px) {
-    // min-width: 260px;
-    width: 100%;
-    border-right: none;
+    // width: 100%;
+    // border-right: none;
+
+    display: none !important;
   }
 }
 

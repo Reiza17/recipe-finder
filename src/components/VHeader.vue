@@ -1,6 +1,6 @@
 <template>
   <header class="navbar sticky-top p-3 d-flex gap-4">
-    <nav class="nav ms-3 narrowscreen-icons">
+    <nav class="nav ms-3 narrowscreen-navbar">
       <ul class="nav__list justify-content-between">
         <a class="navbar-brand d-flex align-items-center me-4" href="/home">
           <img
@@ -29,7 +29,7 @@
             </router-link>
           </li>
 
-          <li class="nav__item text-nowrap">
+          <li class="nav__item text-nowrap me-3">
             <button
               v-if="!this.loggedIn"
               class="nav__btn"
@@ -55,6 +55,17 @@
             </router-link>
           </li>
 
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
           <!-- <li class="nav__item">
           </li> -->
           <!-- <VBookmarks /> -->
@@ -79,6 +90,60 @@
     </nav>
 
     <div
+      class="collapse navbar-collapse narrowscreen-navbar"
+      id="navbarNavDropdown"
+    >
+      <ul class="navbar-nav">
+        <!-- <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Home</a>
+        </li> -->
+        <!-- <li class="nav-item">
+          <a class="nav-link" href="#">Features</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Pricing</a>
+        </li> -->
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Saved Recipes
+          </a>
+          <ul class="dropdown-menu">
+            <VBookmarksMobile />
+          </ul>
+        </li>
+        <li class="nav-item" v-if="!loggedIn">
+          <a class="nav-link" @click="toggleLoginModal">Log In</a>
+        </li>
+        <li class="nav-item" v-if="!loggedIn">
+          <!-- <router-link :to="{ name: 'Home' }">
+            <v-btn color="primary" large>
+              <v-icon left>mdi-home</v-icon>
+              <span>Home</span>
+            </v-btn>
+          </router-link> -->
+          <a class="nav-link" @click="toggleRegisterModal">Sign Up</a>
+        </li>
+        <li class="nav-item" v-else>
+          <!-- <button class="nav__btn" @click="toggleUploadRecipeView">
+            <svg class="nav__icon">
+              <use href="@/assets/images/icons.svg#icon-edit"></use>
+            </svg>
+            <span>Add recipe</span>
+          </button> -->
+          <a class="nav-link" @click="$store.dispatch('auth/logout')">
+            Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div
       class="d-flex flex-row align-items-center flex-grow-1 ms-5 widescreen-search"
     >
       <a
@@ -97,6 +162,24 @@
       <!-- <img src="" alt="Logo" class="logo me-5" /> -->
       <VSearch />
     </div>
+
+    <button
+      v-if="!loadingSearchResults && $route.query.query"
+      class="navbar-toggler dropdown-toggle narrowscreen-navbar p-2"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#searchResultsDropdown"
+      aria-controls="searchResultsDropdown"
+      aria-expanded="false"
+      aria-label="Toggle search results"
+    >
+      <span class="fs-2 fw-normal p-2">Search results</span>
+    </button>
+
+    <VSearchResults
+      class="collapse narrowscreen-navbar"
+      id="searchResultsDropdown"
+    />
 
     <nav class="nav ms-4 widescreen-icons">
       <ul class="nav__list">
@@ -247,6 +330,8 @@
 <script>
 import VSearch from '@/components/VSearch.vue';
 import VBookmarks from '@/components/VBookmarks.vue';
+import VBookmarksMobile from '@/components/VBookmarksMobile.vue';
+import VSearchResults from '@/components/VSearchResults.vue';
 // import VUserRecipes from '@/components/VUserRecipes.vue';
 import { createNamespacedHelpers } from 'vuex';
 const { mapMutations } = createNamespacedHelpers('home');
@@ -256,6 +341,8 @@ export default {
   components: {
     VSearch,
     VBookmarks,
+    VBookmarksMobile,
+    VSearchResults,
     // VUserRecipes,
   },
   data() {
@@ -266,6 +353,9 @@ export default {
   computed: {
     loggedIn() {
       return this.$store.getters['auth/loggedIn'];
+    },
+    loadingSearchResults() {
+      return this.$store.getters['home/loadingSearchResults'];
     },
   },
   methods: {
@@ -291,8 +381,18 @@ export default {
   }
 }
 
-.narrowscreen-icons {
+.narrowscreen-navbar {
   display: none;
+}
+
+.nav-link {
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dropdown-item {
+  font-size: 15px;
 }
 
 @media all and (max-width: 644px) {
@@ -303,7 +403,7 @@ export default {
     margin-left: 0 !important;
   }
 
-  .narrowscreen-icons {
+  .narrowscreen-navbar {
     display: block;
     width: 100%;
     margin-right: 0 !important;
@@ -316,8 +416,8 @@ export default {
   }
 
   .logo-text-narrow {
-    font-size: 17px !important;
-    letter-spacing: 0.1rem !important;
+    font-size: 16px !important;
+    letter-spacing: 0 !important;
   }
 }
 
